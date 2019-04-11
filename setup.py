@@ -32,9 +32,6 @@ if __name__=="__main__":
     createDirectory(workingDir + '/Pipeline_prefactor')
     createDirectory(workingDir + '/Imaging_deep')
 
-    #
-    # copy useful files in sub directories
-    #
     copyFiles(PrefacorDir + '/PARSETS/Imaging_deep-pipeline.cfg', workingDir + '/')
     copyFiles(PrefacorDir + '/PARSETS/Imaging_deep.parset', workingDir + '/')
 
