@@ -68,3 +68,5 @@ fabric.properties
 .idea/
 __pycache__/
 venv/
+*.log
+.*
