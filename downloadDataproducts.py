@@ -13,7 +13,8 @@ if __name__ == "__main__":
         progess = get_progress()
         if progess != None:
             stagesIDs = list(progess.keys())
-            tmpStagesIDs.add(stagesIDs)
+            for id in stagesIDs:
+                tmpStagesIDs.add(id)
             print("status IDs", stagesIDs)
 
             for stageID in stagesIDs:

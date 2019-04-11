@@ -39,11 +39,10 @@ for observation in query_observations:
         fileobject = ((FileObject.data_object == dataproduct) & (FileObject.isValid > 0)).max('creation_date')
 
         if fileobject:
-            print("URI found %s" % fileobject.URI)
+            #print("URI found %s" % fiurisleobject.URI)
             uris[project].add(fileobject.URI)
         else:
-            print("No URI found for %s with dataProductIdentifier %d" % (
-                dataproduct.__class__.__name__, dataproduct.dataProductIdentifier))
+            print("No URI found for %s with dataProductIdentifier %d" % (dataproduct.__class__.__name__, dataproduct.dataProductIdentifier))
 
     print("Total URI's found for project %s: %d" % (project, len(uris[project])))
 
