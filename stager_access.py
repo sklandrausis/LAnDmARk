@@ -177,6 +177,7 @@ def print_running():
 
 def download(surls, dirTO):
     prefix = "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl="
+    #prefix = "https://lofar-download.grid.surfsara.nl/lofigrid /SRMFifoGet.py?surl ="
 
     downloadFiles = [prefix + surl for surl in surls]
 

@@ -1,14 +1,12 @@
 from awlofar.main.aweimports import *
 from awlofar.toolbox.LtaStager import LtaStager, LtaStagerError
 import awlofar.main as mmm
-
-
 from datetime import datetime
 from awlofar.database.Context import context
 from awlofar.main.aweimports import CorrelatedDataProduct, FileObject, Observation
 from awlofar.toolbox.LtaStager import LtaStager, LtaStagerError
 
-do_stage = False
+do_stage = True
 project = 'LC4_010'
 #RA = 277.3822
 #DEC = 48.7464
@@ -19,13 +17,8 @@ uris = {
     project: set()
 }
 
-
 cls = CorrelatedDataProduct
 query_observations = Observation.select_all().project_only(project)
-
-o = Observation.select_all()
-print("qwerty", query_observations.copy())
-print(o.add_clause("==", "observation_id", "366346"))
 
 for observation in query_observations:
     print("Querying ObservationID %s" % observation.observationId)
