@@ -12,6 +12,11 @@ def getConfigs(key, value):
 
 if __name__ == "__main__":
     do_stage = False
+    if getConfigs("Data", "Stage") == "True":
+        do_stage = True
+    else:
+        do_stage = False
+
     uris = set()
     SASid = int(getConfigs("Data", "SASid"))
     print("SAS id", SASid)
@@ -19,6 +24,7 @@ if __name__ == "__main__":
     print("Target name", targetName)
     cls = CorrelatedDataProduct
     queryObservations = (getattr(Process, "observationId") == SASid) & (Process.isValid > 0)
+
 
     for observation in queryObservations:
         print("Querying ObservationID",  observation.observationId)
