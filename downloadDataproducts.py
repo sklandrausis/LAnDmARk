@@ -35,8 +35,6 @@ if __name__ == "__main__":
                 surl = get_surls_online(int(id))
                 download(surl, getConfigs("Paths", "WorkingPath") + "targets")
 
-
-
             break
 
         time.sleep(30)
