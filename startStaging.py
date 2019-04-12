@@ -13,9 +13,9 @@ def getConfigs(key, value):
 if __name__ == "__main__":
     do_stage = False
     uris = set()
-    SASid = int(getConfigs("Project", "SASid"))
+    SASid = int(getConfigs("Data", "SASid"))
     print("SAS id", SASid)
-    targetName = getConfigs("Project", "TargetName")
+    targetName = getConfigs("Data", "TargetName")
     print("Target name", targetName)
     cls = CorrelatedDataProduct
     queryObservations = (getattr(Process, "observationId") == SASid) & (Process.isValid > 0)

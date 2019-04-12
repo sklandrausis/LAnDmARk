@@ -18,8 +18,8 @@ if __name__=="__main__":
     workingDir = getConfigs("Paths", "WorkingPath")
     auxDir = getConfigs("Paths", "AuxPath")
     PrefacorDir = getConfigs("Paths", "PrefacorPath")
-    SASid = getConfigs("Project", "SASid")
-    calibratorName = getConfigs("Project", "CalibratorName")
+    SASid = getConfigs("Data", "SASid")
+    calibratorName = getConfigs("Data", "CalibratorName")
 
     createDirectory(workingDir + "calibrators")
     createDirectory(workingDir + '/calibrators/L' + str(int(SASid[0]) - 1) + '_' + calibratorName+ '')
