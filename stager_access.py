@@ -12,6 +12,7 @@ __version__ = "1.3"
 import datetime
 from os.path import expanduser
 import os
+import glob
 
 # Python2/3 dependent stuff
 from sys import version_info
@@ -26,8 +27,6 @@ else:
 
     string_types = basestring
 
-# ---
-# Determine credentials and create proxy
 user = None
 passw = None
 try:
@@ -54,46 +53,27 @@ proxy = xmlrpclib.ServerProxy("https://" + user + ':' + passw + "@webportal.astr
 LtaStager = proxy.LtaStager
 
 def stage(surls):
-    """ Stage list of SURLs """
     if isinstance(surls, str):
         surls = [surls]
     stageid = proxy.LtaStager.add_getid(surls)
     return stageid
 
-
 def get_status(stageid):
-    """ Get status of request with given ID """
     return proxy.LtaStager.getstatus(stageid)
 
-
 def abort(stageid):
-    """ Abort running request / release data of a finished request with given ID """
     return proxy.LtaStager.abort(stageid)
 
-
 def get_surls_online(stageid):
-    """ Get a list of all files that are already online for a running request with given ID  """
     return proxy.LtaStager.getstagedurls(stageid)
 
-
 def get_srm_token(stageid):
-    """ Get the SRM request token for direct interaction with the SRM site via Grid/SRM tools """
     return proxy.LtaStager.gettoken(stageid)
 
-
 def reschedule(stageid):
-    """ Reschedule a request with a given ID, e.g. after it was put on hold due to maintenance """
     return proxy.LtaStager.reschedule(stageid)
 
-
 def get_progress(status=None, exclude=False):
-    """ Get a detailed list of all running requests and their current progress.
-        As a normal user, this only returns your own requests.
-        :param status: If set to a valid status then only requests with that
-        status are returned.
-        :param exclude: If set to True then the requests with status 'status' are
-        excluded.
-    """
     all_requests = proxy.LtaStager.getprogress()
     if status is not None and isinstance(status, string_types):
         if python_version == 3:
@@ -108,12 +88,7 @@ def get_progress(status=None, exclude=False):
         requests = all_requests
     return requests
 
-
 def reschedule_on_status(status=None):
-    """ Reschedule requests that have a status "on hold" or "aborted".
-        :param status: The status that a request has to have in order to be
-        rescheduled.
-    """
     if status is not None and isinstance(status, string_types) and (status == "on hold" or status == "aborted"):
         requests = get_progress(status)
         for key in requests.keys():
@@ -121,14 +96,10 @@ def reschedule_on_status(status=None):
     else:
         print("The parameter status is either None, not a string neither of \"on hold\" nor \"aborted\".")
 
-
 def get_storage_info():
-    """ Get storage information of the different LTA sites, e.g. to check available disk pool space. Requires support role permissions. """
     return proxy.LtaStager.getsrmstorageinfo()
 
-
 def prettyprint(dictionary, indent=""):
-    """ Prints nested dict responses nicely. Example: 'stager_access.prettyprint(stager_access.get_progress())'"""
     if type(dictionary) is dict:
         for key in sorted(dictionary.keys()):
             item = dictionary.get(key)
@@ -142,46 +113,37 @@ def prettyprint(dictionary, indent=""):
 
 
 def reschedule_on_hold():
-    """ Reschedule requests that are on hold.
-    """
     reschedule_on_status("on hold")
 
-
 def print_on_hold():
-    """Print a list of all requests that are on hold.
-    """
     requests = get_progress("on hold")
     prettyprint(requests)
 
-
 def reschedule_aborted():
-    """ Reschedule requests that were aborted.
-    """
     reschedule_on_status("aborted")
 
-
 def print_aborted():
-    """Print a list of all requests that were aborted.
-    """
     requests = get_progress("aborted")
     prettyprint(requests)
 
-
 def print_running():
-    """Print a list of requests that are currently executed and do not have a
-    status of "success"
-    """
     requests = get_progress("success", True)
     prettyprint(requests)
 
 def download(surls, dirTO):
     prefix = "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl="
-    #prefix = "https://lofar-download.grid.surfsara.nl/lofigrid /SRMFifoGet.py?surl ="
 
     downloadFiles = [prefix + surl for surl in surls]
 
     for file in downloadFiles:
         os.system("wget " + file + " -P " + dirTO)
+
+    for filename in glob.glob(dirTO + "*SB*.tar*"):
+        outname = filename.split("%")[-1]
+        os.rename(filename, outname)
+        os.system('tar -xvf ' + outname)
+        os.system('rm -r ' + outname)
+        print(outname + ' untarred.')
 
 '''
 stageID = 37384

@@ -25,11 +25,17 @@ if __name__ == "__main__":
         dataproduct_query = cls.observations.contains(observation)
         dataproduct_query &= cls.subArrayPointing.targetName == targetName
 
+        #print(len(dataproduct_query))
+
+        count_files = 0
         for dataproduct in dataproduct_query:
             fileobject = ((FileObject.data_object == dataproduct) & (FileObject.isValid > 0)).max('creation_date')
+
             if fileobject:
-                uris.add(fileobject.URI)
-                print("URI found", fileobject.URI)
+                if '/L' + str(SASid) in fileobject.URI:
+                    uris.add(fileobject.URI)
+                    count_files = count_files + 1
+                    print("File nr :", count_files, "URI found", fileobject.URI)
             else:
                 print("No URI found for %s with dataProductIdentifier", (dataproduct.__class__.__name__, dataproduct.dataProductIdentifier))
 

@@ -1,3 +1,5 @@
+import time
+import os
 from stager_access import *
 from parsers._configparser import ConfigParser
 
@@ -32,6 +34,9 @@ if __name__ == "__main__":
             for id in tmpStagesIDs:
                 surl = get_surls_online(int(id))
                 download(surl, getConfigs("Paths", "WorkingPath") + "targets")
+
+
+
             break
 
         time.sleep(30)
