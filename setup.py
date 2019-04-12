@@ -16,7 +16,7 @@ def copyFiles(fileFrom, fileTo):
 
 if __name__=="__main__":
     workingDir = getConfigs("Paths", "WorkingPath")
-    auxDir = getConfigs("Paths", "AuxPath")
+    auxDir = getConfigs("Paths", "WorkingPath") + "AuxPath"
     PrefacorDir = getConfigs("Paths", "PrefacorPath")
     SASid = getConfigs("Data", "SASid")
     calibratorName = getConfigs("Data", "CalibratorName")
