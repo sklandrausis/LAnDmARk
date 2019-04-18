@@ -2,7 +2,6 @@ import os
 from awlofar.toolbox.LtaStager import LtaStager, LtaStagerError
 from awlofar.main.aweimports import *
 import matplotlib.pyplot as plt
-import numpy as np
 
 from parsers._configparser import ConfigParser
 
@@ -13,18 +12,22 @@ def getConfigs(key, value):
     return config.getConfig(key, value)
 
 class Staging(object):
-    __slots__=("SASids", "targetName", "SURIs", "dataGoodnes")
+    __slots__=("SASids", "targetName", "SURIs", "dataGoodnes", "logText")
     def __init__(self, SASids):
         self.SASids = SASids
         self.targetName = getConfigs("Data", "TargetName")
         self.SURIs = dict()
         self.dataGoodnes = dict()
+        self.logText = ""
 
     def getSURI(self, SASid):
         uris = set()
 
         print("SAS id", SASid)
         print("Target name", self.targetName)
+        self.logText += "SAS id " + str(SASid) + "\n"
+        self.logText += "Target name " +  self.targetName + "\n"
+
         cls = CorrelatedDataProduct
         queryObservations = (getattr(Process, "observationId") == SASid) & (Process.isValid > 0)
 
@@ -32,6 +35,8 @@ class Staging(object):
 
             for observation in queryObservations:
                 print("Querying ObservationID", observation.observationId)
+                self.logText += "Querying ObservationID " + str(observation.observationId) + "\n"
+
                 dataproduct_query = cls.observations.contains(observation)
                 dataproduct_query &= cls.subArrayPointing.targetName == self.targetName
 
@@ -39,27 +44,33 @@ class Staging(object):
 
                 validFiles = 0
                 invalidFiles = 0
+
+
                 for dataproduct in dataproduct_query:
-                    fileobject = ((FileObject.data_object == dataproduct) & (FileObject.isValid > 0)).max(
-                        'creation_date')
+                    fileobject = ((FileObject.data_object == dataproduct) & (FileObject.isValid > 0)).max('creation_date')
 
                     if fileobject:
                         if '/L' + str(SASid) in fileobject.URI:
                             uris.add(fileobject.URI)
                             validFiles += 1
                             print("File nr :", validFiles, "URI found", fileobject.URI)
+                            self.logText += "File nr : " + str(validFiles) + " URI found " + str(fileobject.URI) + "\n"
                     else:
                         invalidFiles += 1
                         print("No URI found for %s with dataProductIdentifier", (dataproduct.__class__.__name__, dataproduct.dataProductIdentifier))
+                        self.logText += "No URI found for %s with dataProductIdentifier " +  str((dataproduct.__class__.__name__, dataproduct.dataProductIdentifier)) + "\n"
 
             print("Total URI's found %d" % len(uris))
             print("Valid files found ", validFiles, " Invalid files found ", invalidFiles, "\n")
+            self.logText += "Total URI's found " + str(len(uris)) + "\n"
+            self.logText += "Valid files found " + str(validFiles) + " Invalid files found " + str(invalidFiles) + "\n"
             self.dataGoodnes[str(SASid)] = {"validFiles":validFiles, "invalidFiles":invalidFiles}
 
-            os.system("rm " + "*.log")
+            #os.system("rm " + "*.log")
 
         else:
             print("Wrong SAS id ", SASid, "\n")
+            self.logText += "Wrong SAS id " + SASid + "\n"
 
         self.SURIs[str(SASid)] = uris
         return uris
@@ -85,12 +96,23 @@ class Staging(object):
         plt.ylabel("ratios")
         plt.show()
 
+    def writeLogs(self):
+        f = ""
+        for file in os.listdir('.'):
+            if ".log" in file:
+                log = open(file, "a+")
+                f = file
+                break
+
+        log.write(self.logText)
+        os.system("mv " + f + " " + getConfigs("Paths", "WorkingPath") + "/logs/"  + f)
+
 if __name__ == "__main__":
     SASids = [int(id) for id in getConfigs("Data", "SASids").replace(" ", "").split(",")]
     staging = Staging(SASids)
     staging.query()
     staging.plot()
+    staging.writeLogs()
 
     if getConfigs("Data", "Stage") == "True":
         staging.startStaging()
-
