@@ -1,7 +1,8 @@
 import time
-import os
-from stager_access import *
+
 from parsers._configparser import ConfigParser
+from stager_access import *
+
 
 def getConfigs(key, value):
     configFilePath = "config.cfg"

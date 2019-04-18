@@ -33,19 +33,22 @@ if __name__ == "__main__":
 
         #print(len(dataproduct_query))
 
-        count_files = 0
+        validFiles = 0
+        invalidFiles = 0
         for dataproduct in dataproduct_query:
             fileobject = ((FileObject.data_object == dataproduct) & (FileObject.isValid > 0)).max('creation_date')
 
             if fileobject:
                 if '/L' + str(SASid) in fileobject.URI:
                     uris.add(fileobject.URI)
-                    count_files = count_files + 1
-                    print("File nr :", count_files, "URI found", fileobject.URI)
+                    validFiles += 1
+                    print("File nr :", validFiles, "URI found", fileobject.URI)
             else:
+                invalidFiles += 1
                 print("No URI found for %s with dataProductIdentifier", (dataproduct.__class__.__name__, dataproduct.dataProductIdentifier))
 
     print("Total URI's found %d" % len(uris))
+    print("Valid files found ", validFiles, " Invalid files found ", invalidFiles)
 
     os.system("rm " + "*.log")
 

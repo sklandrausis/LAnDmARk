@@ -10,10 +10,9 @@
 __version__ = "1.3"
 
 import datetime
-from os.path import expanduser
-import os
 import glob
-
+import os
+from os.path import expanduser
 # Python2/3 dependent stuff
 from sys import version_info
 
