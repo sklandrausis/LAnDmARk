@@ -1,6 +1,8 @@
 import os
 from awlofar.toolbox.LtaStager import LtaStager, LtaStagerError
 from awlofar.main.aweimports import *
+import matplotlib.pyplot as plt
+import numpy as np
 
 from parsers._configparser import ConfigParser
 
@@ -10,57 +12,85 @@ def getConfigs(key, value):
     config.CreateConfig(configFilePath)
     return config.getConfig(key, value)
 
-def startStaging(SASid):
-    if getConfigs("Data", "Stage") == "True":
-        do_stage = True
-    else:
-        do_stage = False
+class Staging(object):
+    __slots__=("SASids", "targetName", "SURIs", "dataGoodnes")
+    def __init__(self, SASids):
+        self.SASids = SASids
+        self.targetName = getConfigs("Data", "TargetName")
+        self.SURIs = dict()
+        self.dataGoodnes = dict()
 
-    uris = set()
-    print("SAS id", SASid)
-    targetName = getConfigs("Data", "TargetName")
-    print("Target name", targetName)
-    cls = CorrelatedDataProduct
-    queryObservations = (getattr(Process, "observationId") == SASid) & (Process.isValid > 0)
+    def getSURI(self, SASid):
+        uris = set()
 
-    if len(queryObservations) > 0:
+        print("SAS id", SASid)
+        print("Target name", self.targetName)
+        cls = CorrelatedDataProduct
+        queryObservations = (getattr(Process, "observationId") == SASid) & (Process.isValid > 0)
 
-        for observation in queryObservations:
-            print("Querying ObservationID", observation.observationId)
-            dataproduct_query = cls.observations.contains(observation)
-            dataproduct_query &= cls.subArrayPointing.targetName == targetName
+        if len(queryObservations) > 0:
 
-            # print(len(dataproduct_query))
+            for observation in queryObservations:
+                print("Querying ObservationID", observation.observationId)
+                dataproduct_query = cls.observations.contains(observation)
+                dataproduct_query &= cls.subArrayPointing.targetName == self.targetName
 
-            validFiles = 0
-            invalidFiles = 0
-            for dataproduct in dataproduct_query:
-                fileobject = ((FileObject.data_object == dataproduct) & (FileObject.isValid > 0)).max('creation_date')
+                # print(len(dataproduct_query))
 
-                if fileobject:
-                    if '/L' + str(SASid) in fileobject.URI:
-                        uris.add(fileobject.URI)
-                        validFiles += 1
-                        print("File nr :", validFiles, "URI found", fileobject.URI)
-                else:
-                    invalidFiles += 1
-                    print("No URI found for %s with dataProductIdentifier",
-                          (dataproduct.__class__.__name__, dataproduct.dataProductIdentifier))
+                validFiles = 0
+                invalidFiles = 0
+                for dataproduct in dataproduct_query:
+                    fileobject = ((FileObject.data_object == dataproduct) & (FileObject.isValid > 0)).max(
+                        'creation_date')
 
-        print("Total URI's found %d" % len(uris))
-        print("Valid files found ", validFiles, " Invalid files found ", invalidFiles, "\n")
+                    if fileobject:
+                        if '/L' + str(SASid) in fileobject.URI:
+                            uris.add(fileobject.URI)
+                            validFiles += 1
+                            print("File nr :", validFiles, "URI found", fileobject.URI)
+                    else:
+                        invalidFiles += 1
+                        print("No URI found for %s with dataProductIdentifier", (dataproduct.__class__.__name__, dataproduct.dataProductIdentifier))
 
-        os.system("rm " + "*.log")
+            print("Total URI's found %d" % len(uris))
+            print("Valid files found ", validFiles, " Invalid files found ", invalidFiles, "\n")
+            self.dataGoodnes[str(SASid)] = {"validFiles":validFiles, "invalidFiles":invalidFiles}
 
-        if do_stage:
+            os.system("rm " + "*.log")
+
+        else:
+            print("Wrong SAS id ", SASid, "\n")
+
+        self.SURIs[str(SASid)] = uris
+        return uris
+
+    def startStaging(self):
+        for id in  self.SASids:
             stager = LtaStager()
-            stager.stage_uris(uris)
-    else:
-        print("Wrong SAS id ", SASid,  "\n")
+            stager.stage_uris(self.SURIs[str(id)])
 
+    def query(self):
+        for id in self.SASids:
+            self.getSURI(id)
+
+    def plot(self):
+        ratios = []
+        for id in self.SASids:
+            ratios.append (self.dataGoodnes[str(id)]["validFiles"] /  (self.dataGoodnes[str(id)]["validFiles"] +  self.dataGoodnes[str(id)]["invalidFiles"]))
+
+        plt.figure("Ratio of valid data")
+        plt.bar(SASids, ratios)
+        plt.xticks(SASids, SASids)
+        plt.xlabel("SAS id")
+        plt.ylabel("ratios")
+        plt.show()
 
 if __name__ == "__main__":
     SASids = [int(id) for id in getConfigs("Data", "SASids").replace(" ", "").split(",")]
+    staging = Staging(SASids)
+    staging.query()
+    staging.plot()
 
-    for id in SASids:
-        startStaging(id)
+    if getConfigs("Data", "Stage") == "True":
+        staging.startStaging()
+

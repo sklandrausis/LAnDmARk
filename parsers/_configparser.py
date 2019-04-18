@@ -1,4 +1,8 @@
-import configparser
+try:
+    import configparser
+
+except:
+    import Configparser
 
 class ConfigParser():
     __instance = None
