@@ -1,9 +1,15 @@
 import os
+import coloredlogs, logging
 from awlofar.toolbox.LtaStager import LtaStager, LtaStagerError
 from awlofar.main.aweimports import *
 import matplotlib.pyplot as plt
 
 from parsers._configparser import ConfigParser
+
+coloredlogs.install(level='PRODUCTION')
+#logging.basicConfig(filename='*.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger('startStaging')
+logging.getLogger()
 
 def getConfigs(key, value):
     configFilePath = "config.cfg"
@@ -23,8 +29,9 @@ class Staging(object):
     def getSURI(self, SASid):
         uris = set()
 
-        print("SAS id", SASid)
-        print("Target name", self.targetName)
+        logging.info("SAS id " + str(SASid))
+        logging.info("Target name " + self.targetName)
+
         self.logText += "SAS id " + str(SASid) + "\n"
         self.logText += "Target name " +  self.targetName + "\n"
 
@@ -34,7 +41,7 @@ class Staging(object):
         if len(queryObservations) > 0:
 
             for observation in queryObservations:
-                print("Querying ObservationID", observation.observationId)
+                logging.info("Querying ObservationID " + observation.observationId)
                 self.logText += "Querying ObservationID " + str(observation.observationId) + "\n"
 
                 dataproduct_query = cls.observations.contains(observation)
@@ -44,7 +51,6 @@ class Staging(object):
 
                 validFiles = 0
                 invalidFiles = 0
-
 
                 for dataproduct in dataproduct_query:
                     fileobject = ((FileObject.data_object == dataproduct) & (FileObject.isValid > 0)).max('creation_date')
@@ -60,8 +66,8 @@ class Staging(object):
                         print("No URI found for %s with dataProductIdentifier", (dataproduct.__class__.__name__, dataproduct.dataProductIdentifier))
                         self.logText += "No URI found for %s with dataProductIdentifier " +  str((dataproduct.__class__.__name__, dataproduct.dataProductIdentifier)) + "\n"
 
-            print("Total URI's found %d" % len(uris))
-            print("Valid files found ", validFiles, " Invalid files found ", invalidFiles, "\n")
+            logging.info("Total URI's found " + str(len(uris)))
+            logging.info("Valid files found " + str(validFiles) +  " Invalid files found " + str(invalidFiles))
             self.logText += "Total URI's found " + str(len(uris)) + "\n"
             self.logText += "Valid files found " + str(validFiles) + " Invalid files found " + str(invalidFiles) + "\n"
             self.dataGoodnes[str(SASid)] = {"validFiles":validFiles, "invalidFiles":invalidFiles}
@@ -69,7 +75,7 @@ class Staging(object):
             #os.system("rm " + "*.log")
 
         else:
-            print("Wrong SAS id ", SASid, "\n")
+            logging.error("Wrong SAS id " + SASid)
             self.logText += "Wrong SAS id " + SASid + "\n"
 
         self.SURIs[str(SASid)] = uris
@@ -114,5 +120,5 @@ if __name__ == "__main__":
     staging.plot()
     staging.writeLogs()
 
-    if getConfigs("Data", "Stage") == "True":
+    if getConfigs("Operations", "Stage") == "True":
         staging.startStaging()
