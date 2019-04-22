@@ -6,8 +6,7 @@ import matplotlib.pyplot as plt
 
 from parsers._configparser import ConfigParser
 
-coloredlogs.install(level='PRODUCTION')
-#logging.basicConfig(filename='*.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
+coloredlogs.install(level='PRODUCTION', filename='tmp.log', filemode='w')
 logger = logging.getLogger('startStaging')
 logging.getLogger()
 
