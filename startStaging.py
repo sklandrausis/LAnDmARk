@@ -4,35 +4,30 @@ from awlofar.toolbox.LtaStager import LtaStager, LtaStagerError
 from awlofar.main.aweimports import *
 import matplotlib.pyplot as plt
 
-from parsers._configparser import ConfigParser
+from parsers._configparser import getConfigs
 
 coloredlogs.install(level='PRODUCTION', filename='tmp.log', filemode='w')
 logger = logging.getLogger('startStaging')
 logging.getLogger()
 
-def getConfigs(key, value):
-    configFilePath = "config.cfg"
-    config = ConfigParser.getInstance()
-    config.CreateConfig(configFilePath)
-    return config.getConfig(key, value)
-
 class Staging(object):
-    __slots__=("SASids", "targetName", "SURIs", "dataGoodnes", "logText")
-    def __init__(self, SASids):
+    __slots__=("SASids", "targetName", "SURIs", "dataGoodnes", "logText", "calibrator")
+    def __init__(self, SASids, calibrator):
         self.SASids = SASids
-        self.targetName = getConfigs("Data", "TargetName")
+        self.targetName = getConfigs("Data", "TargetName", "config.cfg")
         self.SURIs = dict()
         self.dataGoodnes = dict()
         self.logText = ""
+        self.calibrator = calibrator
 
     def getSURI(self, SASid):
         uris = set()
-
         logging.info("SAS id " + str(SASid))
-        logging.info("Target name " + self.targetName)
 
         self.logText += "SAS id " + str(SASid) + "\n"
-        self.logText += "Target name " +  self.targetName + "\n"
+        if self.calibrator == False:
+            self.logText += "Target name " +  self.targetName + "\n"
+            logging.info("Target name " + self.targetName)
 
         cls = CorrelatedDataProduct
         queryObservations = (getattr(Process, "observationId") == SASid) & (Process.isValid > 0)
@@ -44,9 +39,12 @@ class Staging(object):
                 self.logText += "Querying ObservationID " + str(observation.observationId) + "\n"
 
                 dataproduct_query = cls.observations.contains(observation)
-                dataproduct_query &= cls.subArrayPointing.targetName == self.targetName
+                if self.calibrator == False:
+                    dataproduct_query &= cls.subArrayPointing.targetName == self.targetName
+                else:
+                    print("cls.subArrayPointing.targetName", cls.subArrayPointing.targetName)
 
-                # print(len(dataproduct_query))
+                #print(len(dataproduct_query))
 
                 validFiles = 0
                 invalidFiles = 0
@@ -95,8 +93,8 @@ class Staging(object):
             ratios.append (self.dataGoodnes[str(id)]["validFiles"] /  (self.dataGoodnes[str(id)]["validFiles"] +  self.dataGoodnes[str(id)]["invalidFiles"]))
 
         plt.figure("Ratio of valid data")
-        plt.bar(SASids, ratios)
-        plt.xticks(SASids, SASids)
+        plt.bar(self.SASids, ratios)
+        plt.xticks(self.SASids, self.SASids)
         plt.xlabel("SAS id")
         plt.ylabel("ratios")
         plt.show()
@@ -110,14 +108,27 @@ class Staging(object):
                 break
 
         log.write(self.logText)
-        os.system("mv " + f + " " + getConfigs("Paths", "WorkingPath") + "/logs/"  + f)
+        #os.system("mv " + f + " " + getConfigs("Paths", "WorkingPath", "config.cfg") + "/logs/"  + f)
+
+
+#only one log file is created!!!
 
 if __name__ == "__main__":
-    SASids = [int(id) for id in getConfigs("Data", "SASids").replace(" ", "").split(",")]
-    staging = Staging(SASids)
-    staging.query()
-    staging.plot()
-    staging.writeLogs()
+    SASidsTarget = [int(id) for id in getConfigs("Data", "SASids", "config.cfg").replace(" ", "").split(",")]
+    SASidsCalibrator = [id - 1 for id in SASidsTarget]
 
-    if getConfigs("Operations", "Stage") == "True":
-        staging.startStaging()
+    print("Processing target")
+    stagingTarget = Staging(SASidsTarget, False)
+    stagingTarget.query()
+    stagingTarget.plot()
+    stagingTarget.writeLogs()
+
+    print("Processing calibrators")
+    stagingCalibrator = Staging(SASidsCalibrator, True)
+    stagingCalibrator.query()
+    stagingCalibrator.plot()
+    stagingCalibrator.writeLogs()
+
+    if getConfigs("Operations", "Stage", "config.cfg") == "True":
+        stagingTarget.startStaging()
+        stagingCalibrator.startStaging()

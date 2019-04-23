@@ -28,4 +28,9 @@ class ConfigParser():
     def getConfig(self, key, value):
         _config = self.config.get(key, value)
         return _config
-    
+
+def getConfigs(key, value, configFilePath):
+    configFilePath = configFilePath
+    config = ConfigParser.getInstance()
+    config.CreateConfig(configFilePath)
+    return config.getConfig(key, value)
