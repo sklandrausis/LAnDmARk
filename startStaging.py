@@ -35,12 +35,14 @@ class Staging(object):
         if len(queryObservations) > 0:
 
             for observation in queryObservations:
+
                 logging.info("Querying ObservationID " + observation.observationId)
                 self.logText += "Querying ObservationID " + str(observation.observationId) + "\n"
 
                 dataproduct_query = cls.observations.contains(observation)
                 if self.calibrator == False:
                     dataproduct_query &= cls.subArrayPointing.targetName == self.targetName
+
                 else:
                     print("cls.subArrayPointing.targetName", cls.subArrayPointing.targetName)
 
@@ -68,8 +70,6 @@ class Staging(object):
             self.logText += "Total URI's found " + str(len(uris)) + "\n"
             self.logText += "Valid files found " + str(validFiles) + " Invalid files found " + str(invalidFiles) + "\n"
             self.dataGoodnes[str(SASid)] = {"validFiles":validFiles, "invalidFiles":invalidFiles}
-
-            #os.system("rm " + "*.log")
 
         else:
             logging.error("Wrong SAS id " + SASid)
@@ -99,7 +99,10 @@ class Staging(object):
         plt.ylabel("ratios")
         plt.show()
 
-    def writeLogs(self):
+    def getLogs(self):
+        return self.logText
+
+    def writeLogs(self, logText):
         f = ""
         for file in os.listdir('.'):
             if ".log" in file:
@@ -107,27 +110,27 @@ class Staging(object):
                 f = file
                 break
 
-        log.write(self.logText)
-        #os.system("mv " + f + " " + getConfigs("Paths", "WorkingPath", "config.cfg") + "/logs/"  + f)
-
-
-#only one log file is created!!!
+        log.write(logText)
+        os.system("mv " + f + " " + getConfigs("Paths", "WorkingPath", "config.cfg") + "/logs/"  + f)
 
 if __name__ == "__main__":
     SASidsTarget = [int(id) for id in getConfigs("Data", "SASids", "config.cfg").replace(" ", "").split(",")]
     SASidsCalibrator = [id - 1 for id in SASidsTarget]
 
-    print("Processing target")
+    logging.info("Processing target")
     stagingTarget = Staging(SASidsTarget, False)
     stagingTarget.query()
     stagingTarget.plot()
-    stagingTarget.writeLogs()
+    tmpTargetLogs = stagingTarget.getLogs()
+    logsTMP = "Processing target\n" + tmpTargetLogs
 
-    print("Processing calibrators")
+    logging.info("Processing calibrators")
     stagingCalibrator = Staging(SASidsCalibrator, True)
     stagingCalibrator.query()
     stagingCalibrator.plot()
-    stagingCalibrator.writeLogs()
+    tmpCalibratorLogs = stagingCalibrator.getLogs()
+    logsTMP = logsTMP + "\nProcessing calibrators\n" + tmpCalibratorLogs
+    stagingCalibrator.writeLogs(logsTMP)
 
     if getConfigs("Operations", "Stage", "config.cfg") == "True":
         stagingTarget.startStaging()
