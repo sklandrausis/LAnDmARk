@@ -3,6 +3,7 @@ import coloredlogs, logging
 from awlofar.toolbox.LtaStager import LtaStager, LtaStagerError
 from awlofar.main.aweimports import *
 import matplotlib.pyplot as plt
+import numpy as np
 
 from parsers._configparser import getConfigs
 
@@ -22,6 +23,7 @@ class Staging(object):
 
     def getSURI(self, SASid):
         uris = set()
+        self.dataGoodnes[str(SASid)] = dict()
         logging.info("SAS id " + str(SASid))
 
         self.logText += "SAS id " + str(SASid) + "\n"
@@ -40,6 +42,9 @@ class Staging(object):
 
                 logging.info("Core stations " + str(observation.nrStationsCore) + " Remote stations " + str(observation.nrStationsRemote) + " International stations " + str(observation.nrStationsInternational) + " Total stations " + str(observation.numberOfStations))
                 self.logText += "Core stations " + str(observation.nrStationsCore) + " Remote stations " + str(observation.nrStationsRemote) + " International stations " + str(observation.nrStationsInternational) + " Total stations " + str(observation.numberOfStations) + "\n"
+                self.dataGoodnes[str(SASid)]["Core_stations"] = observation.nrStationsCore
+                self.dataGoodnes[str(SASid)]["Remote_station"] = observation.nrStationsRemote
+                self.dataGoodnes[str(SASid)]["International_stations"] = observation.nrStationsInternational
 
                 dataproduct_query = cls.observations.contains(observation)
                 if self.calibrator == False:
@@ -70,7 +75,8 @@ class Staging(object):
             logging.info("Valid files found " + str(validFiles) +  " Invalid files found " + str(invalidFiles))
             self.logText += "Total URI's found " + str(len(uris)) + "\n"
             self.logText += "Valid files found " + str(validFiles) + " Invalid files found " + str(invalidFiles) + "\n"
-            self.dataGoodnes[str(SASid)] = {"validFiles":validFiles, "invalidFiles":invalidFiles}
+            self.dataGoodnes[str(SASid)]["validFiles"] = validFiles
+            self.dataGoodnes[str(SASid)]["invalidFiles"] = invalidFiles
 
         else:
             logging.error("Wrong SAS id " + SASid)
@@ -90,14 +96,36 @@ class Staging(object):
 
     def plot(self):
         ratios = []
+        cStations = []
+        rStations = []
+        iStations = []
         for id in self.SASids:
-            ratios.append (self.dataGoodnes[str(id)]["validFiles"] /  (self.dataGoodnes[str(id)]["validFiles"] +  self.dataGoodnes[str(id)]["invalidFiles"]))
+            ratios.append(self.dataGoodnes[str(id)]["validFiles"] / (self.dataGoodnes[str(id)]["validFiles"] + self.dataGoodnes[str(id)]["invalidFiles"]))
+            cStations.append(self.dataGoodnes[str(id)]["Core_stations"])
+            rStations.append(self.dataGoodnes[str(id)]["Remote_station"])
+            iStations.append(self.dataGoodnes[str(id)]["International_stations"])
 
-        plt.figure("Ratio of valid data")
-        plt.bar(self.SASids, ratios)
+        width = 0.35
+        ind = np.arange(0, len(self.SASids))
+
+        fig, ax = plt.subplots()
+        p1 = ax.bar(ind, cStations, width, color='r')
+        p2 = ax.bar(ind + width, rStations, width, color='g')
+        p3 = ax.bar(ind + width, iStations, width, color='b')
+        ax.set_xticks(ind + width / 2)
+        ax.set_xticklabels((self.SASids))
+        ax.legend((p1[0], p2[0], p3[0]), ('Core stations', 'Remote stations', 'International stations'))
+        ax.autoscale_view()
+        plt.xlabel("SAS id")
+        plt.grid()
+        plt.show()
+
+        plt.figure("Percent of valid data")
+        plt.bar(self.SASids, np.array(ratios) * 100)
         plt.xticks(self.SASids, self.SASids)
         plt.xlabel("SAS id")
-        plt.ylabel("ratios")
+        plt.ylabel("Percent")
+        plt.grid()
         plt.show()
 
     def getLogs(self):
