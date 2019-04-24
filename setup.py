@@ -2,7 +2,6 @@ import os
 
 from parsers._configparser import ConfigParser
 
-
 def getConfigs(key, value):
     configFilePath = "config.cfg"
     config = ConfigParser.getInstance()

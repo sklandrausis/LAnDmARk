@@ -33,20 +33,21 @@ class Staging(object):
         queryObservations = (getattr(Process, "observationId") == SASid) & (Process.isValid > 0)
 
         if len(queryObservations) > 0:
-
             for observation in queryObservations:
 
                 logging.info("Querying ObservationID " + observation.observationId)
                 self.logText += "Querying ObservationID " + str(observation.observationId) + "\n"
+
+                logging.info("Core stations " + str(observation.nrStationsCore) + " Remote stations " + str(observation.nrStationsRemote) + " International stations " + str(observation.nrStationsInternational) + " Total stations " + str(observation.numberOfStations))
+                self.logText += "Core stations " + str(observation.nrStationsCore) + " Remote stations " + str(observation.nrStationsRemote) + " International stations " + str(observation.nrStationsInternational) + " Total stations " + str(observation.numberOfStations) + "\n"
 
                 dataproduct_query = cls.observations.contains(observation)
                 if self.calibrator == False:
                     dataproduct_query &= cls.subArrayPointing.targetName == self.targetName
 
                 else:
-                    print("cls.subArrayPointing.targetName", cls.subArrayPointing.targetName)
-
-                #print(len(dataproduct_query))
+                    logging.info("Calibrator source " + observation.observationDescription.split("/")[1])
+                    self.logText += "Calibrator source " + observation.observationDescription.split("/")[1]
 
                 validFiles = 0
                 invalidFiles = 0
