@@ -1,12 +1,7 @@
 import os
+import argparse
 
-from parsers._configparser import ConfigParser
-
-def getConfigs(key, value):
-    configFilePath = "config.cfg"
-    config = ConfigParser.getInstance()
-    config.CreateConfig(configFilePath)
-    return config.getConfig(key, value)
+from parsers._configparser import getConfigs
 
 def createDirectory(DirName):
     os.system("mkdir " + DirName)
@@ -14,40 +9,51 @@ def createDirectory(DirName):
 def copyFiles(fileFrom, fileTo):
     os.system("cp -rf " + fileFrom + "  " + fileTo)
 
+def parseArguments():
+    parser = argparse.ArgumentParser(description='''Setup working directory tree. ''', epilog="""Setup""")
+    parser.add_argument("calibratorSources", help="calibrator sources", type=str, default="")
+    parser.add_argument("-c", "--config", help="Configuration cfg file", type=str, default="config.cfg")
+    parser.add_argument("-v", "--version", action="version", version='%(prog)s - Version 1.0')
+    args = parser.parse_args()
+    return args
+
+def getArgs(key):
+    return str(parseArguments().__dict__[key])
+
 if __name__=="__main__":
-    workingDir = getConfigs("Paths", "WorkingPath")
-    auxDir = getConfigs("Paths", "WorkingPath") + "AuxPath"
-    PrefacorDir = getConfigs("Paths", "PrefacorPath")
-    SASid = getConfigs("Data", "SASid")
-    calibratorName = getConfigs("Data", "CalibratorName")
+    calibratorName = getArgs("calibratorSources")
 
-    createDirectory(workingDir + "calibrators")
-    createDirectory(workingDir + '/calibrators/L' + str(int(SASid[0]) - 1) + '_' + calibratorName+ '')
-    createDirectory(workingDir + '/calibrators/L' + str(int(SASid[1]) - 1) + '_' + calibratorName+ '')
-    createDirectory(workingDir + '/calibrators/L' + str(int(SASid[0]) - 1) + '_RESULTS')
-    createDirectory(workingDir + '/calibrators/L' + str(int(SASid[1]) - 1) + '_RESULTS')
-    createDirectory(workingDir + '/targets')
-    createDirectory(workingDir + '/targets/L' + str(int(SASid[0])) + '')
-    createDirectory(workingDir + '/targets/L' + str(int(SASid[1])) + '')
-    createDirectory(workingDir + '/Pipeline_prefactor')
-    createDirectory(workingDir + '/Imaging_deep')
+    workingDir = getConfigs("Paths", "WorkingPath", "config.cfg")
+    targetName = getConfigs("Data", "TargetName","config.cfg")
+    workingDir = workingDir + "/" + targetName + "/"
+    auxDir = getConfigs("Paths", "WorkingPath", "config.cfg") + "AuxPath"
+    PrefacorDir = getConfigs("Paths", "PrefacorPath", "config.cfg")
+    SASids = getConfigs("Data", "SASids", "config.cfg").replace(" ", "").split(",")
 
-    copyFiles(PrefacorDir + '/PARSETS/Imaging_deep-pipeline.cfg', workingDir + '/')
-    copyFiles(PrefacorDir + '/PARSETS/Imaging_deep.parset', workingDir + '/')
+    createDirectory(workingDir)
 
-    #copyFiles(auxDir + '/FILES/* ' + workingDir + '/calibrators/L' + str(int(SASid[0]) - 1) + '_' + str(calibratorName) + '')
-    #copyFiles(auxDir + '/FILES/* ' + workingDir + '/calibrators/L' + str(int(SASid[1]) - 1) + '_' + str(calibratorName) + '')
+    for id in SASids:
+        print ("id", id)
+        createDirectory(workingDir + id)
+        createDirectory(workingDir + id +'/calibrators/' )
+        createDirectory(workingDir + id + '/calibrators/L' + str(int(id[0]) - 1) + '_' + calibratorName+ '')
+        createDirectory(workingDir + id + '/calibrators/L' + str(int(id[1]) - 1) + '_' + calibratorName+ '')
+        createDirectory(workingDir + id + '/calibrators/L' + str(int(id[0]) - 1) + '_RESULTS')
+        createDirectory(workingDir + id + '/calibrators/L' + str(int(id[1]) - 1) + '_RESULTS')
+        createDirectory(workingDir + id + '/targets')
+        createDirectory(workingDir + id + '/targets/L' + str(int(id[0])) + '')
+        createDirectory(workingDir + id + '/targets/L' + str(int(id[1])) + '')
+        createDirectory(workingDir + id + '/Pipeline_prefactor')
+        createDirectory(workingDir + id +'/Imaging_deep')
 
-    copyFiles(PrefacorDir + '/PARSETS/Pre-Facet-Calibrator-RawSingle-pipeline.cfg', workingDir + '/calibrators/')
-    copyFiles(PrefacorDir + '/PARSETS/Pre-Facet-Calibrator-RawSingle.parset',  workingDir + '/calibrators/')
+        copyFiles(PrefacorDir + 'pipeline.cfg', workingDir + id + '/')
+        copyFiles(PrefacorDir + 'Imaging.parset', workingDir + id + '/')
 
-    #copyFiles(auxDir + '/FILES/* ' + workingDir + '/targets/L' + str(int(SASid[0])) + '')
-    #copyFiles(auxDir + '/FILES/* ' + workingDir + '/targets/L' + str(int(SASid[1])) + '')
+        copyFiles(PrefacorDir + 'pipeline.cfg', workingDir + id + '/calibrators/')
+        copyFiles(PrefacorDir + 'Pre-Facet-Calibrator.parset',  workingDir + id + '/calibrators/')
 
-    copyFiles(PrefacorDir + '/PARSETS/Pre-Facet-Target-RawCombine-pipeline.cfg', workingDir + '/targets/')
-    copyFiles(PrefacorDir + '/PARSETS/Pre-Facet-Target-RawCombine.parset', workingDir + '/targets/')
-
-    #copyFiles(auxDir + '/SCRIPTS/runTARGET.py ' + workingDir + '/targets/')
+        copyFiles(PrefacorDir + 'pipeline.cfg', workingDir + id +'/targets/')
+        copyFiles(PrefacorDir + 'Pre-Facet-Target.parset', workingDir + id +'/targets/')
 
     print("Done")
 
