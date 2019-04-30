@@ -34,15 +34,13 @@ if __name__=="__main__":
 
     for id in SASids:
         print ("id", id)
+        index = int(id) - 1
         createDirectory(workingDir + id)
         createDirectory(workingDir + id +'/calibrators/' )
-        createDirectory(workingDir + id + '/calibrators/L' + str(int(id[0]) - 1) + '_' + calibratorName+ '')
-        createDirectory(workingDir + id + '/calibrators/L' + str(int(id[1]) - 1) + '_' + calibratorName+ '')
-        createDirectory(workingDir + id + '/calibrators/L' + str(int(id[0]) - 1) + '_RESULTS')
-        createDirectory(workingDir + id + '/calibrators/L' + str(int(id[1]) - 1) + '_RESULTS')
+        createDirectory(workingDir + id + '/calibrators/L' + str(index) + '_' + calibratorName+ '')
+        createDirectory(workingDir + id + '/calibrators/L' + str(index) + '_RESULTS')
         createDirectory(workingDir + id + '/targets')
-        createDirectory(workingDir + id + '/targets/L' + str(int(id[0])) + '')
-        createDirectory(workingDir + id + '/targets/L' + str(int(id[1])) + '')
+        createDirectory(workingDir + id + '/targets/L' + str(int(id)) + '')
         createDirectory(workingDir + id + '/Pipeline_prefactor')
         createDirectory(workingDir + id +'/Imaging_deep')
 
