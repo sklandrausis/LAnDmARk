@@ -12,7 +12,7 @@ logger = logging.getLogger('startStaging')
 logging.getLogger()
 
 class Staging(object):
-    __slots__=("SASids", "targetName", "SURIs", "dataGoodnes", "logText", "calibrator")
+    __slots__=("SASids", "targetName", "SURIs", "dataGoodnes", "logText", "calibrator", "calibratorsList")
     def __init__(self, SASids, calibrator):
         self.SASids = SASids
         self.targetName = getConfigs("Data", "TargetName", "config.cfg")
@@ -20,6 +20,7 @@ class Staging(object):
         self.dataGoodnes = dict()
         self.logText = ""
         self.calibrator = calibrator
+        self.calibratorsList = list()
 
     def getSURI(self, SASid):
         uris = set()
@@ -51,6 +52,7 @@ class Staging(object):
                     dataproduct_query &= cls.subArrayPointing.targetName == self.targetName
 
                 else:
+                    self.calibratorsList.append(observation.observationDescription.split("/")[1])
                     logging.info("Calibrator source " + observation.observationDescription.split("/")[1])
                     self.logText += "Calibrator source " + observation.observationDescription.split("/")[1]
 
@@ -84,6 +86,9 @@ class Staging(object):
 
         self.SURIs[str(SASid)] = uris
         return uris
+
+    def getAllCalibrators(self):
+        return self.calibratorsList
 
     def startStaging(self):
         for id in  self.SASids:
@@ -159,6 +164,7 @@ if __name__ == "__main__":
     stagingCalibrator.plot()
     tmpCalibratorLogs = stagingCalibrator.getLogs()
     logsTMP = logsTMP + "\nProcessing calibrators\n" + tmpCalibratorLogs
+    os.system("python3.6 " + "setup.py " + stagingCalibrator.getAllCalibrators()[0])
     stagingCalibrator.writeLogs(logsTMP)
 
     if getConfigs("Operations", "Stage", "config.cfg") == "True":

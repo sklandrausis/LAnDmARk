@@ -24,13 +24,16 @@ if __name__=="__main__":
     calibratorName = getArgs("calibratorSources")
 
     workingDir = getConfigs("Paths", "WorkingPath", "config.cfg")
+    auxDir = getConfigs("Paths", "WorkingPath", "config.cfg") + "/aux"
+    logDir = getConfigs("Paths", "WorkingPath", "config.cfg") + "/logs"
     targetName = getConfigs("Data", "TargetName","config.cfg")
     workingDir = workingDir + "/" + targetName + "/"
-    auxDir = getConfigs("Paths", "WorkingPath", "config.cfg") + "AuxPath"
     PrefacorDir = getConfigs("Paths", "PrefacorPath", "config.cfg")
     SASids = getConfigs("Data", "SASids", "config.cfg").replace(" ", "").split(",")
 
     createDirectory(workingDir)
+    createDirectory(auxDir)
+    createDirectory(logDir)
 
     for id in SASids:
         print ("id", id)
