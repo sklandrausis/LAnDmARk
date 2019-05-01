@@ -164,7 +164,7 @@ if __name__ == "__main__":
     stagingCalibrator.plot()
     tmpCalibratorLogs = stagingCalibrator.getLogs()
     logsTMP = logsTMP + "\nProcessing calibrators\n" + tmpCalibratorLogs
-    os.system("python3.6 " + "setup.py " + stagingCalibrator.getAllCalibrators()[0])
+    os.system("python3.6 " + "setup.py " + str(stagingCalibrator.getAllCalibrators()).replace(",", " ").replace("[", "").replace("]", ""))
     stagingCalibrator.writeLogs(logsTMP)
 
     if getConfigs("Operations", "Stage", "config.cfg") == "True":

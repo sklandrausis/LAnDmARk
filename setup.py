@@ -4,14 +4,14 @@ import argparse
 from parsers._configparser import getConfigs
 
 def createDirectory(DirName):
-    os.system("mkdir " + DirName)
+    os.system("mkdir -p " + DirName)
 
 def copyFiles(fileFrom, fileTo):
-    os.system("cp -rf " + fileFrom + "  " + fileTo)
+     os.system("cp -rfu " + fileFrom + "  " + fileTo)
 
 def parseArguments():
     parser = argparse.ArgumentParser(description='''Setup working directory tree. ''', epilog="""Setup""")
-    parser.add_argument("calibratorSources", help="calibrator sources", type=str, default="")
+    parser.add_argument("calibratorSources", help="calibrator sources", nargs="+", type=str, default="")
     parser.add_argument("-c", "--config", help="Configuration cfg file", type=str, default="config.cfg")
     parser.add_argument("-v", "--version", action="version", version='%(prog)s - Version 1.0')
     args = parser.parse_args()
@@ -21,7 +21,8 @@ def getArgs(key):
     return str(parseArguments().__dict__[key])
 
 if __name__=="__main__":
-    calibratorName = getArgs("calibratorSources")
+    calibratorNames = getArgs("calibratorSources").replace("[", "").replace("]", "").replace("'", "").replace(" ", "").split(",")
+    calibratorNames
 
     workingDir = getConfigs("Paths", "WorkingPath", "config.cfg")
     auxDir = getConfigs("Paths", "WorkingPath", "config.cfg") + "/aux"
@@ -35,13 +36,14 @@ if __name__=="__main__":
     createDirectory(auxDir)
     createDirectory(logDir)
 
+    index = 0
     for id in SASids:
         print ("id", id)
-        index = int(id) - 1
+
         createDirectory(workingDir + id)
         createDirectory(workingDir + id +'/calibrators/' )
-        createDirectory(workingDir + id + '/calibrators/L' + str(index) + '_' + calibratorName+ '')
-        createDirectory(workingDir + id + '/calibrators/L' + str(index) + '_RESULTS')
+        createDirectory(workingDir + id + '/calibrators/L' + str(int(id) - 1) + '_' + calibratorNames[index]+ '')
+        createDirectory(workingDir + id + '/calibrators/L' + str(int(id) - 1) + '_RESULTS')
         createDirectory(workingDir + id + '/targets')
         createDirectory(workingDir + id + '/targets/L' + str(int(id)) + '')
         createDirectory(workingDir + id + '/Pipeline_prefactor')
@@ -55,6 +57,7 @@ if __name__=="__main__":
 
         copyFiles(PrefacorDir + 'pipeline.cfg', workingDir + id +'/targets/')
         copyFiles(PrefacorDir + 'Pre-Facet-Target.parset', workingDir + id +'/targets/')
+        index += 1
 
     print("Done")
 
