@@ -1,9 +1,11 @@
 import os
 import coloredlogs, logging
+from awlofar.database.Context import context
 from awlofar.toolbox.LtaStager import LtaStager, LtaStagerError
 from awlofar.main.aweimports import *
 import matplotlib.pyplot as plt
 import numpy as np
+from pathlib import Path
 
 from parsers._configparser import getConfigs
 
@@ -87,6 +89,9 @@ class Staging(object):
         self.SURIs[str(SASid)] = uris
         return uris
 
+    def getSURIs(self):
+        return self.SURIs
+
     def getAllCalibrators(self):
         return self.calibratorsList
 
@@ -148,6 +153,14 @@ class Staging(object):
         os.system("mv " + f + " " + getConfigs("Paths", "WorkingPath", "config.cfg") + "/logs/"  + f)
 
 if __name__ == "__main__":
+
+    #Check if project is private and we are not members of project
+    project = getConfigs("Data", "PROJECTid", "config.cfg")
+    context.set_project(project)
+    if project != context.get_current_project().name:
+        raise Exception("You are not member of project", project)
+        sys.exit(0)
+
     SASidsTarget = [int(id) for id in getConfigs("Data", "SASids", "config.cfg").replace(" ", "").split(",")]
     SASidsCalibrator = [id - 1 for id in SASidsTarget]
 
@@ -163,6 +176,30 @@ if __name__ == "__main__":
     stagingCalibrator.query()
     stagingCalibrator.plot()
     tmpCalibratorLogs = stagingCalibrator.getLogs()
+
+    workingDir = getConfigs("Paths", "WorkingPath", "config.cfg")
+    targetName = getConfigs("Data", "TargetName", "config.cfg")
+    workingDir = workingDir + "/" + targetName + "/"
+    home = str(Path.home())
+    workingDir = workingDir.replace("$HOME", home)
+
+    targetSURIs = ""
+    calibratorSURIs = ""
+
+    for id in SASidsTarget:
+        for URI in stagingTarget.getSURIs()[str(id)]:
+            targetSURIs += URI + "\n"
+
+    for id in SASidsCalibrator:
+        for URI in stagingCalibrator.getSURIs()[str(id)]:
+            calibratorSURIs += URI + "\n"
+
+    with open(workingDir + "targetSURIs.txt","w") as targetSURIfile:
+        targetSURIfile.write(targetSURIs)
+
+    with open(workingDir +"calibratorSURIs.txt","w") as calibratorSURIfile:
+        calibratorSURIfile.write(calibratorSURIs)
+
     logsTMP = logsTMP + "\nProcessing calibrators\n" + tmpCalibratorLogs
     os.system("python3.6 " + "setup.py " + str(stagingCalibrator.getAllCalibrators()).replace(",", " ").replace("[", "").replace("]", ""))
     stagingCalibrator.writeLogs(logsTMP)
