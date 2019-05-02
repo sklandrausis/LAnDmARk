@@ -1,4 +1,5 @@
 import os
+import sys
 import coloredlogs, logging
 from awlofar.database.Context import context
 from awlofar.toolbox.LtaStager import LtaStager, LtaStagerError
@@ -95,6 +96,9 @@ class Staging(object):
     def getAllCalibrators(self):
         return self.calibratorsList
 
+    def getDataGoodnes(self):
+        return self.dataGoodnes
+
     def startStaging(self):
         for id in  self.SASids:
             stager = LtaStager()
@@ -152,6 +156,78 @@ class Staging(object):
         log.write(logText)
         os.system("mv " + f + " " + getConfigs("Paths", "WorkingPath", "config.cfg") + "/logs/"  + f)
 
+def plotDataGoodnes(targetGoodnes, calibratorGoodnes, SASidsTarget, SASidsCalibrator):
+    ratiosTarget = []
+    ratiosCalibrator = []
+
+    cStationsTarget = []
+    rStationsTarget = []
+    iStationsTarget = []
+    cStationsCalibrator = []
+    rStationsCalibrator = []
+    iStationsCalibrator = []
+
+    for id in SASidsTarget:
+        ratiosTarget.append(targetGoodnes[str(id)]["validFiles"] / (targetGoodnes[str(id)]["validFiles"] + targetGoodnes[str(id)]["invalidFiles"]))
+        cStationsTarget.append(targetGoodnes[str(id)]["Core_stations"])
+        rStationsTarget.append(targetGoodnes[str(id)]["Remote_station"])
+        iStationsTarget.append(targetGoodnes[str(id)]["International_stations"])
+
+    for id in SASidsCalibrator:
+        ratiosCalibrator.append(calibratorGoodnes[str(id)]["validFiles"] / (calibratorGoodnes[str(id)]["validFiles"] + calibratorGoodnes[str(id)]["invalidFiles"]))
+        cStationsCalibrator.append(calibratorGoodnes[str(id)]["Core_stations"])
+        rStationsCalibrator.append(calibratorGoodnes[str(id)]["Remote_station"])
+        iStationsCalibrator.append(calibratorGoodnes[str(id)]["International_stations"])
+
+    plt.figure("Percent of valid data")
+
+    plt.subplot(1,2,1)
+    plt.bar(SASidsTarget, np.array(ratiosTarget) * 100, color='g')
+    plt.xticks(SASidsTarget, SASidsTarget)
+    plt.xlabel("SAS id")
+    plt.ylabel("Percent")
+    plt.title("Target")
+    plt.grid()
+
+    plt.subplot(1, 2, 2)
+    plt.bar(SASidsCalibrator, np.array(ratiosCalibrator) * 100, color='r')
+    plt.xticks(SASidsCalibrator, SASidsCalibrator)
+    plt.xlabel("SAS id")
+    plt.ylabel("Percent")
+    plt.title("Calibrator")
+    plt.grid()
+
+    plt.show()
+
+    width = 0.35
+    ind = np.arange(0, len(SASidsTarget))
+
+    #plt.subplot(1, 2, 1)
+    fig, ax = plt.subplots(1,2)
+    pt1 = ax[0].bar(ind, cStationsTarget, width, color='r')
+    pt2 = ax[0].bar(ind + width, rStationsTarget, width, color='g')
+    pt3 = ax[0].bar(ind + width, iStationsTarget, width, color='b')
+    ax[0].set_xticks(ind + width / 2)
+    ax[0].set_xticklabels((SASidsTarget))
+    ax[0].legend((pt1[0], pt2[0], pt3[0]), ('Core stations', 'Remote stations', 'International stations'))
+    ax[0].autoscale_view()
+    ax[0].xlabel("SAS id")
+    plt.grid()
+
+    #plt.subplot(1, 2, 2)
+    #fig, ax = plt.subplots()
+    pc1 = ax[1].bar(ind, cStationsCalibrator, width, color='r')
+    pc2 = ax[1].bar(ind + width, rStationsCalibrator, width, color='g')
+    pc3 = ax[1].bar(ind + width, iStationsCalibrator, width, color='b')
+    ax[1].set_xticks(ind + width / 2)
+    ax[1].set_xticklabels((SASidsCalibrator))
+    ax[1].legend((pc1[0], pc2[0], pc3[0]), ('Core stations', 'Remote stations', 'International stations'))
+    ax[1].autoscale_view()
+    plt.xlabel("SAS id")
+    plt.grid()
+
+    plt.show()
+
 if __name__ == "__main__":
 
     #Check if project is private and we are not members of project
@@ -159,7 +235,7 @@ if __name__ == "__main__":
     context.set_project(project)
     if project != context.get_current_project().name:
         raise Exception("You are not member of project", project)
-        sys.exit(0)
+        sys.exit(1)
 
     SASidsTarget = [int(id) for id in getConfigs("Data", "SASids", "config.cfg").replace(" ", "").split(",")]
     SASidsCalibrator = [id - 1 for id in SASidsTarget]
@@ -167,14 +243,14 @@ if __name__ == "__main__":
     logging.info("Processing target")
     stagingTarget = Staging(SASidsTarget, False)
     stagingTarget.query()
-    stagingTarget.plot()
+    #stagingTarget.plot()
     tmpTargetLogs = stagingTarget.getLogs()
     logsTMP = "Processing target\n" + tmpTargetLogs
 
     logging.info("Processing calibrators")
     stagingCalibrator = Staging(SASidsCalibrator, True)
     stagingCalibrator.query()
-    stagingCalibrator.plot()
+    #stagingCalibrator.plot()
     tmpCalibratorLogs = stagingCalibrator.getLogs()
 
     workingDir = getConfigs("Paths", "WorkingPath", "config.cfg")
@@ -204,6 +280,10 @@ if __name__ == "__main__":
     os.system("python3.6 " + "setup.py " + str(stagingCalibrator.getAllCalibrators()).replace(",", " ").replace("[", "").replace("]", ""))
     stagingCalibrator.writeLogs(logsTMP)
 
+    plotDataGoodnes(stagingTarget.getDataGoodnes(), stagingCalibrator.getDataGoodnes(), SASidsTarget, SASidsCalibrator)
+
     if getConfigs("Operations", "Stage", "config.cfg") == "True":
         stagingTarget.startStaging()
         stagingCalibrator.startStaging()
+
+    sys.exit(0)
