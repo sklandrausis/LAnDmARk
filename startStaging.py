@@ -49,6 +49,7 @@ class Staging(object):
                 self.dataGoodnes[str(SASid)]["Core_stations"] = observation.nrStationsCore
                 self.dataGoodnes[str(SASid)]["Remote_station"] = observation.nrStationsRemote
                 self.dataGoodnes[str(SASid)]["International_stations"] = observation.nrStationsInternational
+                self.dataGoodnes[str(SASid)]["Total_stations"] = observation.numberOfStations
 
                 dataproduct_query = cls.observations.contains(observation)
                 if self.calibrator == False:
@@ -108,40 +109,6 @@ class Staging(object):
         for id in self.SASids:
             self.getSURI(id)
 
-    def plot(self):
-        ratios = []
-        cStations = []
-        rStations = []
-        iStations = []
-        for id in self.SASids:
-            ratios.append(self.dataGoodnes[str(id)]["validFiles"] / (self.dataGoodnes[str(id)]["validFiles"] + self.dataGoodnes[str(id)]["invalidFiles"]))
-            cStations.append(self.dataGoodnes[str(id)]["Core_stations"])
-            rStations.append(self.dataGoodnes[str(id)]["Remote_station"])
-            iStations.append(self.dataGoodnes[str(id)]["International_stations"])
-
-        width = 0.35
-        ind = np.arange(0, len(self.SASids))
-
-        fig, ax = plt.subplots()
-        p1 = ax.bar(ind, cStations, width, color='r')
-        p2 = ax.bar(ind + width, rStations, width, color='g')
-        p3 = ax.bar(ind + width, iStations, width, color='b')
-        ax.set_xticks(ind + width / 2)
-        ax.set_xticklabels((self.SASids))
-        ax.legend((p1[0], p2[0], p3[0]), ('Core stations', 'Remote stations', 'International stations'))
-        ax.autoscale_view()
-        plt.xlabel("SAS id")
-        plt.grid()
-        plt.show()
-
-        plt.figure("Percent of valid data")
-        plt.bar(self.SASids, np.array(ratios) * 100)
-        plt.xticks(self.SASids, self.SASids)
-        plt.xlabel("SAS id")
-        plt.ylabel("Percent")
-        plt.grid()
-        plt.show()
-
     def getLogs(self):
         return self.logText
 
@@ -163,21 +130,25 @@ def plotDataGoodnes(targetGoodnes, calibratorGoodnes, SASidsTarget, SASidsCalibr
     cStationsTarget = []
     rStationsTarget = []
     iStationsTarget = []
+    tStationsTarget = []
     cStationsCalibrator = []
     rStationsCalibrator = []
     iStationsCalibrator = []
+    tStationsCalibrator = []
 
     for id in SASidsTarget:
         ratiosTarget.append(targetGoodnes[str(id)]["validFiles"] / (targetGoodnes[str(id)]["validFiles"] + targetGoodnes[str(id)]["invalidFiles"]))
         cStationsTarget.append(targetGoodnes[str(id)]["Core_stations"])
         rStationsTarget.append(targetGoodnes[str(id)]["Remote_station"])
         iStationsTarget.append(targetGoodnes[str(id)]["International_stations"])
+        tStationsTarget.append(targetGoodnes[str(id)]["Total_stations"])
 
     for id in SASidsCalibrator:
         ratiosCalibrator.append(calibratorGoodnes[str(id)]["validFiles"] / (calibratorGoodnes[str(id)]["validFiles"] + calibratorGoodnes[str(id)]["invalidFiles"]))
         cStationsCalibrator.append(calibratorGoodnes[str(id)]["Core_stations"])
         rStationsCalibrator.append(calibratorGoodnes[str(id)]["Remote_station"])
         iStationsCalibrator.append(calibratorGoodnes[str(id)]["International_stations"])
+        tStationsCalibrator.append(calibratorGoodnes[str(id)]["Total_stations"])
 
     plt.figure("Percent of valid data")
 
@@ -201,29 +172,32 @@ def plotDataGoodnes(targetGoodnes, calibratorGoodnes, SASidsTarget, SASidsCalibr
 
     width = 0.35
     ind = np.arange(0, len(SASidsTarget))
+    fig = plt.figure("Number of stations")
+    axt = fig.add_subplot(1, 2, 1)
+    axc = fig.add_subplot(1, 2, 2)
 
-    #plt.subplot(1, 2, 1)
-    fig, ax = plt.subplots(1,2)
-    pt1 = ax[0].bar(ind, cStationsTarget, width, color='r')
-    pt2 = ax[0].bar(ind + width, rStationsTarget, width, color='g')
-    pt3 = ax[0].bar(ind + width, iStationsTarget, width, color='b')
-    ax[0].set_xticks(ind + width / 2)
-    ax[0].set_xticklabels((SASidsTarget))
-    ax[0].legend((pt1[0], pt2[0], pt3[0]), ('Core stations', 'Remote stations', 'International stations'))
-    ax[0].autoscale_view()
-    ax[0].xlabel("SAS id")
+    pt4 = axt.bar(ind - width, tStationsTarget, width/2, color='y')
+    pt1 = axt.bar(ind, cStationsTarget, width, color='r')
+    pt2 = axt.bar(ind + width, rStationsTarget, width, color='g')
+    pt3 = axt.bar(ind + width, iStationsTarget, width, color='b')
+    axt.set_xticks(ind + width / 2)
+    axt.set_xticklabels((SASidsTarget))
+    axt.legend((pt1[0], pt2[0], pt3[0], pt4[0]), ('Core stations' , 'Remote stations', 'International stations', 'Total stations'))
+    axt.autoscale_view()
+    axt.set_title("Target")
+    axt.set_xlabel("SAS id")
     plt.grid()
 
-    #plt.subplot(1, 2, 2)
-    #fig, ax = plt.subplots()
-    pc1 = ax[1].bar(ind, cStationsCalibrator, width, color='r')
-    pc2 = ax[1].bar(ind + width, rStationsCalibrator, width, color='g')
-    pc3 = ax[1].bar(ind + width, iStationsCalibrator, width, color='b')
-    ax[1].set_xticks(ind + width / 2)
-    ax[1].set_xticklabels((SASidsCalibrator))
-    ax[1].legend((pc1[0], pc2[0], pc3[0]), ('Core stations', 'Remote stations', 'International stations'))
-    ax[1].autoscale_view()
-    plt.xlabel("SAS id")
+    pc4 = axc.bar(ind - width, tStationsCalibrator, width/2, color='y')
+    pc1 = axc.bar(ind, cStationsCalibrator, width, color='r')
+    pc2 = axc.bar(ind + width, rStationsCalibrator, width, color='g')
+    pc3 = axc.bar(ind + width, iStationsCalibrator, width, color='b')
+    axc.set_xticks(ind + width / 2)
+    axc.set_xticklabels((SASidsCalibrator))
+    axc.legend((pc1[0], pc2[0], pc3[0], pc4[0]), ('Core stations', 'Remote stations', 'International stations', 'Total stations'))
+    axc.autoscale_view()
+    axc.set_title("Calibrator")
+    axc.set_xlabel("SAS id")
     plt.grid()
 
     plt.show()
@@ -243,14 +217,12 @@ if __name__ == "__main__":
     logging.info("Processing target")
     stagingTarget = Staging(SASidsTarget, False)
     stagingTarget.query()
-    #stagingTarget.plot()
     tmpTargetLogs = stagingTarget.getLogs()
     logsTMP = "Processing target\n" + tmpTargetLogs
 
     logging.info("Processing calibrators")
     stagingCalibrator = Staging(SASidsCalibrator, True)
     stagingCalibrator.query()
-    #stagingCalibrator.plot()
     tmpCalibratorLogs = stagingCalibrator.getLogs()
 
     workingDir = getConfigs("Paths", "WorkingPath", "config.cfg")
