@@ -1,7 +1,8 @@
 import os
 import argparse
+from pathlib import Path
 
-from parsers._configparser import getConfigs
+from parsers._configparser import setConfigs, getConfigs
 
 def createDirectory(DirName):
     os.system("mkdir -p " + DirName)
@@ -22,7 +23,6 @@ def getArgs(key):
 
 if __name__=="__main__":
     calibratorNames = getArgs("calibratorSources").replace("[", "").replace("]", "").replace("'", "").replace(" ", "").split(",")
-    calibratorNames
 
     workingDir = getConfigs("Paths", "WorkingPath", "config.cfg")
     auxDir = getConfigs("Paths", "WorkingPath", "config.cfg") + "/aux"
@@ -54,6 +54,12 @@ if __name__=="__main__":
 
         copyFiles(PrefacorDir + 'pipeline.cfg', workingDir + id + '/calibrators/')
         copyFiles(PrefacorDir + 'Pre-Facet-Calibrator.parset',  workingDir + id + '/calibrators/')
+
+        home = str(Path.home())
+        workingDir = workingDir.replace("$HOME", home)
+
+        setConfigs("DEFAULT", "runtime_directory", workingDir + id + "/calibrators/", workingDir + id + '/calibrators/pipeline.cfg')
+        setConfigs("DEFAULT", "runtime_directory", workingDir + id + "/targets/", workingDir + id + '/targets/pipeline.cfg')
 
         copyFiles(PrefacorDir + 'pipeline.cfg', workingDir + id +'/targets/')
         copyFiles(PrefacorDir + 'Pre-Facet-Target.parset', workingDir + id +'/targets/')

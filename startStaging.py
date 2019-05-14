@@ -257,14 +257,18 @@ if __name__ == "__main__":
         for URI in stagingCalibrator.getSURIs()[str(id)]:
             calibratorSURIs += URI + "\n"
 
-    with open(workingDir + "targetSURIs.txt","w") as targetSURIfile:
-        targetSURIfile.write(targetSURIs)
-
-    with open(workingDir +"calibratorSURIs.txt","w") as calibratorSURIfile:
-        calibratorSURIfile.write(calibratorSURIs)
-
     logsTMP = logsTMP + "\nProcessing calibrators\n" + tmpCalibratorLogs
     os.system("python3.6 " + "setup.py " + str(stagingCalibrator.getAllCalibrators()).replace(",", " ").replace("[", "").replace("]", ""))
+
+    home = str(Path.home())
+    workingDir = workingDir.replace("$HOME", home)
+
+    with open(workingDir + "targetSURIs.txt", "w") as targetSURIfile:
+        targetSURIfile.write(targetSURIs)
+
+    with open(workingDir + "calibratorSURIs.txt", "w") as calibratorSURIfile:
+        calibratorSURIfile.write(calibratorSURIs)
+
     stagingCalibrator.writeLogs(logsTMP)
 
     plotDataGoodnes(stagingTarget.getDataGoodnes(), stagingCalibrator.getDataGoodnes(), SASidsTarget, SASidsCalibrator)
