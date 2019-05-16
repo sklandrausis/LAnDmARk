@@ -78,11 +78,22 @@ class Staging(object):
                     fileobject = ((FileObject.data_object == dataproduct) & (FileObject.isValid > 0)).max('creation_date')
 
                     if fileobject:
-                        if '/L' + str(SASid) in fileobject.URI:
+                        if getConfigs("Data", "ProductType", "config.cfg") == "observation":
+                            if '/L' + str(SASid) in fileobject.URI:
+                                uris.add(fileobject.URI)
+                                validFiles += 1
+                                print("File nr :", validFiles, "URI found", fileobject.URI)
+                                self.logText += "File nr : " + str(validFiles) + " URI found " + str(fileobject.URI) + "\n"
+
+                        elif getConfigs("Data", "ProductType", "config.cfg") == "pipeline":
                             uris.add(fileobject.URI)
                             validFiles += 1
                             print("File nr :", validFiles, "URI found", fileobject.URI)
                             self.logText += "File nr : " + str(validFiles) + " URI found " + str(fileobject.URI) + "\n"
+
+                        else:
+                            print("Specified wronge data product type")
+                            exit(1)
                     else:
                         invalidFiles += 1
                         print("No URI found for %s with dataProductIdentifier", (dataproduct.__class__.__name__, dataproduct.dataProductIdentifier))
