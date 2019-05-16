@@ -32,9 +32,18 @@ if __name__=="__main__":
     PrefacorDir = getConfigs("Paths", "PrefacorPath", "config.cfg")
     SASids = getConfigs("Data", "SASids", "config.cfg").replace(" ", "").split(",")
 
+    home = str(Path.home())
+    workingDir = workingDir.replace("$HOME", home)
+
     createDirectory(workingDir)
     createDirectory(auxDir)
     createDirectory(logDir)
+
+    lofarroot = getConfigs("Paths", "lofarroot", "config.cfg")
+    casaroot = getConfigs("Paths", "casaroot", "config.cfg")
+    pyraproot = getConfigs("Paths", "pyraproot", "config.cfg")
+    hdf5root = getConfigs("Paths", "hdf5root", "config.cfg")
+    wcsroot = getConfigs("Paths", "wcsroot", "config.cfg")
 
     index = 0
     for id in SASids:
@@ -46,23 +55,39 @@ if __name__=="__main__":
         createDirectory(workingDir + id + '/calibrators/L' + str(int(id) - 1) + '_RESULTS')
         createDirectory(workingDir + id + '/targets')
         createDirectory(workingDir + id + '/targets/L' + str(int(id)) + '')
-        createDirectory(workingDir + id + '/Pipeline_prefactor')
         createDirectory(workingDir + id +'/Imaging_deep')
 
-        copyFiles(PrefacorDir + 'pipeline.cfg', workingDir + id + '/')
-        copyFiles(PrefacorDir + 'Imaging.parset', workingDir + id + '/')
+        # Creating imaging files
+        copyFiles(PrefacorDir + 'pipeline.cfg', workingDir + id + '/Imaging_deep')
+        copyFiles(PrefacorDir + 'Initial-Subtract.parset', workingDir + id + '/Imaging_deep')
+        setConfigs("DEFAULT", "runtime_directory", workingDir + id + "/Imaging_deep/", workingDir + id + '/Imaging_deep/pipeline.cfg')
+        setConfigs("DEFAULT", "lofarroot", lofarroot, workingDir + id + '/Imaging_deep/pipeline.cfg')
+        setConfigs("DEFAULT", "casaroot", casaroot, workingDir + id + '/Imaging_deep/pipeline.cfg')
+        setConfigs("DEFAULT", "pyraproot", pyraproot, workingDir + id + '/Imaging_deep/pipeline.cfg')
+        setConfigs("DEFAULT", "hdf5root", hdf5root, workingDir + id + '/Imaging_deep/pipeline.cfg')
+        setConfigs("DEFAULT", "wcsroot", wcsroot, workingDir + id + '/Imaging_deep/pipeline.cfg')
 
+        # Creating calibrator files
         copyFiles(PrefacorDir + 'pipeline.cfg', workingDir + id + '/calibrators/')
         copyFiles(PrefacorDir + 'Pre-Facet-Calibrator.parset',  workingDir + id + '/calibrators/')
+        setConfigs("DEFAULT", "runtime_directory", workingDir + id + "/calibrators/",workingDir + id + '/calibrators/pipeline.cfg')
+        setConfigs("DEFAULT", "lofarroot", lofarroot, workingDir + id + '/calibrators/pipeline.cfg')
+        setConfigs("DEFAULT", "casaroot", casaroot, workingDir + id + '/calibrators/pipeline.cfg')
+        setConfigs("DEFAULT", "pyraproot", pyraproot, workingDir + id + '/calibrators/pipeline.cfg')
+        setConfigs("DEFAULT", "hdf5root", hdf5root, workingDir + id + '/calibrators/pipeline.cfg')
+        setConfigs("DEFAULT", "wcsroot", wcsroot, workingDir + id + '/calibrators/pipeline.cfg')
 
-        home = str(Path.home())
-        workingDir = workingDir.replace("$HOME", home)
 
-        setConfigs("DEFAULT", "runtime_directory", workingDir + id + "/calibrators/", workingDir + id + '/calibrators/pipeline.cfg')
-        setConfigs("DEFAULT", "runtime_directory", workingDir + id + "/targets/", workingDir + id + '/targets/pipeline.cfg')
-
+        # Creating target files
         copyFiles(PrefacorDir + 'pipeline.cfg', workingDir + id +'/targets/')
         copyFiles(PrefacorDir + 'Pre-Facet-Target.parset', workingDir + id +'/targets/')
+        setConfigs("DEFAULT", "runtime_directory", workingDir + id + "/targets/", workingDir + id + '/targets/pipeline.cfg')
+        setConfigs("DEFAULT", "lofarroot", lofarroot, workingDir + id + '/targets/pipeline.cfg')
+        setConfigs("DEFAULT", "casaroot", casaroot, workingDir + id + '/targets/pipeline.cfg')
+        setConfigs("DEFAULT", "pyraproot", pyraproot, workingDir + id + '/targets/pipeline.cfg')
+        setConfigs("DEFAULT", "hdf5root", hdf5root, workingDir + id + '/targets/pipeline.cfg')
+        setConfigs("DEFAULT", "wcsroot", wcsroot, workingDir + id + '/targets/pipeline.cfg')
+
         index += 1
 
     print("Done")
