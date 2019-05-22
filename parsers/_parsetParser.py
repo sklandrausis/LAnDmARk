@@ -51,7 +51,3 @@ class ParsetParser():
                 elif str(l) in self.params.keys():
                     file.write(self.params[str(l)] + " = " + self.parsetDict[self.params[str(l)]] + "\n")
 
-p = ParsetParser("/home/janis/Documents/prefactor/Pre-Facet-Calibrator.parset")
-p.parse()
-p.setParam("! cal_input_path", "/home/janis/")
-p.writeParset("/home/janis/Documents/msss/H128+44/201299/calibrators/Pre-Facet-Calibrator.parset")

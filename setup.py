@@ -3,6 +3,7 @@ import argparse
 from pathlib import Path
 
 from parsers._configparser import setConfigs, getConfigs
+from parsers._parsetParser import ParsetParser
 
 def createDirectory(DirName):
     os.system("mkdir -p " + DirName)
@@ -34,6 +35,7 @@ if __name__=="__main__":
 
     home = str(Path.home())
     workingDir = workingDir.replace("$HOME", home)
+    PrefacorDir = PrefacorDir.replace("$HOME", home)
 
     createDirectory(workingDir)
     createDirectory(auxDir)
@@ -67,6 +69,21 @@ if __name__=="__main__":
         setConfigs("DEFAULT", "hdf5root", hdf5root, workingDir + id + '/Imaging_deep/pipeline.cfg')
         setConfigs("DEFAULT", "wcsroot", wcsroot, workingDir + id + '/Imaging_deep/pipeline.cfg')
 
+        imagingParset = ParsetParser(workingDir + id + '/Imaging_deep' + "/Initial-Subtract.parset")
+        imagingParset.parse()
+        imagingParset.setParam("! data_input_path", workingDir + id + "/Imaging_deep")
+        imagingParset.setParam("! data_input_pattern", "L" + str(int(id)) + "*.ms")
+        imagingParset.setParam("! prefactor_directory", PrefacorDir)
+        imagingParset.setParam("! wsclean_executable", "/home/drabent/wsclean")
+        imagingParset.setParam("! lofar_directory", "$LOFARROOT")
+        imagingParset.setParam("! job_directory", "input.output.job_directory")
+        imagingParset.setParam("! scripts", "{{prefactor_directory}}/scripts")
+        imagingParset.setParam("pipeline.pluginpath", "{{prefactor_directory}}/plugins")
+        imagingParset.setParam("! results_directory ", workingDir + id +'/Imaging_deep')
+        imagingParset.setParam("! inspection_directory", workingDir + id +'/Imaging_deep')
+        imagingParset.setParam("! local_scratch_dir", " /tmp")
+        imagingParset.writeParset(workingDir + id + '/Imaging_deep' + "/Initial-Subtract.parset")
+
         # Creating calibrator files
         copyFiles(PrefacorDir + 'pipeline.cfg', workingDir + id + '/calibrators/')
         copyFiles(PrefacorDir + 'Pre-Facet-Calibrator.parset',  workingDir + id + '/calibrators/')
@@ -76,7 +93,20 @@ if __name__=="__main__":
         setConfigs("DEFAULT", "pyraproot", pyraproot, workingDir + id + '/calibrators/pipeline.cfg')
         setConfigs("DEFAULT", "hdf5root", hdf5root, workingDir + id + '/calibrators/pipeline.cfg')
         setConfigs("DEFAULT", "wcsroot", wcsroot, workingDir + id + '/calibrators/pipeline.cfg')
-
+        calibratorParset = ParsetParser(workingDir + id + '/calibrators/Pre-Facet-Calibrator.parset')
+        calibratorParset.parse()
+        calibratorParset.setParam("! data_input_path", workingDir + id + '/calibrators/L' + str(int(id) - 1) + '_' + calibratorNames[index]+ '')
+        calibratorParset.setParam("! data_input_pattern", "L" + str(int(id)) + "*.ms")
+        calibratorParset.setParam("! prefactor_directory", PrefacorDir)
+        calibratorParset.setParam("! wsclean_executable", "/home/drabent/wsclean")
+        calibratorParset.setParam("! lofar_directory", "$LOFARROOT")
+        calibratorParset.setParam("! job_directory", "input.output.job_directory")
+        calibratorParset.setParam("! scripts", "{{prefactor_directory}}/scripts")
+        calibratorParset.setParam("pipeline.pluginpath", "{{prefactor_directory}}/plugins")
+        calibratorParset.setParam("! results_directory ", workingDir + id + '/calibrators/L' + str(int(id) - 1) + '_RESULTS')
+        calibratorParset.setParam("! inspection_directory", workingDir + id + '/calibrators/L' + str(int(id) - 1) + '_RESULTS')
+        calibratorParset.setParam("! local_scratch_dir", " /tmp")
+        calibratorParset.writeParset(workingDir + id + '/calibrators/Pre-Facet-Calibrator.parset')
 
         # Creating target files
         copyFiles(PrefacorDir + 'pipeline.cfg', workingDir + id +'/targets/')
@@ -87,6 +117,20 @@ if __name__=="__main__":
         setConfigs("DEFAULT", "pyraproot", pyraproot, workingDir + id + '/targets/pipeline.cfg')
         setConfigs("DEFAULT", "hdf5root", hdf5root, workingDir + id + '/targets/pipeline.cfg')
         setConfigs("DEFAULT", "wcsroot", wcsroot, workingDir + id + '/targets/pipeline.cfg')
+        targetParset = ParsetParser(workingDir + id + '/targets/Pre-Facet-Target.parset')
+        targetParset.parse()
+        targetParset.setParam("! data_input_path", workingDir + id + '/targets/L' + str(int(id) - 1))
+        targetParset.setParam("! data_input_pattern", "L" + str(int(id)) + "*.ms")
+        targetParset.setParam("! prefactor_directory", PrefacorDir)
+        targetParset.setParam("! wsclean_executable", "/home/drabent/wsclean")
+        targetParset.setParam("! lofar_directory", "$LOFARROOT")
+        targetParset.setParam("! job_directory", "input.output.job_directory")
+        targetParset.setParam("! scripts", "{{prefactor_directory}}/scripts")
+        targetParset.setParam("pipeline.pluginpath", "{{prefactor_directory}}/plugins")
+        targetParset.setParam("! results_directory ",workingDir + id + '/targets/L' + str(int(id) - 1) + '_RESULTS')
+        targetParset.setParam("! inspection_directory",workingDir + id + '/targets/L' + str(int(id) - 1) + '_RESULTS')
+        targetParset.setParam("! local_scratch_dir", " /tmp")
+        targetParset.writeParset(workingDir + id + '/targets/Pre-Facet-Target.parset')
 
         index += 1
 
