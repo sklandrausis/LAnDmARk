@@ -237,7 +237,7 @@ if __name__ == "__main__":
         raise Exception("You are not member of project", project)
         sys.exit(1)
 
-    SASidsTarget = [int(id) for id in getConfigs("Data", "SASids", "config.cfg").replace(" ", "").split(",")]
+    SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", "config.cfg").replace(" ", "").split(",")]
     SASidsCalibrator = [id - 1 for id in SASidsTarget]
 
     logging.info("Processing target")

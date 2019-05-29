@@ -83,49 +83,46 @@ if __name__=="__main__":
         createDirectory(targetDir + id + "_RESULTS")
 
         # Creating calibrator files
-        copyFiles(PrefactorDir + 'pipeline.cfg', calibratorDir)
-        copyFiles(PrefactorDir + 'Pre-Facet-Calibrator.parset',  calibratorDir)
-        setConfigs("DEFAULT", "lofarroot", lofarroot, calibratorDir + "pipeline.cfg")
-        setConfigs("DEFAULT", "casaroot", casaroot, calibratorDir + "pipeline.cfg")
-        setConfigs("DEFAULT", "pyraproot", pyraproot, calibratorDir + "pipeline.cfg")
-        setConfigs("DEFAULT", "hdf5root", hdf5root, calibratorDir + "pipeline.cfg")
-        setConfigs("DEFAULT", "wcsroot", wcsroot, calibratorDir + "pipeline.cfg")
-        setConfigs("DEFAULT", "runtime_directory", calibratorDir, calibratorDir + "pipeline.cfg")
-        setConfigs("DEFAULT", "working_directory", "%(runtime_directory)s", calibratorDir + "pipeline.cfg")
-        setConfigs("remote", "max_per_node", max_per_node, calibratorDir + "pipeline.cfg")
-        calibratorParset = ParsetParser(workingDir + id + '/calibrators/Pre-Facet-Calibrator.parset')
-
+        copyFiles(PrefactorDir + 'pipeline.cfg', calibratorDir + id + '_' + calibratorNames[index])
+        copyFiles(PrefactorDir + 'Pre-Facet-Calibrator.parset',  calibratorDir + id + '_' + calibratorNames[index])
+        setConfigs("DEFAULT", "lofarroot", lofarroot, calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
+        setConfigs("DEFAULT", "casaroot", casaroot, calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
+        setConfigs("DEFAULT", "pyraproot", pyraproot, calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
+        setConfigs("DEFAULT", "hdf5root", hdf5root, calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
+        setConfigs("DEFAULT", "wcsroot", wcsroot, calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
+        setConfigs("DEFAULT", "runtime_directory", calibratorDir, calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
+        setConfigs("DEFAULT", "working_directory", "%(runtime_directory)s", calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
+        setConfigs("remote", "max_per_node", max_per_node, calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
+        calibratorParset = ParsetParser(calibratorDir + id + '_' + calibratorNames[index] + '/Pre-Facet-Calibrator.parset')
         calibratorParset.parse()
-        calibratorParset.setParam("! cal_input_path", workingDir + id + '/calibrators/L' + str(int(id) - 1) + '_' + calibratorNames[index]+ '')
-        calibratorParset.setParam("! cal_input_pattern", "L" + str(int(id)) + "*.ms")
-        calibratorParset.setParam("! prefactor_directory", PrefacorDir)
-        calibratorParset.setParam("losoto_directory", losotopath)
+        calibratorParset.setParam("! cal_input_path", calibratorDir + id + '_' + calibratorNames[index]+ '')
+        calibratorParset.setParam("! cal_input_pattern",  "L" + "*.ms")
+        calibratorParset.setParam("! prefactor_directory", PrefactorDir)
+        calibratorParset.setParam("! losoto_directory", losotopath)
         calibratorParset.setParam("! aoflagger", aoflagger)
-        calibratorParset.writeParset(imagingDir + "/Initial-Subtract.parset")
+        calibratorParset.writeParset(calibratorDir + id + '_' + calibratorNames[index] + '/Pre-Facet-Calibrator.parset')
 
-        '''
         # Creating target files
-        copyFiles(PrefacorDir + 'pipeline.cfg', workingDir + id +'/targets/')
-        copyFiles(PrefacorDir + 'Pre-Facet-Target.parset', workingDir + id +'/targets/')
-        setConfigs("DEFAULT", "runtime_directory", workingDir + id + "/targets/", workingDir + id + '/targets/pipeline.cfg')
-        setConfigs("DEFAULT", "lofarroot", lofarroot, workingDir + id + '/targets/pipeline.cfg')
-        setConfigs("DEFAULT", "casaroot", casaroot, workingDir + id + '/targets/pipeline.cfg')
-        setConfigs("DEFAULT", "pyraproot", pyraproot, workingDir + id + '/targets/pipeline.cfg')
-        setConfigs("DEFAULT", "hdf5root", hdf5root, workingDir + id + '/targets/pipeline.cfg')
-        setConfigs("DEFAULT", "wcsroot", wcsroot, workingDir + id + '/targets/pipeline.cfg')
-        targetParset = ParsetParser(workingDir + id + '/targets/Pre-Facet-Target.parset')
+        copyFiles(PrefactorDir + 'pipeline.cfg', targetDir + id + "_RAW")
+        copyFiles(PrefactorDir + 'Pre-Facet-Target.parset', targetDir + id + "_RAW")
+        setConfigs("DEFAULT", "lofarroot", lofarroot, targetDir + id + "_RAW" + "/pipeline.cfg")
+        setConfigs("DEFAULT", "casaroot", casaroot, targetDir + id + "_RAW" + "/pipeline.cfg")
+        setConfigs("DEFAULT", "pyraproot", pyraproot, targetDir + id + "_RAW" + "/pipeline.cfg")
+        setConfigs("DEFAULT", "hdf5root", hdf5root, targetDir + id + "_RAW" + "/pipeline.cfg")
+        setConfigs("DEFAULT", "wcsroot", wcsroot, targetDir + id + "_RAW" + "/pipeline.cfg")
+        setConfigs("DEFAULT", "runtime_directory", targetDir, targetDir + id + "_RAW" + "/pipeline.cfg")
+        setConfigs("DEFAULT", "working_directory", "%(runtime_directory)s", targetDir + id + "_RAW" + "/pipeline.cfg")
+        setConfigs("remote", "max_per_node", max_per_node, targetDir + id + "_RAW"+ "/pipeline.cfg")
+        targetParset = ParsetParser(targetDir + id + "_RAW/" + 'Pre-Facet-Target.parset')
         targetParset.parse()
-        targetParset.setParam("! target_input_path", workingDir + id + '/targets/L' + str(int(id) - 1))
-        targetParset.setParam("! target_input_pattern", "L" + str(int(id)) + "*.ms")
-        targetParset.setParam("! prefactor_directory", PrefacorDir)
+        targetParset.setParam("! target_input_path", calibratorDir + id + "_RAW")
+        targetParset.setParam("! target_input_pattern", "L" + "*.ms")
+        targetParset.setParam("! prefactor_directory", PrefactorDir)
         targetParset.setParam("! losoto_directory", losotopath)
         targetParset.setParam("! aoflagger", aoflagger)
-    
-        '''
+
+        targetParset.writeParset(targetDir + id + "_RAW/" + 'Pre-Facet-Target.parset')
+
         index += 1
 
     print("Done")
-
-
-
-
