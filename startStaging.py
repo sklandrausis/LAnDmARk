@@ -46,6 +46,7 @@ class Staging(object):
         if len(queryObservations) > 0:
             validFiles = 0
             invalidFiles = 0
+
             for observation in queryObservations:
 
                 logging.info("Querying ObservationID " + observation.observationId)
@@ -53,6 +54,7 @@ class Staging(object):
 
                 if "UnspecifiedProcess" in str(type(observation)):
                     invalidFiles += 1
+                    print("yes2")
 
                 else:
                     logging.info("Core stations " + str(observation.nrStationsCore) + " Remote stations " + str(observation.nrStationsRemote) + " International stations " + str(observation.nrStationsInternational) + " Total stations " + str(observation.numberOfStations))
@@ -86,10 +88,12 @@ class Staging(object):
                                 self.logText += "File nr : " + str(validFiles) + " URI found " + str(fileobject.URI) + "\n"
 
                         elif getConfigs("Data", "ProductType", "config.cfg") == "pipeline":
-                            uris.add(fileobject.URI)
-                            validFiles += 1
-                            print("File nr :", validFiles, "URI found", fileobject.URI)
-                            self.logText += "File nr : " + str(validFiles) + " URI found " + str(fileobject.URI) + "\n"
+
+                            if "dppp" in fileobject.URI:
+                                uris.add(fileobject.URI)
+                                validFiles += 1
+                                print("File nr :", validFiles, "URI found", fileobject.URI)
+                                self.logText += "File nr : " + str(validFiles) + " URI found " + str(fileobject.URI) + "\n"
 
                         else:
                             print("Specified wronge data product type")
@@ -99,9 +103,11 @@ class Staging(object):
                         print("No URI found for %s with dataProductIdentifier", (dataproduct.__class__.__name__, dataproduct.dataProductIdentifier))
                         self.logText += "No URI found for %s with dataProductIdentifier " +  str((dataproduct.__class__.__name__, dataproduct.dataProductIdentifier)) + "\n"
 
-            dataproduct_query &= cls.isValid == 0
-            for dataproduct in dataproduct_query:
-                invalidFiles += 1
+                dataproduct_query = cls.observations.contains(observation)
+                dataproduct_query &= cls.isValid == 0
+
+                for dataproduct in dataproduct_query:
+                    invalidFiles += 1
 
             logging.info("Total URI's found " + str(len(uris)))
             logging.info("Valid files found " + str(validFiles) + " Invalid files found " + str(invalidFiles))
@@ -147,7 +153,7 @@ class Staging(object):
                 break
 
         log.write(logText)
-        os.system("mv " + f + " " + getConfigs("Paths", "WorkingPath", "config.cfg") + "/logs/"  + f)
+        os.system("mv " + f + " " + getConfigs("Paths", "WorkingPath", "config.cfg") + getConfigs("Data", "TargetName", "config.cfg") + "/Pipeline_aux/"  + f)
 
 def plotDataGoodnes(targetGoodnes, calibratorGoodnes, SASidsTarget, SASidsCalibrator):
     ratiosTarget = []
@@ -233,12 +239,23 @@ if __name__ == "__main__":
     #Check if project is private and we are not members of project
     project = getConfigs("Data", "PROJECTid", "config.cfg")
     context.set_project(project)
+
     if project != context.get_current_project().name:
         raise Exception("You are not member of project", project)
         sys.exit(1)
 
     SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", "config.cfg").replace(" ", "").split(",")]
-    SASidsCalibrator = [id - 1 for id in SASidsTarget]
+
+    if len(getConfigs("Data", "calibratorSASids", "config.cfg")) == 0:
+        if project == "MSSS_HBA_2013":
+            SASidsCalibrator = [id - 1 for id in SASidsTarget]
+
+        else:
+            raise Exception("SAS id for calibrator is not set in config.cfg file")
+            sys.exit(1)
+    else:
+        SASidsCalibrator =  [int(id) for id in getConfigs("Data", "calibratorSASids", "config.cfg").replace(" ", "").split(",")]
+
 
     logging.info("Processing target")
     stagingTarget = Staging(SASidsTarget, False, "config.cfg")

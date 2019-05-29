@@ -90,7 +90,7 @@ if __name__=="__main__":
         setConfigs("DEFAULT", "pyraproot", pyraproot, calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
         setConfigs("DEFAULT", "hdf5root", hdf5root, calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
         setConfigs("DEFAULT", "wcsroot", wcsroot, calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
-        setConfigs("DEFAULT", "runtime_directory", calibratorDir, calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
+        setConfigs("DEFAULT", "runtime_directory", calibratorDir + id + '_' + calibratorNames[index], calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
         setConfigs("DEFAULT", "working_directory", "%(runtime_directory)s", calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
         setConfigs("remote", "max_per_node", max_per_node, calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
         calibratorParset = ParsetParser(calibratorDir + id + '_' + calibratorNames[index] + '/Pre-Facet-Calibrator.parset')
