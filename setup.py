@@ -120,7 +120,7 @@ if __name__=="__main__":
         targetParset.setParam("! prefactor_directory", PrefactorDir)
         targetParset.setParam("! losoto_directory", losotopath)
         targetParset.setParam("! aoflagger", aoflagger)
-
+        targetParset.setParam("! cal_solutionsr", calibratorDir + id + "_RESULTS" +  "/results/cal_values/cal_solutions.h5")
         targetParset.writeParset(targetDir + id + "_RAW/" + 'Pre-Facet-Target.parset')
 
         index += 1
