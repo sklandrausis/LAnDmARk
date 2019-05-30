@@ -54,7 +54,11 @@ class Staging(object):
 
                 if "UnspecifiedProcess" in str(type(observation)):
                     invalidFiles += 1
-                    print("yes2")
+                    dataproduct_query = cls.observations.contains(observation)
+                    dataproduct_query &= cls.isValid == 1
+
+                    print("Possibly corrupted file", len(dataproduct_query))
+                    print("Possibly staging", observation.can_be_staged, "Number of unspecified data products", observation.numberOfUnspecifiedDataProducts)
 
                 else:
                     logging.info("Core stations " + str(observation.nrStationsCore) + " Remote stations " + str(observation.nrStationsRemote) + " International stations " + str(observation.nrStationsInternational) + " Total stations " + str(observation.numberOfStations))
@@ -102,6 +106,7 @@ class Staging(object):
                         invalidFiles += 1
                         print("No URI found for %s with dataProductIdentifier", (dataproduct.__class__.__name__, dataproduct.dataProductIdentifier))
                         self.logText += "No URI found for %s with dataProductIdentifier " +  str((dataproduct.__class__.__name__, dataproduct.dataProductIdentifier)) + "\n"
+
 
                 dataproduct_query = cls.observations.contains(observation)
                 dataproduct_query &= cls.isValid == 0
