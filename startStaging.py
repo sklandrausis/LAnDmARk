@@ -6,7 +6,6 @@ from awlofar.toolbox.LtaStager import LtaStager, LtaStagerError
 from awlofar.main.aweimports import *
 import matplotlib.pyplot as plt
 import numpy as np
-from pathlib import Path
 
 from parsers._configparser import getConfigs
 
@@ -276,8 +275,6 @@ if __name__ == "__main__":
     workingDir = getConfigs("Paths", "WorkingPath", "config.cfg")
     targetName = getConfigs("Data", "TargetName", "config.cfg")
     workingDir = workingDir + "/" + targetName + "/"
-    home = str(Path.home())
-    workingDir = workingDir.replace("$HOME", home)
 
     targetSURIs = ""
     calibratorSURIs = ""
@@ -292,9 +289,6 @@ if __name__ == "__main__":
 
     logsTMP = logsTMP + "\nProcessing calibrators\n" + tmpCalibratorLogs
     os.system("python3.6 " + "setup.py " + str(stagingCalibrator.getAllCalibrators()).replace(",", " ").replace("[", "").replace("]", ""))
-
-    home = str(Path.home())
-    workingDir = workingDir.replace("$HOME", home)
 
     with open(workingDir + "targetSURIs.txt", "w") as targetSURIfile:
         targetSURIfile.write(targetSURIs)

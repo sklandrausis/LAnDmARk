@@ -1,6 +1,5 @@
 import os
 import argparse
-from pathlib import Path
 
 from parsers._configparser import setConfigs, getConfigs
 from parsers._parsetParser import ParsetParser
@@ -30,13 +29,10 @@ if __name__=="__main__":
     PrefactorDir = getConfigs("Paths", "PrefactorPath", "config.cfg")
     targetSASids = getConfigs("Data", "targetSASids", "config.cfg").replace(" ", "").split(",")
 
-    home = str(Path.home())
-    workingDir = workingDir.replace("$HOME", home)
     imagingDir = workingDir + "imaging_deep" + "/"
     calibratorDir = workingDir + "calibrators" + "/"
     targetDir = workingDir + "targets" + "/"
     auxDir = workingDir + "/Pipeline_aux"
-    PrefactorDir = PrefactorDir.replace("$HOME", home)
 
     # Creating directory structure
     createDirectory(workingDir)
