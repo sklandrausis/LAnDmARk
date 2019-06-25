@@ -281,11 +281,22 @@ if __name__ == "__main__":
 
     for id in SASidsTarget:
         for URI in stagingTarget.getSURIs()[str(id)]:
-            targetSURIs += URI + "\n"
+            if "sara" in URI:
+                targetSURIs += "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n"
+            elif "juelich" in URI:
+                targetSURIs += "https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl=" + URI + "\n"
+            else:
+                targetSURIs += "https://lta-download.lofar.psnc.pl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n"
+
 
     for id in SASidsCalibrator:
         for URI in stagingCalibrator.getSURIs()[str(id)]:
-            calibratorSURIs += URI + "\n"
+            if "sara" in URI:
+                calibratorSURIs += "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n"
+            elif "juelich" in URI:
+                calibratorSURIs += "https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl=" + URI + "\n"
+            else:
+                calibratorSURIs += "https://lta-download.lofar.psnc.pl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n"
 
     logsTMP = logsTMP + "\nProcessing calibrators\n" + tmpCalibratorLogs
     os.system("python3.6 " + "setup.py " + str(stagingCalibrator.getAllCalibrators()).replace(",", " ").replace("[", "").replace("]", ""))
