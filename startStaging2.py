@@ -1,6 +1,6 @@
 import os
 import sys
-#import coloredlogs, logging
+import coloredlogs, logging
 from awlofar.database.Context import context
 from awlofar.toolbox.LtaStager import LtaStager, LtaStagerError
 from awlofar.main.aweimports import *
@@ -9,9 +9,9 @@ import numpy as np
 
 from parsers._configparser import getConfigs
 
-#coloredlogs.install(level='PRODUCTION', filename='tmp.log', filemode='w')
-#logger = logging.getLogger('startStaging')
-#logging.getLogger()
+coloredlogs.install(level='PRODUCTION', filename='tmp.log', filemode='w')
+logger = logging.getLogger('startStaging')
+logging.getLogger()
 
 class Staging(object):
     __slots__=("SASids", "targetName", "SURIs", "dataGoodnes", "logText", "calibrator", "calibratorsList", "stationCount", "configFile")
@@ -32,12 +32,12 @@ class Staging(object):
     def getSURI(self, SASid):
         uris = set()
         self.dataGoodnes[str(SASid)] = dict()
-        print("SAS id " + str(SASid))
+        logging.info("SAS id " + str(SASid))
 
         self.logText += "SAS id " + str(SASid) + "\n"
         if self.calibrator == False:
             self.logText += "Target name " +  self.targetName + "\n"
-            print("Target name " + self.targetName)
+            logging.info("Target name " + self.targetName)
 
         cls = CorrelatedDataProduct
         queryObservations = (getattr(Process, "observationId") == SASid) & (Process.isValid > 0)
@@ -60,7 +60,7 @@ class Staging(object):
                     print("Possibly staging", observation.can_be_staged, "Number of unspecified data products", observation.numberOfUnspecifiedDataProducts)
 
                 else:
-                    print("Core stations " + str(observation.nrStationsCore) + " Remote stations " + str(observation.nrStationsRemote) + " International stations " + str(observation.nrStationsInternational) + " Total stations " + str(observation.numberOfStations))
+                    logging.info("Core stations " + str(observation.nrStationsCore) + " Remote stations " + str(observation.nrStationsRemote) + " International stations " + str(observation.nrStationsInternational) + " Total stations " + str(observation.numberOfStations))
                     self.logText += "Core stations " + str(observation.nrStationsCore) + " Remote stations " + str(observation.nrStationsRemote) + " International stations " + str(observation.nrStationsInternational) + " Total stations " + str(observation.numberOfStations) + "\n"
                     self.dataGoodnes[str(SASid)]["Core_stations"] = observation.nrStationsCore
                     self.dataGoodnes[str(SASid)]["Remote_station"] = observation.nrStationsRemote
@@ -84,7 +84,7 @@ class Staging(object):
 
                     if fileobject:
                         if getConfigs("Data", "ProductType", "config.cfg") == "observation":
-                            if '/L' + str(SASid) in fileobject.URI:
+                            if '/L' + str(SASid) in fileobject.URI and not "dppp" in fileobject.URI:
                                 uris.add(fileobject.URI)
                                 validFiles += 1
                                 print("File nr :", validFiles, "URI found", fileobject.URI)
@@ -92,14 +92,14 @@ class Staging(object):
 
                         elif getConfigs("Data", "ProductType", "config.cfg") == "pipeline":
 
-                            if "dppp" in fileobject.URI:
+                            if '/L' + str(SASid) in fileobject.URI and "dppp" in fileobject.URI:
                                 uris.add(fileobject.URI)
                                 validFiles += 1
                                 print("File nr :", validFiles, "URI found", fileobject.URI)
                                 self.logText += "File nr : " + str(validFiles) + " URI found " + str(fileobject.URI) + "\n"
 
                         else:
-                            print("Specified wronge data product type")
+                            print("Wrong data product type requested")
                             exit(1)
                     else:
                         invalidFiles += 1
@@ -113,15 +113,15 @@ class Staging(object):
                 for dataproduct in dataproduct_query:
                     invalidFiles += 1
 
-            print("Total URI's found " + str(len(uris)))
-            print("Valid files found " + str(validFiles) + " Invalid files found " + str(invalidFiles))
+            logging.info("Total URI's found " + str(len(uris)))
+            logging.info("Valid files found " + str(validFiles) + " Invalid files found " + str(invalidFiles))
             self.logText += "Total URI's found " + str(len(uris)) + "\n"
             self.logText += "Valid files found " + str(validFiles) + " Invalid files found " + str(invalidFiles) + "\n"
             self.dataGoodnes[str(SASid)]["validFiles"] = validFiles
             self.dataGoodnes[str(SASid)]["invalidFiles"] = invalidFiles
 
         else:
-            print("Wrong SAS id " + SASid)
+            logging.error("Wrong SAS id " + SASid)
             self.logText += "Wrong SAS id " + SASid + "\n"
 
         self.SURIs[str(SASid)] = uris
@@ -261,13 +261,13 @@ if __name__ == "__main__":
         SASidsCalibrator =  [int(id) for id in getConfigs("Data", "calibratorSASids", "config.cfg").replace(" ", "").split(",")]
 
 
-    print("Processing target")
+    logging.info("Processing target")
     stagingTarget = Staging(SASidsTarget, False, "config.cfg")
     stagingTarget.query()
     tmpTargetLogs = stagingTarget.getLogs()
     logsTMP = "Processing target\n" + tmpTargetLogs
 
-    print("Processing calibrators")
+    logging.info("Processing calibrators")
     stagingCalibrator = Staging(SASidsCalibrator, True, "config.cfg")
     stagingCalibrator.query()
     tmpCalibratorLogs = stagingCalibrator.getLogs()
@@ -281,14 +281,25 @@ if __name__ == "__main__":
 
     for id in SASidsTarget:
         for URI in stagingTarget.getSURIs()[str(id)]:
-            targetSURIs += URI + "\n"
+            if "sara" in URI:
+                targetSURIs += "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n"
+            elif "juelich" in URI:
+                targetSURIs += "https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl=" + URI + "\n"
+            else:
+                targetSURIs += "https://lta-download.lofar.psnc.pl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n"
+
 
     for id in SASidsCalibrator:
         for URI in stagingCalibrator.getSURIs()[str(id)]:
-            calibratorSURIs += URI + "\n"
+            if "sara" in URI:
+                calibratorSURIs += "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n"
+            elif "juelich" in URI:
+                calibratorSURIs += "https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl=" + URI + "\n"
+            else:
+                calibratorSURIs += "https://lta-download.lofar.psnc.pl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n"
 
     logsTMP = logsTMP + "\nProcessing calibrators\n" + tmpCalibratorLogs
-    os.system("python3.6 " + "setup.py " + str(stagingCalibrator.getAllCalibrators()).replace(",", " ").replace("[", "").replace("]", ""))
+    os.system("python3 " + "setup.py " + str(stagingCalibrator.getAllCalibrators()).replace(",", " ").replace("[", "").replace("]", ""))
 
     with open(workingDir + "targetSURIs.txt", "w") as targetSURIfile:
         targetSURIfile.write(targetSURIs)
