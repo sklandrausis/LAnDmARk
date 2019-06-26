@@ -27,6 +27,7 @@ class Staging(object):
         self.targetName = getConfigs("Data", "TargetName", self.configFile)
 
     def getStationsCount(self):
+        
         return self.stationCount
 
     def getSURI(self, SASid):
