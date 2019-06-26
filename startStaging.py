@@ -84,7 +84,7 @@ class Staging(object):
 
                     if fileobject:
                         if getConfigs("Data", "ProductType", "config.cfg") == "observation":
-                            if '/L' + str(SASid) in fileobject.URI:
+                            if '/L' + str(SASid) in fileobject.URI and not "dppp" in fileobject.URI:
                                 uris.add(fileobject.URI)
                                 validFiles += 1
                                 print("File nr :", validFiles, "URI found", fileobject.URI)
@@ -92,14 +92,14 @@ class Staging(object):
 
                         elif getConfigs("Data", "ProductType", "config.cfg") == "pipeline":
 
-                            if "dppp" in fileobject.URI:
+                            if '/L' + str(SASid) in fileobject.URI and "dppp" in fileobject.URI:
                                 uris.add(fileobject.URI)
                                 validFiles += 1
                                 print("File nr :", validFiles, "URI found", fileobject.URI)
                                 self.logText += "File nr : " + str(validFiles) + " URI found " + str(fileobject.URI) + "\n"
 
                         else:
-                            print("Specified wronge data product type")
+                            print("Wrong data product type requested")
                             exit(1)
                     else:
                         invalidFiles += 1
