@@ -48,7 +48,7 @@ class Staging(object):
 
             for observation in queryObservations:
 
-                logging.info("Querying ObservationID " + observation.observationId)
+                print("Querying ObservationID " + observation.observationId)
                 self.logText += "Querying ObservationID " + str(observation.observationId) + "\n"
 
                 if "UnspecifiedProcess" in str(type(observation)):
@@ -76,7 +76,7 @@ class Staging(object):
 
                 else:
                     self.calibratorsList.append(observation.observationDescription.split("/")[1])
-                    logging.info("Calibrator source " + observation.observationDescription.split("/")[1])
+                    print("Calibrator source " + observation.observationDescription.split("/")[1])
                     self.logText += "Calibrator source " + observation.observationDescription.split("/")[1]
 
                 for dataproduct in dataproduct_query:
