@@ -84,7 +84,7 @@ class Staging(object):
 
                     if fileobject:
                         if getConfigs("Data", "ProductType", "config.cfg") == "observation":
-                            if '/L' + str(SASid) in fileobject.URI:
+                            if '/L' + str(SASid) in fileobject.URI and not "dppp" in fileobject.URI:
                                 uris.add(fileobject.URI)
                                 validFiles += 1
                                 print("File nr :", validFiles, "URI found", fileobject.URI)
@@ -92,14 +92,14 @@ class Staging(object):
 
                         elif getConfigs("Data", "ProductType", "config.cfg") == "pipeline":
 
-                            if "dppp" in fileobject.URI:
+                            if '/L' + str(SASid) in fileobject.URI and "dppp" in fileobject.URI:
                                 uris.add(fileobject.URI)
                                 validFiles += 1
                                 print("File nr :", validFiles, "URI found", fileobject.URI)
                                 self.logText += "File nr : " + str(validFiles) + " URI found " + str(fileobject.URI) + "\n"
 
                         else:
-                            print("Specified wronge data product type")
+                            print("Wrong data product type requested")
                             exit(1)
                     else:
                         invalidFiles += 1
@@ -281,14 +281,25 @@ if __name__ == "__main__":
 
     for id in SASidsTarget:
         for URI in stagingTarget.getSURIs()[str(id)]:
-            targetSURIs += URI + "\n"
+            if "sara" in URI:
+                targetSURIs += "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n"
+            elif "juelich" in URI:
+                targetSURIs += "https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl=" + URI + "\n"
+            else:
+                targetSURIs += "https://lta-download.lofar.psnc.pl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n"
+
 
     for id in SASidsCalibrator:
         for URI in stagingCalibrator.getSURIs()[str(id)]:
-            calibratorSURIs += URI + "\n"
+            if "sara" in URI:
+                calibratorSURIs += "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n"
+            elif "juelich" in URI:
+                calibratorSURIs += "https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl=" + URI + "\n"
+            else:
+                calibratorSURIs += "https://lta-download.lofar.psnc.pl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n"
 
     logsTMP = logsTMP + "\nProcessing calibrators\n" + tmpCalibratorLogs
-    os.system("python3.6 " + "setup.py " + str(stagingCalibrator.getAllCalibrators()).replace(",", " ").replace("[", "").replace("]", ""))
+    os.system("python3 " + "setup.py " + str(stagingCalibrator.getAllCalibrators()).replace(",", " ").replace("[", "").replace("]", ""))
 
     with open(workingDir + "targetSURIs.txt", "w") as targetSURIfile:
         targetSURIfile.write(targetSURIs)
