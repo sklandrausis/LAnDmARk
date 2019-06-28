@@ -1,6 +1,6 @@
 import os
 import sys
-import coloredlogs, logging
+#import coloredlogs, logging
 from awlofar.database.Context import context
 from awlofar.toolbox.LtaStager import LtaStager, LtaStagerError
 from awlofar.main.aweimports import *
@@ -9,9 +9,9 @@ import numpy as np
 
 from parsers._configparser import getConfigs
 
-coloredlogs.install(level='PRODUCTION', filename='tmp.log', filemode='w')
-logger = logging.getLogger('startStaging')
-logging.getLogger()
+#coloredlogs.install(level='PRODUCTION', filename='tmp.log', filemode='w')
+#logger = logging.getLogger('startStaging')
+#logging.getLogger()
 
 class Staging(object):
     __slots__=("SASids", "targetName", "SURIs", "dataGoodnes", "logText", "calibrator", "calibratorsList", "stationCount", "configFile")
@@ -33,12 +33,12 @@ class Staging(object):
     def getSURI(self, SASid):
         uris = set()
         self.dataGoodnes[str(SASid)] = dict()
-        logging.info("SAS id " + str(SASid))
+        print("SAS id " + str(SASid))
 
         self.logText += "SAS id " + str(SASid) + "\n"
         if self.calibrator == False:
             self.logText += "Target name " +  self.targetName + "\n"
-            logging.info("Target name " + self.targetName)
+            print("Target name " + self.targetName)
 
         cls = CorrelatedDataProduct
         queryObservations = (getattr(Process, "observationId") == SASid) & (Process.isValid > 0)
@@ -61,7 +61,7 @@ class Staging(object):
                     print("Possibly staging", observation.can_be_staged, "Number of unspecified data products", observation.numberOfUnspecifiedDataProducts)
 
                 else:
-                    logging.info("Core stations " + str(observation.nrStationsCore) + " Remote stations " + str(observation.nrStationsRemote) + " International stations " + str(observation.nrStationsInternational) + " Total stations " + str(observation.numberOfStations))
+                    print("Core stations " + str(observation.nrStationsCore) + " Remote stations " + str(observation.nrStationsRemote) + " International stations " + str(observation.nrStationsInternational) + " Total stations " + str(observation.numberOfStations))
                     self.logText += "Core stations " + str(observation.nrStationsCore) + " Remote stations " + str(observation.nrStationsRemote) + " International stations " + str(observation.nrStationsInternational) + " Total stations " + str(observation.numberOfStations) + "\n"
                     self.dataGoodnes[str(SASid)]["Core_stations"] = observation.nrStationsCore
                     self.dataGoodnes[str(SASid)]["Remote_station"] = observation.nrStationsRemote
@@ -114,15 +114,15 @@ class Staging(object):
                 for dataproduct in dataproduct_query:
                     invalidFiles += 1
 
-            logging.info("Total URI's found " + str(len(uris)))
-            logging.info("Valid files found " + str(validFiles) + " Invalid files found " + str(invalidFiles))
+            print("Total URI's found " + str(len(uris)))
+            print("Valid files found " + str(validFiles) + " Invalid files found " + str(invalidFiles))
             self.logText += "Total URI's found " + str(len(uris)) + "\n"
             self.logText += "Valid files found " + str(validFiles) + " Invalid files found " + str(invalidFiles) + "\n"
             self.dataGoodnes[str(SASid)]["validFiles"] = validFiles
             self.dataGoodnes[str(SASid)]["invalidFiles"] = invalidFiles
 
         else:
-            logging.error("Wrong SAS id " + SASid)
+            print("Wrong SAS id " + SASid)
             self.logText += "Wrong SAS id " + SASid + "\n"
 
         self.SURIs[str(SASid)] = uris
@@ -262,13 +262,13 @@ if __name__ == "__main__":
         SASidsCalibrator =  [int(id) for id in getConfigs("Data", "calibratorSASids", "config.cfg").replace(" ", "").split(",")]
 
 
-    logging.info("Processing target")
+    print("Processing target")
     stagingTarget = Staging(SASidsTarget, False, "config.cfg")
     stagingTarget.query()
     tmpTargetLogs = stagingTarget.getLogs()
     logsTMP = "Processing target\n" + tmpTargetLogs
 
-    logging.info("Processing calibrators")
+    print("Processing calibrators")
     stagingCalibrator = Staging(SASidsCalibrator, True, "config.cfg")
     stagingCalibrator.query()
     tmpCalibratorLogs = stagingCalibrator.getLogs()
