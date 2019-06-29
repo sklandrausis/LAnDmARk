@@ -1,14 +1,7 @@
 import time
 
-from parsers._configparser import ConfigParser
+from parsers._configparser import getConfigs
 from stager_access import *
-
-
-def getConfigs(key, value):
-    configFilePath = "config.cfg"
-    config = ConfigParser.getInstance()
-    config.CreateConfig(configFilePath)
-    return config.getConfig(key, value)
 
 if __name__ == "__main__":
     tmpStagesIDs = set([])
@@ -34,7 +27,7 @@ if __name__ == "__main__":
         else:
             for id in tmpStagesIDs:
                 surl = get_surls_online(int(id))
-                download(surl, getConfigs("Paths", "WorkingPath") + "targets")
+                download(surl, getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", "config.cfg") + "/")
 
             break
 

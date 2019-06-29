@@ -145,20 +145,18 @@ def print_running():
 
 def download(surls, dir_to):
     ''' Download file '''
-    prefix = "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl="
-
     download_files = []
 
     for surl in surls:
 
         if "sara" in surl:
-            prefix += "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl="
+            prefix = "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl="
 
         elif "juelich" in surl:
-            prefix += "https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl="
+            prefix = "https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl="
 
         else:
-            prefix += "https://lta-download.lofar.psnc.pl/lofigrid/SRMFifoGet.py?surl="
+            prefix = "https://lta-download.lofar.psnc.pl/lofigrid/SRMFifoGet.py?surl="
 
         download_files.append(prefix + surl)
 
