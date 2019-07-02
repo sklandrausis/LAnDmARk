@@ -166,6 +166,6 @@ def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
     for filename in os.listdir(dir_to):
         if ".tar" in filename:
             outname = dir_to + "/" + filename.split("%")[-1]
-            os.rename(filename, outname)
+            os.rename(dir_to + "/" + filename, outname)
             os.system('tar -xvf ' + outname)
             os.system('rm -r ' + outname)
