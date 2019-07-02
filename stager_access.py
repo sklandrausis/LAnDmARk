@@ -167,7 +167,7 @@ def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
         if ".tar" in filename:
             outname = dir_to + "/" + filename.split("%")[-1]
             os.rename(dir_to + "/" + filename, outname)
-            os.system('tar -xvf ' + outname)
+            os.system('tar -xvf ' + outname + " -C " + dir_to + "/")
             os.system('rm -r ' + outname)
 
     calDIR =  dir_to + "/" + "calibrators/"
