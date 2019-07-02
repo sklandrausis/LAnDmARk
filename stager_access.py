@@ -175,9 +175,9 @@ def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
 
     for filename in os.listdir(dir_to):
         for calSASid in SASidsCalibrator:
-            if '/L' + str(calSASid) in filename:
+            if 'L' + str(calSASid) in filename:
                 os.system("mv " + dir_to + "/" + filename + "  " + dir_to + "/" + "calibrators/" + str(calDIR_raw) + "_RAW" + "/")
 
         for tarSASid in SASidsTarget:
-            if '/L' + str(tarSASid) in filename:
+            if 'L' + str(tarSASid) in filename:
                 os.system("mv " + dir_to + "/" + filename + "  " + dir_to + "/" + "targets/" + str(tarSASid) + "_RAW/")
