@@ -299,7 +299,7 @@ if __name__ == "__main__":
                 calibratorSURIs += "https://lta-download.lofar.psnc.pl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n"
 
     logsTMP = logsTMP + "\nProcessing calibrators\n" + tmpCalibratorLogs
-    os.system("python3 " + "setup.py " + str(stagingCalibrator.getAllCalibrators()).replace(",", " ").replace("[", "").replace("]", ""))
+    os.system("python3 " + "setup.py")
 
     with open(workingDir + "targetSURIs.txt", "w") as targetSURIfile:
         targetSURIfile.write(targetSURIs)
