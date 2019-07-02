@@ -143,7 +143,7 @@ def print_running():
     requests = get_progress("success", True)
     prettyprint(requests)
 
-def download(surls, dir_to):
+def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
     ''' Download file '''
     download_files = []
 
@@ -163,9 +163,9 @@ def download(surls, dir_to):
     for file in download_files:
         os.system("wget " + file + " -P " + dir_to)
 
-    for filename in glob.glob(dir_to + "*SB*.tar*"):
-        outname = filename.split("%")[-1]
-        os.rename(filename, outname)
-        os.system('tar -xvf ' + outname)
-        os.system('rm -r ' + outname)
-        print(outname + ' untarred.')
+    for filename in os.listdir(dir_to):
+        if ".tar" in filename:
+            outname = dir_to + "/" + filename.split("%")[-1]
+            os.rename(filename, outname)
+            os.system('tar -xvf ' + outname)
+            os.system('rm -r ' + outname)
