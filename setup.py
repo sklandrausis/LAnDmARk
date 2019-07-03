@@ -12,7 +12,6 @@ def copyFiles(fileFrom, fileTo):
 
 def parseArguments():
     parser = argparse.ArgumentParser(description='''Setup working directory tree. ''', epilog="""Setup""")
-    parser.add_argument("calibratorSources", help="calibrator sources", nargs="+", type=str, default="")
     parser.add_argument("-c", "--config", help="Configuration cfg file", type=str, default="config.cfg")
     parser.add_argument("-v", "--version", action="version", version='%(prog)s - Version 1.0')
     args = parser.parse_args()
@@ -22,7 +21,6 @@ def getArgs(key):
     return str(parseArguments().__dict__[key])
 
 if __name__=="__main__":
-    calibratorNames = getArgs("calibratorSources").replace("[", "").replace("]", "").replace("'", "").replace(" ", "").split(",")
     workingDir = getConfigs("Paths", "WorkingPath", "config.cfg")
     targetName = getConfigs("Data", "TargetName","config.cfg")
     workingDir = workingDir + targetName + "/"
@@ -73,30 +71,30 @@ if __name__=="__main__":
     index = 0
     for id in targetSASids:
         print ("Setup for target id", id)
-        createDirectory(calibratorDir + id + "_" + calibratorNames[index])
+        createDirectory(calibratorDir + id + "_RAW")
         createDirectory(calibratorDir + id + "_RESULTS")
         createDirectory(targetDir + id + "_RAW")
         createDirectory(targetDir + id + "_RESULTS")
 
         # Creating calibrator files
-        copyFiles(PrefactorDir + 'pipeline.cfg', calibratorDir + id + '_' + calibratorNames[index])
-        copyFiles(PrefactorDir + 'Pre-Facet-Calibrator.parset',  calibratorDir + id + '_' + calibratorNames[index])
-        setConfigs("DEFAULT", "lofarroot", lofarroot, calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
-        setConfigs("DEFAULT", "casaroot", casaroot, calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
-        setConfigs("DEFAULT", "pyraproot", pyraproot, calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
-        setConfigs("DEFAULT", "hdf5root", hdf5root, calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
-        setConfigs("DEFAULT", "wcsroot", wcsroot, calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
-        setConfigs("DEFAULT", "runtime_directory", calibratorDir + id + '_' + calibratorNames[index], calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
-        setConfigs("DEFAULT", "working_directory", "%(runtime_directory)s", calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
-        setConfigs("remote", "max_per_node", max_per_node, calibratorDir + id + '_' + calibratorNames[index] + "/pipeline.cfg")
-        calibratorParset = ParsetParser(calibratorDir + id + '_' + calibratorNames[index] + '/Pre-Facet-Calibrator.parset')
+        copyFiles(PrefactorDir + 'pipeline.cfg', calibratorDir + id + "_RAW/")
+        copyFiles(PrefactorDir + 'Pre-Facet-Calibrator.parset',  calibratorDir + id + "_RAW/")
+        setConfigs("DEFAULT", "lofarroot", lofarroot, calibratorDir + id + "_RAW" + "/pipeline.cfg")
+        setConfigs("DEFAULT", "casaroot", casaroot, calibratorDir + id + "_RAW" + "/pipeline.cfg")
+        setConfigs("DEFAULT", "pyraproot", pyraproot, calibratorDir + id + "_RAW" + "/pipeline.cfg")
+        setConfigs("DEFAULT", "hdf5root", hdf5root, calibratorDir + id + "_RAW" + "/pipeline.cfg")
+        setConfigs("DEFAULT", "wcsroot", wcsroot, calibratorDir + id + "_RAW" + "/pipeline.cfg")
+        setConfigs("DEFAULT", "runtime_directory", calibratorDir + id + "_RAW", calibratorDir + id + "_RAW" + "/pipeline.cfg")
+        setConfigs("DEFAULT", "working_directory", "%(runtime_directory)s", calibratorDir + id + "_RAW" + "/pipeline.cfg")
+        setConfigs("remote", "max_per_node", max_per_node, calibratorDir + id + "_RAW" + "/pipeline.cfg")
+        calibratorParset = ParsetParser(calibratorDir + id + "_RAW" + '/Pre-Facet-Calibrator.parset')
         calibratorParset.parse()
-        calibratorParset.setParam("! cal_input_path", calibratorDir + id + '_' + calibratorNames[index]+ '')
+        calibratorParset.setParam("! cal_input_path", calibratorDir + id + "_RAW"+ '')
         calibratorParset.setParam("! cal_input_pattern",  "L" + "*.ms")
         calibratorParset.setParam("! prefactor_directory", PrefactorDir)
         calibratorParset.setParam("! losoto_directory", losotopath)
         calibratorParset.setParam("! aoflagger", aoflagger)
-        calibratorParset.writeParset(calibratorDir + id + '_' + calibratorNames[index] + '/Pre-Facet-Calibrator.parset')
+        calibratorParset.writeParset(calibratorDir + id + "_RAW" + '/Pre-Facet-Calibrator.parset')
 
         # Creating target files
         copyFiles(PrefactorDir + 'pipeline.cfg', targetDir + id + "_RAW")
@@ -116,7 +114,7 @@ if __name__=="__main__":
         targetParset.setParam("! prefactor_directory", PrefactorDir)
         targetParset.setParam("! losoto_directory", losotopath)
         targetParset.setParam("! aoflagger", aoflagger)
-        targetParset.setParam("! cal_solutionsr", calibratorDir + id + "_RESULTS" +  "/results/cal_values/cal_solutions.h5")
+        targetParset.setParam("! cal_solutionsr", calibratorDir + id + "_RESULTS" + "/results/cal_values/cal_solutions.h5")
         targetParset.writeParset(targetDir + id + "_RAW/" + 'Pre-Facet-Target.parset')
 
         index += 1

@@ -143,31 +143,41 @@ def print_running():
     requests = get_progress("success", True)
     prettyprint(requests)
 
-def download(surls, dir_to):
+def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
     ''' Download file '''
-    prefix = "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl="
-
     download_files = []
 
     for surl in surls:
 
         if "sara" in surl:
-            prefix += "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl="
+            prefix = "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl="
 
         elif "juelich" in surl:
-            prefix += "https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl="
+            prefix = "https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl="
 
         else:
-            prefix += "https://lta-download.lofar.psnc.pl/lofigrid/SRMFifoGet.py?surl="
+            prefix = "https://lta-download.lofar.psnc.pl/lofigrid/SRMFifoGet.py?surl="
 
         download_files.append(prefix + surl)
 
     for file in download_files:
         os.system("wget " + file + " -P " + dir_to)
 
-    for filename in glob.glob(dir_to + "*SB*.tar*"):
-        outname = filename.split("%")[-1]
-        os.rename(filename, outname)
-        os.system('tar -xvf ' + outname)
-        os.system('rm -r ' + outname)
-        print(outname + ' untarred.')
+    for filename in os.listdir(dir_to):
+        if ".tar" in filename:
+            outname = dir_to + "/" + filename.split("%")[-1]
+            os.rename(dir_to + "/" + filename, outname)
+            os.system('tar -xvf ' + outname + " -C " + dir_to + "/")
+            os.system('rm -r ' + outname)
+
+    calDIR =  dir_to + "/" + "calibrators/"
+    calDIR_raw = [name for name in os.listdir(calDIR)][0].split("_")[0]
+
+    for filename in os.listdir(dir_to):
+        for calSASid in SASidsCalibrator:
+            if 'L' + str(calSASid) in filename:
+                os.system("mv " + dir_to + "/" + filename + "  " + dir_to + "/" + "calibrators/" + str(calDIR_raw) + "_RAW" + "/")
+
+        for tarSASid in SASidsTarget:
+            if 'L' + str(tarSASid) in filename:
+                os.system("mv " + dir_to + "/" + filename + "  " + dir_to + "/" + "targets/" + str(tarSASid) + "_RAW/")

@@ -1,14 +1,7 @@
 import time
 
-from parsers._configparser import ConfigParser
+from parsers._configparser import getConfigs
 from stager_access import *
-
-
-def getConfigs(key, value):
-    configFilePath = "config.cfg"
-    config = ConfigParser.getInstance()
-    config.CreateConfig(configFilePath)
-    return config.getConfig(key, value)
 
 if __name__ == "__main__":
     tmpStagesIDs = set([])
@@ -34,7 +27,20 @@ if __name__ == "__main__":
         else:
             for id in tmpStagesIDs:
                 surl = get_surls_online(int(id))
-                download(surl, getConfigs("Paths", "WorkingPath") + "targets")
+                SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", "config.cfg").replace(" ", "").split(",")]
+
+                project = getConfigs("Data", "PROJECTid", "config.cfg")
+                if len(getConfigs("Data", "calibratorSASids", "config.cfg")) == 0:
+                    if project == "MSSS_HBA_2013":
+                        SASidsCalibrator = [id - 1 for id in SASidsTarget]
+
+                    else:
+                        raise Exception("SAS id for calibrator is not set in config.cfg file")
+                        sys.exit(1)
+                else:
+                    SASidsCalibrator = [int(id) for id in getConfigs("Data", "calibratorSASids", "config.cfg").replace(" ", "").split(",")]
+
+                download(surl, getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", "config.cfg") + "/", SASidsCalibrator, SASidsTarget, )
 
             break
 
