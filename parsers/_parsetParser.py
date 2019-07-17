@@ -42,12 +42,15 @@ class ParsetParser():
         with open(parsetFile, "w") as file:
             for l in range(0, self.lineNr):
                 if str(l) in self.comentsDict.keys() and  str(l) in self.params.keys():
-                    s1 = self.params[str(l)] + " = " + self.parsetDict[self.params[str(l)]]
-                    s2 = "#" + self.comentsDict[str(l)][0] + "\n"
+                    s1 = self.params[str(l)] + " = " + self.parsetDict[self.params[str(l)]].replace("{{", "{{ ").replace("}}", " }}")
+                    s2 = "#" + self.comentsDict[str(l)][0]
                     s = s1.ljust(99, " ") + s2
+                    s.replace("{{", "{{ ")
+                    s.replace("}}", " }}")
+                    s.replace("#  #", "##")
                     file.write(s)
                 elif str(l) in self.comentsDict.keys():
                     file.write("# " + self.comentsDict[str(l)][0] + "\n")
                 elif str(l) in self.params.keys():
-                    file.write(self.params[str(l)] + " = " + self.parsetDict[self.params[str(l)]] + "\n")
+                    file.write(self.params[str(l)].replace("{{", "{{ ").replace("}}", " }}") + " = " + self.parsetDict[self.params[str(l)]].replace("{{", "{{ ").replace("}}", " }}").replace("#  #", "##"))
 

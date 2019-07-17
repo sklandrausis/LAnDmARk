@@ -94,6 +94,7 @@ if __name__=="__main__":
         calibratorParset.setParam("! prefactor_directory", PrefactorDir)
         calibratorParset.setParam("! losoto_directory", losotopath)
         calibratorParset.setParam("! aoflagger", aoflagger)
+        calibratorParset.setParam("! job_directory", calibratorDir + id + "_RESULTS")
         calibratorParset.writeParset(calibratorDir + id + "_RAW" + '/Pre-Facet-Calibrator.parset')
 
         # Creating target files
@@ -115,6 +116,7 @@ if __name__=="__main__":
         targetParset.setParam("! losoto_directory", losotopath)
         targetParset.setParam("! aoflagger", aoflagger)
         targetParset.setParam("! cal_solutionsr", calibratorDir + id + "_RESULTS" + "/results/cal_values/cal_solutions.h5")
+        targetParset.setParam("! job_directory", targetDir + id + "_RESULTS")
         targetParset.writeParset(targetDir + id + "_RAW/" + 'Pre-Facet-Target.parset')
 
         index += 1
