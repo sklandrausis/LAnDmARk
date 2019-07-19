@@ -39,4 +39,4 @@ if __name__ == "__main__":
         
     parsetImage = imageDir + "Initial-Subtract.parset"
     configImage = imageDir + "pipeline.cfg"
-    run_pipeline(parsetImage, configImage)  # run imaging
+    run_pipeline(parsetImage, configImage) # run imaging
