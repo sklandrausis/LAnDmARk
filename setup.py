@@ -110,7 +110,7 @@ if __name__=="__main__":
         setConfigs("remote", "max_per_node", max_per_node, targetDir + id + "_RAW"+ "/pipeline.cfg")
         targetParset = ParsetParser(targetDir + id + "_RAW/" + 'Pre-Facet-Target.parset')
         targetParset.parse()
-        targetParset.setParam("! target_input_path", calibratorDir + id + "_RAW")
+        targetParset.setParam("! target_input_path", targetDir + id + "_RAW")
         targetParset.setParam("! target_input_pattern", "L" + "*.MS")
         targetParset.setParam("! prefactor_directory", PrefactorDir)
         targetParset.setParam("! losoto_directory", losotopath)
