@@ -13,6 +13,12 @@ def parseArguments():
 def getArgs(key):
     return str(parseArguments().__dict__[key])
 
+def run_pipeline(parset_file, config_file):
+    try:
+        os.system('genericpipeline.py ' + parset_file + ' -c ' + config_file + ' -d')
+    except:
+        print("Something went wrong")
+
 if __name__ == "__main__":
     workingDir = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", "config.cfg") + "/"
     calibratorDir = workingDir + "calibrators" + "/"
@@ -27,10 +33,10 @@ if __name__ == "__main__":
         
         parsetTarget = targetDir + str(id) + "_RAW/" + "Pre-Facet-Target.parset"
         configTarget = targetDir + str(id) + "_RAW/" + "pipeline.cfg"
-        
-        os.system('genericpipeline.py '+ parsetCalib + ' -c ' +  configCalib + ' -d') # run calibrator
-        os.system('genericpipeline.py '+ parsetTarget + ' -c ' +  configTarget + ' -d') # run target
+
+        run_pipeline(parsetCalib, configCalib) # run calibrator
+        run_pipeline(parsetCalib, configTarget) # run target
         
     parsetImage = imageDir + "Initial-Subtract.parset"
     configImage = imageDir + "pipeline.cfg"
-    os.system('genericpipeline.py '+ parsetImage + ' -c ' +  configImage + ' -d') # run imaging
+    run_pipeline(parsetImage, configImage)  # run imaging
