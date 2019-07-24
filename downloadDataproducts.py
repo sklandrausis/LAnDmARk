@@ -5,6 +5,13 @@ from stager_access import *
 
 if __name__ == "__main__":
     tmpStagesIDs = set([])
+	
+    #plot information intial
+    size = 100
+    x_vec = np.linspace(0,100,size+1)[0:-1]
+    y_vec = np.linspace(0,100,size+1)[0:-1]
+    line1 = []
+	
     while True:
         progess = get_progress()
         if progess != None:
@@ -22,7 +29,11 @@ if __name__ == "__main__":
                 print("Flagged abort", progess[stageID]["Flagged abort"])
                 print("File count", progess[stageID]["File count"])
                 print("Percent done", progess[stageID]["Percent done"])
+                y_vec[-1] = get_progess[stageID]
                 print("Location", progess[stageID]["Location"], "\n")
+
+                line1 = live_plotter(x_vec,y_vec,line1)
+                y_vec = np.append(y_vec[1:],0.0)
 
         else:
             for id in tmpStagesIDs:
