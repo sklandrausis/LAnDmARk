@@ -38,7 +38,7 @@ if __name__ == "__main__":
         run_pipeline(parsetCalib, configCalib) # run calibrator
         run_pipeline(parsetCalib, configTarget) # run target
 
-    for id in SASidsTarge:
+    for id in SASidsTarget:
         dir_from = targetDir + str(id) + "_RESULTS/results/"
         dir_to = workingDir + image_input + "/*.ms"
 
