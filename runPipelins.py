@@ -1,4 +1,5 @@
 import os
+import sys
 import argparse
 
 from parsers._configparser import getConfigs
@@ -36,7 +37,14 @@ if __name__ == "__main__":
 
         run_pipeline(parsetCalib, configCalib) # run calibrator
         run_pipeline(parsetCalib, configTarget) # run target
-        
-    parsetImage = imageDir + "Initial-Subtract.parset"
+
+    for id in SASidsTarge:
+        dir_from = targetDir + str(id) + "_RESULTS/results/"
+        dir_to = workingDir + image_input + "/*.ms"
+
+        os.system("cp -rvf " + dir_from)
+
+    parsetImage = imageDir + "Prefactor-Image.parset"
     configImage = imageDir + "pipeline.cfg"
     run_pipeline(parsetImage, configImage) # run imaging
+    sys.exit(0)

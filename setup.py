@@ -1,4 +1,5 @@
 import os
+import sys
 import argparse
 
 from parsers._configparser import setConfigs, getConfigs
@@ -122,3 +123,4 @@ if __name__=="__main__":
         index += 1
 
     print("Done")
+    sys.exit(0)
