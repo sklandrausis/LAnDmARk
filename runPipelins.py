@@ -42,7 +42,7 @@ if __name__ == "__main__":
         dir_from = targetDir + str(id) + "_RESULTS/results/*.ms"
         dir_to = workingDir + image_input + "/"
 
-        os.system("cp -rvf " + dir_from)
+        os.system("cp -rvf " + dir_from + " " + dir_to)
 
     parsetImage = imageDir + "Prefactor-Image.parset"
     configImage = imageDir + "pipeline.cfg"
