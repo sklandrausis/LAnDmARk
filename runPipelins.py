@@ -39,8 +39,8 @@ if __name__ == "__main__":
         run_pipeline(parsetCalib, configTarget) # run target
 
     for id in SASidsTarget:
-        dir_from = targetDir + str(id) + "_RESULTS/results/"
-        dir_to = workingDir + image_input + "/*.ms"
+        dir_from = targetDir + str(id) + "_RESULTS/results/*.ms"
+        dir_to = workingDir + image_input + "/"
 
         os.system("cp -rvf " + dir_from)
 
