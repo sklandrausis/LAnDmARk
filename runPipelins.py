@@ -31,17 +31,15 @@ if __name__ == "__main__":
     for id in SASidsTarget:
         parsetCalib = calibratorDir + str(id) + "_RAW/" + "Pre-Facet-Calibrator.parset"
         configCalib = calibratorDir + str(id) + "_RAW/" + "pipeline.cfg"
-        
+        run_pipeline(parsetCalib, configCalib)  # run calibrator
+
         parsetTarget = targetDir + str(id) + "_RAW/" + "Pre-Facet-Target.parset"
         configTarget = targetDir + str(id) + "_RAW/" + "pipeline.cfg"
-
-        run_pipeline(parsetCalib, configCalib) # run calibrator
-        run_pipeline(parsetCalib, configTarget) # run target
+        run_pipeline(parsetTarget, configTarget) # run target
 
     for id in SASidsTarget:
         dir_from = targetDir + str(id) + "_RESULTS/results/*.ms"
         dir_to = workingDir + "image_input/"
-
         os.system("cp -rvf " + dir_from + " " + dir_to)
 
     parsetImage = imageDir + "Prefactor-Image.parset"
