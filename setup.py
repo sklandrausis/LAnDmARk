@@ -31,7 +31,7 @@ if __name__=="__main__":
 
     if len(getConfigs("Data", "calibratorSASids", "config.cfg")) == 0:
         if project == "MSSS_HBA_2013":
-            SASidsCalibrator = [id - 1 for id in SASidsTargets]
+            SASidsCalibrator = [id - 1 for id in targetSASids]
 
         else:
             raise Exception("SAS id for calibrator is not set in config.cfg file")
