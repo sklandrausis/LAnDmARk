@@ -16,8 +16,7 @@ def getArgs(key):
 
 def run_pipeline(parset_file, config_file):
     try:
-        print("")
-        #os.system('genericpipeline.py ' + parset_file + ' -c ' + config_file + ' -d')
+        os.system('genericpipeline.py ' + parset_file + ' -c ' + config_file + ' -d')
     except:
         print("Something went wrong")
 
@@ -53,7 +52,7 @@ if __name__ == "__main__":
     for id in SASidsTarget:
         dir_from = targetDir + str(id) + "_RESULTS/results/*.ms"
         dir_to = workingDir + "image_input/"
-        #os.system("cp -rvf " + dir_from + " " + dir_to)
+        os.system("cp -rvf " + dir_from + " " + dir_to)
 
     parsetImage = imageDir + "Prefactor-Image.parset"
     configImage = imageDir + "pipeline.cfg"
