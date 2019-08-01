@@ -28,9 +28,20 @@ if __name__=="__main__":
     PrefactorDir = getConfigs("Paths", "PrefactorPath", "config.cfg")
     targetSASids = getConfigs("Data", "targetSASids", "config.cfg").replace(" ", "").split(",")
 
+    if len(getConfigs("Data", "calibratorSASids", "config.cfg")) == 0:
+        if project == "MSSS_HBA_2013":
+            SASidsCalibrator = [id - 1 for id in SASidsTarget]
+
+        else:
+            raise Exception("SAS id for calibrator is not set in config.cfg file")
+            sys.exit(1)
+    else:
+        SASidsCalibrator = [int(id) for id in getConfigs("Data", "calibratorSASids", "config.cfg").replace(" ", "").split(",")]
+
     imagingDir = workingDir + "imaging_deep" + "/"
     calibratorDir = workingDir + "calibrators" + "/"
     targetDir = workingDir + "targets" + "/"
+    image_input_dir = workingDir + "image_input"
     auxDir = workingDir + "/Pipeline_aux"
 
     # Creating directory structure
@@ -38,6 +49,7 @@ if __name__=="__main__":
     createDirectory(imagingDir)
     createDirectory(calibratorDir)
     createDirectory(targetDir)
+    createDirectory(image_input_dir)
     createDirectory(auxDir)
 
     lofarroot = getConfigs("Paths", "lofarroot", "config.cfg")
@@ -49,6 +61,7 @@ if __name__=="__main__":
     aoflagger = getConfigs("Paths", "aoflagger", "config.cfg")
     max_per_node = getConfigs("Data", "max_per_node", "config.cfg")
     wsclean_executable = getConfigs("Paths", "wsclean_executable", "config.cfg")
+    pythonpath = getConfigs("Paths", "pythonpath", "config.cfg")
 
     # Creating imaging files
     copyFiles(PrefactorDir + 'pipeline.cfg', imagingDir)
@@ -60,6 +73,7 @@ if __name__=="__main__":
     setConfigs("DEFAULT", "wcsroot", wcsroot, imagingDir + "pipeline.cfg")
     setConfigs("DEFAULT", "runtime_directory", imagingDir, imagingDir + "pipeline.cfg")
     setConfigs("DEFAULT", "working_directory", "%(runtime_directory)s", imagingDir + "pipeline.cfg")
+    setConfigs("DEFAULT", "pythonpath", pythonpath, imagingDir + "pipeline.cfg")
     setConfigs("remote", "max_per_node", max_per_node, imagingDir + "pipeline.cfg")
     imagingParset = ParsetParser(imagingDir + "/Initial-Subtract.parset")
     imagingParset.parse()
@@ -69,13 +83,10 @@ if __name__=="__main__":
     imagingParset.setParam("! wsclean_executable", wsclean_executable)
     imagingParset.writeParset(imagingDir + "/Initial-Subtract.parset")
 
-    index = 0
-    for id in targetSASids:
-        print ("Setup for target id", id)
+    for id in SASidsCalibrator:
+        print ("Setup for calibrator id", id)
         createDirectory(calibratorDir + id + "_RAW")
         createDirectory(calibratorDir + id + "_RESULTS")
-        createDirectory(targetDir + id + "_RAW")
-        createDirectory(targetDir + id + "_RESULTS")
 
         # Creating calibrator files
         copyFiles(PrefactorDir + 'pipeline.cfg', calibratorDir + id + "_RAW/")
@@ -87,6 +98,7 @@ if __name__=="__main__":
         setConfigs("DEFAULT", "wcsroot", wcsroot, calibratorDir + id + "_RAW" + "/pipeline.cfg")
         setConfigs("DEFAULT", "runtime_directory", calibratorDir + id + "_RAW", calibratorDir + id + "_RAW" + "/pipeline.cfg")
         setConfigs("DEFAULT", "working_directory", calibratorDir + id + "_RAW", calibratorDir + id + "_RAW" + "/pipeline.cfg")
+        setConfigs("DEFAULT", "pythonpath", pythonpath, calibratorDir + id + "_RAW" + "/pipeline.cfg")
         setConfigs("remote", "max_per_node", max_per_node, calibratorDir + id + "_RAW" + "/pipeline.cfg")
         calibratorParset = ParsetParser(calibratorDir + id + "_RAW" + '/Pre-Facet-Calibrator.parset')
         calibratorParset.parse()
@@ -98,6 +110,11 @@ if __name__=="__main__":
         calibratorParset.setParam("! job_directory", calibratorDir + id + "_RESULTS")
         calibratorParset.writeParset(calibratorDir + id + "_RAW" + '/Pre-Facet-Calibrator.parset')
 
+    for id in targetSASids:
+        print("Setup for target id", id)
+        createDirectory(targetDir + id + "_RAW")
+        createDirectory(targetDir + id + "_RESULTS")
+
         # Creating target files
         copyFiles(PrefactorDir + 'pipeline.cfg', targetDir + id + "_RAW")
         copyFiles(PrefactorDir + 'Pre-Facet-Target.parset', targetDir + id + "_RAW")
@@ -108,6 +125,7 @@ if __name__=="__main__":
         setConfigs("DEFAULT", "wcsroot", wcsroot, targetDir + id + "_RAW" + "/pipeline.cfg")
         setConfigs("DEFAULT", "runtime_directory", targetDir + id + "_RAW", targetDir + id + "_RAW" + "/pipeline.cfg")
         setConfigs("DEFAULT", "working_directory", targetDir + id + "_RAW", targetDir + id + "_RAW" + "/pipeline.cfg")
+        setConfigs("DEFAULT", "pythonpath", pythonpath, targetDir + id + "_RAW" + "/pipeline.cfg")
         setConfigs("remote", "max_per_node", max_per_node, targetDir + id + "_RAW"+ "/pipeline.cfg")
         targetParset = ParsetParser(targetDir + id + "_RAW/" + 'Pre-Facet-Target.parset')
         targetParset.parse()
@@ -119,8 +137,6 @@ if __name__=="__main__":
         targetParset.setParam("! cal_solutionsr", calibratorDir + id + "_RESULTS" + "/cal_values/cal_solutions.h5")
         targetParset.setParam("! job_directory", targetDir + id + "_RESULTS")
         targetParset.writeParset(targetDir + id + "_RAW/" + 'Pre-Facet-Target.parset')
-
-        index += 1
 
     print("Done")
     sys.exit(0)

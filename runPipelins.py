@@ -28,11 +28,22 @@ if __name__ == "__main__":
 
     SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", "config.cfg").replace(" ", "").split(",")]
 
-    for id in SASidsTarget:
+    if len(getConfigs("Data", "calibratorSASids", "config.cfg")) == 0:
+        if project == "MSSS_HBA_2013":
+            SASidsCalibrator = [id - 1 for id in SASidsTarget]
+
+        else:
+            raise Exception("SAS id for calibrator is not set in config.cfg file")
+            sys.exit(1)
+    else:
+        SASidsCalibrator =  [int(id) for id in getConfigs("Data", "calibratorSASids", "config.cfg").replace(" ", "").split(",")]
+
+    for id in SASidsCalibrator:
         parsetCalib = calibratorDir + str(id) + "_RAW/" + "Pre-Facet-Calibrator.parset"
         configCalib = calibratorDir + str(id) + "_RAW/" + "pipeline.cfg"
         run_pipeline(parsetCalib, configCalib)  # run calibrator
 
+    for id in SASidsTarget:
         parsetTarget = targetDir + str(id) + "_RAW/" + "Pre-Facet-Target.parset"
         configTarget = targetDir + str(id) + "_RAW/" + "pipeline.cfg"
         run_pipeline(parsetTarget, configTarget) # run target
