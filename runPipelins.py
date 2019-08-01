@@ -27,6 +27,7 @@ if __name__ == "__main__":
     imageDir = workingDir + "imaging_deep" + "/"
 
     SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", "config.cfg").replace(" ", "").split(",")]
+    project = getConfigs("Data", "PROJECTid", "config.cfg")
 
     if len(getConfigs("Data", "calibratorSASids", "config.cfg")) == 0:
         if project == "MSSS_HBA_2013":

@@ -27,6 +27,7 @@ if __name__=="__main__":
     workingDir = workingDir + targetName + "/"
     PrefactorDir = getConfigs("Paths", "PrefactorPath", "config.cfg")
     targetSASids = getConfigs("Data", "targetSASids", "config.cfg").replace(" ", "").split(",")
+    project = getConfigs("Data", "PROJECTid", "config.cfg")
 
     if len(getConfigs("Data", "calibratorSASids", "config.cfg")) == 0:
         if project == "MSSS_HBA_2013":
