@@ -86,6 +86,7 @@ if __name__=="__main__":
 
     for id in SASidsCalibrator:
         print ("Setup for calibrator id", id)
+        id = str(id)
         createDirectory(calibratorDir + id + "_RAW")
         createDirectory(calibratorDir + id + "_RESULTS")
 
