@@ -77,7 +77,7 @@ if __name__=="__main__":
     setConfigs("DEFAULT", "pythonpath", pythonpath, imagingDir + "pipeline.cfg")
     setConfigs("remote", "max_per_node", max_per_node, imagingDir + "pipeline.cfg")
 
-    with open(imagingDir + "/Pre-Facet-Image.parset", "r") as paset_file:
+    with open(imagingDir + "/Pre-Facet-Image.parset", "r") as parset_file:
         parset_file = parset_file.readlines()
 
     for line in parset_file:
