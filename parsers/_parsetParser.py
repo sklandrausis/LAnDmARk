@@ -43,26 +43,17 @@ class ParsetParser():
             padd = len(max(self.parsetDict.keys()))
             for l in range(0, self.lineNr):
                 if str(l) in self.comentsDict.keys() and  str(l) in self.params.keys():
-                    s1 = self.params[str(l)].ljust(padd + 1, " ") + " = " + self.parsetDict[self.params[str(l)]]
+                    s1 = self.params[str(l)].ljust(padd + 10, " ") + " = " + self.parsetDict[self.params[str(l)]]
                     s2 = " #" + self.comentsDict[str(l)][0]
                     s = s1.ljust(1, " ") + s2
                     #s.replace("{{", "{{ ")
                     #s.replace("}}", " }}")
-                    s.replace("#  #", "##")
-                    s.replace("#    #", "##")
-                    s.replace("#                      #", "##")
-                    s.replace("#                      #########################################", "##########################################")
-                    s.replace("#                      #########################################################################", "##########################################################################")
                     file.write(s)
                 elif str(l) in self.comentsDict.keys():
                     s = "#" + self.comentsDict[str(l)][0]
-                    s.replace("#  #", "##")
-                    s.replace("#                      #", "##")
-                    s.replace("#                      #########################################","##########################################")
-                    s.replace("#                      #########################################################################", "##########################################################################")
                     s.replace(" ", "")
                     file.write(s)
                 elif str(l) in self.params.keys():
-                    s = self.params[str(l)].ljust(padd + 1, " ")  + " = " + self.parsetDict[self.params[str(l)]] + "/n"
+                    s = self.params[str(l)].ljust(padd + 10, " ")  + " = " + self.parsetDict[self.params[str(l)]] + "/n"
                     file.write(s)
 
