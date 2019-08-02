@@ -76,6 +76,30 @@ if __name__=="__main__":
     setConfigs("DEFAULT", "working_directory", workingDir, imagingDir + "pipeline.cfg")
     setConfigs("DEFAULT", "pythonpath", pythonpath, imagingDir + "pipeline.cfg")
     setConfigs("remote", "max_per_node", max_per_node, imagingDir + "pipeline.cfg")
+
+    with open(imagingDir + "/Pre-Facet-Image.parset", "r") as paset_file:
+        parset_file = parset_file.readlines()
+
+    for line in parset_file:
+        if "! data_input_path" in line:
+            line.replace(line, " ")
+
+        elif "! data_input_pattern" in line:
+            line.replace(line, " ")
+
+        elif "! prefactor_directory" in line:
+            line.replace(line, " ")
+
+        elif "wsclean_executable" in line:
+            line.replace(line, " ")
+
+        elif "! job_directory" in line:
+            line.replace(line, " ")
+
+    with open(imagingDir + "/Pre-Facet-Image.parset", "w") as paset_filew:
+        parset_filew.writ("".join(parset_file))
+
+    '''
     imagingParset = ParsetParser(imagingDir + "/Pre-Facet-Image.parset")
     imagingParset.parse()
     imagingParset.setParam("! data_input_path", image_input_dir)
@@ -84,6 +108,7 @@ if __name__=="__main__":
     imagingParset.setParam("! wsclean_executable", wsclean_executable)
     imagingParset.setParam("! job_directory", imagingDir)
     imagingParset.writeParset(imagingDir + "/Pre-Facet-Image.parset")
+    '''
 
     for id in SASidsCalibrator:
         print ("Setup for calibrator id", id)
