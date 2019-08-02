@@ -122,11 +122,11 @@ if __name__=="__main__":
             parset_file = parset_file.readlines()
 
         for line in parset_file:
-            if "! cal_input_pat" in line:
+            if "! cal_input_path" in line:
                 parset_file[parset_file.index(line)] = line.replace(line, "! cal_input_path          =  " + calibratorDir + id + "_RAW" + "  ## specify the directory where your calibrator data is stored\n")
 
             elif "! cal_input_pattern" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! cal_input_pattern       =  " + "L" + "*.MS"  +  "## regular expression pattern of all your calibrator files\n")
+                parset_file[parset_file.index(line)] = line.replace(line, "! cal_input_pattern       =  " + "L" + "*.MS"  +  "  ## regular expression pattern of all your calibrator files\n")
 
             elif "! prefactor_directory" in line:
                 parset_file[parset_file.index(line)] = line.replace(line, "! prefactor_directory      =  " + PrefactorDir + "  ## path to your prefactor copy\n")
