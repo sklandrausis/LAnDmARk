@@ -43,9 +43,9 @@ class ParsetParser():
             padd = len(max(self.parsetDict.keys()))
             for l in range(0, self.lineNr):
                 if str(l) in self.comentsDict.keys() and  str(l) in self.params.keys():
-                    s1 = self.params[str(l)].ljust(padd + 30, " ") + " = " + self.parsetDict[self.params[str(l)]]
+                    s1 = self.params[str(l)].ljust(padd + 20, " ") + " = " + self.parsetDict[self.params[str(l)]]
                     s2 = "#" + self.comentsDict[str(l)][0]
-                    s = s1.ljust(150, " ") + s2
+                    s = s1.ljust(130, " ") + s2
                     #s.replace("{{", "{{ ")
                     #s.replace("}}", " }}")
                     s.replace("#  #", "##")
