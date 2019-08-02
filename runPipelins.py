@@ -54,7 +54,7 @@ if __name__ == "__main__":
         dir_to = workingDir + "image_input/"
         os.system("cp -rvf " + dir_from + " " + dir_to)
 
-    parsetImage = imageDir + "Prefactor-Image.parset"
+    parsetImage = imageDir + "Initial-Subtract.parset"
     configImage = imageDir + "pipeline.cfg"
     run_pipeline(parsetImage, configImage) # run imaging
     sys.exit(0)
