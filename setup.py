@@ -82,19 +82,19 @@ if __name__=="__main__":
 
     for line in parset_file:
         if "! data_input_path" in line:
-            parset_file[parset_file.index(line)] = line.replace(line, "! data_input_path          =  " + image_input_dir + "  ## specify the directory where your concatenated target data are stored")
+            parset_file[parset_file.index(line)] = line.replace(line, "! data_input_path          =  " + image_input_dir + "  ## specify the directory where your concatenated target data are stored\n")
 
         elif "! data_input_pattern" in line:
-            parset_file[parset_file.index(line)] = line.replace(line, "! data_input_pattern       =  L*.pre-cal.ms    ## regular expression pattern of all your calibrator files")
+            parset_file[parset_file.index(line)] = line.replace(line, "! data_input_pattern       =  L*.pre-cal.ms    ## regular expression pattern of all your calibrator files\n")
 
         elif "! prefactor_directory" in line:
-            parset_file[parset_file.index(line)] = line.replace(line, "! prefactor_directory      =  " + PrefactorDir + "  ## path to your prefactor copy")
+            parset_file[parset_file.index(line)] = line.replace(line, "! prefactor_directory      =  " + PrefactorDir + "  ## path to your prefactor copy\n")
 
         elif "wsclean_executable" in line:
-            parset_file[parset_file.index(line)] = line.replace(line, "! wsclean_executable       =   " + wsclean_executable +  "  ## path to your local WSClean executable")
+            parset_file[parset_file.index(line)] = line.replace(line, "! wsclean_executable       =   " + wsclean_executable +  "  ## path to your local WSClean executable\n")
 
         elif "! job_directory" in line:
-            parset_file[parset_file.index(line)] = line.replace(line, "! job_directory            =  " + imagingDir + "  ## directory of the prefactor outputs")
+            parset_file[parset_file.index(line)] = line.replace(line, "! job_directory            =  " + imagingDir + "  ## directory of the prefactor outputs\n")
 
     with open(imagingDir + "/Initial-Subtract.parset", "w") as parset_filew:
         parset_filew.write("".join(parset_file))
@@ -123,22 +123,22 @@ if __name__=="__main__":
 
         for line in parset_file:
             if "! cal_input_pat" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! cal_input_path          =  " + calibratorDir + id + "_RAW" + "  ## specify the directory where your calibrator data is stored")
+                parset_file[parset_file.index(line)] = line.replace(line, "! cal_input_path          =  " + calibratorDir + id + "_RAW" + "  ## specify the directory where your calibrator data is stored\n")
 
             elif "! cal_input_pattern" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! cal_input_pattern       =  " + "L" + "*.MS"  +  "## regular expression pattern of all your calibrator files")
+                parset_file[parset_file.index(line)] = line.replace(line, "! cal_input_pattern       =  " + "L" + "*.MS"  +  "## regular expression pattern of all your calibrator files\n")
 
             elif "! prefactor_directory" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! prefactor_directory      =  " + PrefactorDir + "  ## path to your prefactor copy")
+                parset_file[parset_file.index(line)] = line.replace(line, "! prefactor_directory      =  " + PrefactorDir + "  ## path to your prefactor copy\n")
 
             elif "! losoto_directory" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! losoto_directory       =   " + losotopath + "  ## path to your local LoSoTo installation")
+                parset_file[parset_file.index(line)] = line.replace(line, "! losoto_directory       =   " + losotopath + "  ## path to your local LoSoTo installation\n")
 
             elif "! aoflagger" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! aoflagger       =   " + losotopath + "  ## path to your aoflagger executable")
+                parset_file[parset_file.index(line)] = line.replace(line, "! aoflagger       =   " + losotopath + "  ## path to your aoflagger executable\n")
 
             elif "! job_directory" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! job_directory            =  " + calibratorDir + id + "_RESULTS" + "  ## directory of the prefactor outputs")
+                parset_file[parset_file.index(line)] = line.replace(line, "! job_directory            =  " + calibratorDir + id + "_RESULTS" + "  ## directory of the prefactor outputs\n")
 
         with open(calibratorDir + id + "_RAW" + '/Pre-Facet-Calibrator.parset', "w") as parset_filew:
             parset_filew.write("".join(parset_file))
@@ -166,25 +166,25 @@ if __name__=="__main__":
 
         for line in parset_file:
             if "! target_input_path" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! target_input_path          =  " + targetDir + id + "_RAW" + "  ## specify the directory where your target data is stored")
+                parset_file[parset_file.index(line)] = line.replace(line, "! target_input_path          =  " + targetDir + id + "_RAW" + "  ## specify the directory where your target data is stored\n")
 
             elif "! target_input_pattern" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! target_input_pattern       =  " + "L" + "*.MS" + "  ## regular expression pattern of all your calibrator files")
+                parset_file[parset_file.index(line)] = line.replace(line, "! target_input_pattern       =  " + "L" + "*.MS" + "  ## regular expression pattern of all your calibrator files\n")
 
             elif "! prefactor_directory" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! prefactor_directory      =  " + PrefactorDir + "  ## path to your prefactor copy")
+                parset_file[parset_file.index(line)] = line.replace(line, "! prefactor_directory      =  " + PrefactorDir + "  ## path to your prefactor copy\n")
 
             elif "! losoto_directory" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! losoto_directory       =   " + losotopath + "  ## path to your local LoSoTo installation")
+                parset_file[parset_file.index(line)] = line.replace(line, "! losoto_directory       =   " + losotopath + "  ## path to your local LoSoTo installation\n")
 
             elif "! aoflagger" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! aoflagger       =   " + losotopath + "  ## path to your aoflagger executable")
+                parset_file[parset_file.index(line)] = line.replace(line, "! aoflagger       =   " + losotopath + "  ## path to your aoflagger executable\n")
 
             elif "! cal_solutions" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! cal_solutions       =   " +  calibratorDir + id + "_RESULTS" + "/cal_values/cal_solutions.h5 ")
+                parset_file[parset_file.index(line)] = line.replace(line, "! cal_solutions       =   " +  calibratorDir + id + "_RESULTS" + "/cal_values/cal_solutions.h5 \n")
 
             elif "! job_directory" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! job_directory            =  " + targetDir + id + "_RESULTS" + "  ## directory of the prefactor outputs")
+                parset_file[parset_file.index(line)] = line.replace(line, "! job_directory            =  " + targetDir + id + "_RESULTS" + "  ## directory of the prefactor outputs\n")
 
         with open(imagingDir + "/Initial-Subtract.parset", "w") as parset_filew:
             parset_filew.write("".join(parset_file))
