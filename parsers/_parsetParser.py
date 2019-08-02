@@ -17,7 +17,7 @@ class ParsetParser():
         for line in parsetLines:
             if  not line.startswith("#") and len(line) > 1:
                 key = line.split("=")[0].strip()
-                value = line.split("=")[1]
+                value = line.split("=")[1].strip()
                 if "#" in value:
                     value = value[0:value.index("#")]
 
@@ -44,7 +44,7 @@ class ParsetParser():
             for l in range(0, self.lineNr):
                 if str(l) in self.comentsDict.keys() and  str(l) in self.params.keys():
                     s1 = self.params[str(l)].ljust(padd + 1, " ") + " = " + self.parsetDict[self.params[str(l)]]
-                    s2 = "#" + self.comentsDict[str(l)][0]
+                    s2 = " #" + self.comentsDict[str(l)][0]
                     s = s1.ljust(1, " ") + s2
                     #s.replace("{{", "{{ ")
                     #s.replace("}}", " }}")
