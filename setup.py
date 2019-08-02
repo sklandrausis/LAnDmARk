@@ -96,7 +96,7 @@ if __name__=="__main__":
         elif "! job_directory" in line:
             line.replace(line, " ")
 
-    with open(imagingDir + "/Pre-Facet-Image.parset", "w") as paset_filew:
+    with open(imagingDir + "/Pre-Facet-Image.parset", "w") as parset_filew:
         parset_filew.write("".join(parset_file))
 
     '''
