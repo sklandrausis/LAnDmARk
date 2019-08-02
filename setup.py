@@ -97,7 +97,7 @@ if __name__=="__main__":
             line.replace(line, " ")
 
     with open(imagingDir + "/Pre-Facet-Image.parset", "w") as paset_filew:
-        parset_filew.writ("".join(parset_file))
+        parset_filew.write("".join(parset_file))
 
     '''
     imagingParset = ParsetParser(imagingDir + "/Pre-Facet-Image.parset")
