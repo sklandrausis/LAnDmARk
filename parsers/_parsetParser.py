@@ -40,7 +40,7 @@ class ParsetParser():
 
     def writeParset(self, parsetFile):
         with open(parsetFile, "w") as file:
-            padd = max(self.params)
+            padd = len(max(self.params))
             for l in range(0, self.lineNr):
                 if str(l) in self.comentsDict.keys() and  str(l) in self.params.keys():
                     s1 = self.params[str(l)].ljust(padd + 30, " ") + " = " + self.parsetDict[self.params[str(l)]]
