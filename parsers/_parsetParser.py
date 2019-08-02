@@ -16,8 +16,8 @@ class ParsetParser():
 
         for line in parsetLines:
             if  not line.startswith("#") and len(line) > 1:
-                key = line.split("=")[0].strip()
-                value = line.split("=")[1].replace(" ", "")
+                key = line.split("=")[0]
+                value = line.split("=")[1]
                 if "#" in value:
                     value = value[0:value.index("#")]
 
@@ -50,7 +50,9 @@ class ParsetParser():
                     s.replace("#  #", "##")
                     file.write(s)
                 elif str(l) in self.comentsDict.keys():
-                    file.write("# " + self.comentsDict[str(l)][0] + "\n")
+                    s = "# " + self.comentsDict[str(l)][0] + "\n"
+                    s.replace("#  #", "##")
+                    file.write(s)
                 elif str(l) in self.params.keys():
                     file.write(self.params[str(l)].replace("{{", "{{ ").replace("}}", " }}") + " = " + self.parsetDict[self.params[str(l)]].replace("{{", "{{ ").replace("}}", " }}").replace("#  #", "##"))
 
