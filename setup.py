@@ -135,7 +135,7 @@ if __name__=="__main__":
                 parset_file[parset_file.index(line)] = line.replace(line, "! losoto_directory       =   " + losotopath + "  ## path to your local LoSoTo installation\n")
 
             elif "! aoflagger" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! aoflagger       =   " + losotopath + "  ## path to your aoflagger executable\n")
+                parset_file[parset_file.index(line)] = line.replace(line, "! aoflagger       =   " + aoflagger + "  ## path to your aoflagger executable\n")
 
             elif "! job_directory" in line:
                 parset_file[parset_file.index(line)] = line.replace(line, "! job_directory            =  " + calibratorDir + id + "_RESULTS" + "  ## directory of the prefactor outputs\n")
@@ -178,7 +178,7 @@ if __name__=="__main__":
                 parset_file[parset_file.index(line)] = line.replace(line, "! losoto_directory       =   " + losotopath + "  ## path to your local LoSoTo installation\n")
 
             elif "! aoflagger" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! aoflagger       =   " + losotopath + "  ## path to your aoflagger executable\n")
+                parset_file[parset_file.index(line)] = line.replace(line, "! aoflagger       =   " + aoflagger + "  ## path to your aoflagger executable\n")
 
             elif "! cal_solutions" in line:
                 parset_file[parset_file.index(line)] = line.replace(line, "! cal_solutions       =   " +  calibratorDir + id + "_RESULTS" + "/cal_values/cal_solutions.h5 \n")
