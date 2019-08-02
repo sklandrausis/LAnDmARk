@@ -82,19 +82,19 @@ if __name__=="__main__":
 
     for line in parset_file:
         if "! data_input_path" in line:
-            line.replace(line, " ")
+            parset_file[parset_file.index(line)] = line.replace(line, " ")
 
         elif "! data_input_pattern" in line:
-            line.replace(line, " ")
+            parset_file[parset_file.index(line)] = line.replace(line, " ")
 
         elif "! prefactor_directory" in line:
-            line.replace(line, " ")
+            parset_file[parset_file.index(line)] = line.replace(line, " ")
 
         elif "wsclean_executable" in line:
-            line.replace(line, " ")
+            parset_file[parset_file.index(line)] = line.replace(line, " ")
 
         elif "! job_directory" in line:
-            line.replace(line, " ")
+            parset_file[parset_file.index(line)] = line.replace(line, " ")
 
     with open(imagingDir + "/Pre-Facet-Image.parset", "w") as parset_filew:
         parset_filew.write("".join(parset_file))
