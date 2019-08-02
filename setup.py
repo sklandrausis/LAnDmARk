@@ -137,7 +137,7 @@ if __name__=="__main__":
         targetParset.setParam("! prefactor_directory", PrefactorDir)
         targetParset.setParam("! losoto_directory", losotopath)
         targetParset.setParam("! aoflagger", aoflagger)
-        targetParset.setParam("! cal_solutionsr", calibratorDir + id + "_RESULTS" + "/cal_values/cal_solutions.h5")
+        targetParset.setParam("! cal_solutions", calibratorDir + id + "_RESULTS" + "/cal_values/cal_solutions.h5")
         targetParset.setParam("! job_directory", targetDir + id + "_RESULTS")
         targetParset.writeParset(targetDir + id + "_RAW/" + 'Pre-Facet-Target.parset')
 
