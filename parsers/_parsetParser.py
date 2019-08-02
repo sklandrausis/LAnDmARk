@@ -16,7 +16,7 @@ class ParsetParser():
 
         for line in parsetLines:
             if  not line.startswith("#") and len(line) > 1:
-                key = line.split("=")[0]
+                key = line.split("=")[0].strip()
                 value = line.split("=")[1]
                 if "#" in value:
                     value = value[0:value.index("#")]
