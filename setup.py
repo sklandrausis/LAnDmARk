@@ -66,7 +66,7 @@ if __name__=="__main__":
 
     # Creating imaging files
     copyFiles(PrefactorDir + 'pipeline.cfg', imagingDir)
-    copyFiles(PrefactorDir + 'Prefactor-Image.parset', imagingDir)
+    copyFiles(PrefactorDir + 'Pre-Facet-Image.parset', imagingDir)
     setConfigs("DEFAULT", "lofarroot", lofarroot, imagingDir + "pipeline.cfg")
     setConfigs("DEFAULT", "casaroot", casaroot, imagingDir + "pipeline.cfg")
     setConfigs("DEFAULT", "pyraproot", pyraproot, imagingDir + "pipeline.cfg")
@@ -76,14 +76,14 @@ if __name__=="__main__":
     setConfigs("DEFAULT", "working_directory", workingDir, imagingDir + "pipeline.cfg")
     setConfigs("DEFAULT", "pythonpath", pythonpath, imagingDir + "pipeline.cfg")
     setConfigs("remote", "max_per_node", max_per_node, imagingDir + "pipeline.cfg")
-    imagingParset = ParsetParser(imagingDir + "/Prefactor-Image.parset")
+    imagingParset = ParsetParser(imagingDir + "/Pre-Facet-Image.parset")
     imagingParset.parse()
     imagingParset.setParam("! data_input_path", image_input_dir)
     imagingParset.setParam("! data_input_pattern", "L" + "*.pre-cal.ms")
     imagingParset.setParam("! prefactor_directory", PrefactorDir)
     imagingParset.setParam("! wsclean_executable", wsclean_executable)
     imagingParset.setParam("! job_directory", imagingDir)
-    imagingParset.writeParset(imagingDir + "/Prefactor-Image.parset")
+    imagingParset.writeParset(imagingDir + "/Pre-Facet-Image.parset")
 
     for id in SASidsCalibrator:
         print ("Setup for calibrator id", id)
