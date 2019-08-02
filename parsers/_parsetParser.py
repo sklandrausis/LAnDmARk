@@ -55,11 +55,12 @@ class ParsetParser():
                     s.replace("#                      #########################################################################", "##########################################################################")
                     file.write(s)
                 elif str(l) in self.comentsDict.keys():
-                    s = "# " + self.comentsDict[str(l)][0] + "\n"
+                    s = "#" + self.comentsDict[str(l)][0] + "\n"
                     s.replace("#  #", "##")
                     s.replace("#                      #", "##")
                     s.replace("#                      #########################################","##########################################")
                     s.replace("#                      #########################################################################", "##########################################################################")
+                    s.replace(" ", "")
                     file.write(s)
                 elif str(l) in self.params.keys():
                     s = self.params[str(l)].ljust(padd + 1, " ")  + " = " + self.parsetDict[self.params[str(l)]]
