@@ -56,7 +56,7 @@ class ParsetParser():
                     s.replace("#  #", "##")
                     file.write(s)
                 elif str(l) in self.params.keys():
-                    s = self.params[str(l)].ljust(27, " ")  + " = " + self.parsetDict[self.params[str(l)]]
+                    s = self.params[str(l)].ljust(padd + 1, " ")  + " = " + self.parsetDict[self.params[str(l)]]
                     s.replace("#  #", "##")
                     s.replace("#    #", "##")
                     file.write(s)
