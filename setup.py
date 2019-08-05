@@ -187,7 +187,8 @@ if __name__=="__main__":
                 parset_file[parset_file.index(line)] = line.replace(line, "! job_directory            =  " + targetDir + id + "_RESULTS" + "  ## directory of the prefactor outputs\n")
 
         with open(imagingDir + "/Initial-Subtract.parset", "w") as parset_filew:
-            parset_filew.write("".join(parset_file))
+            for line in parset_file:
+                parset_filew.write(line)
 
     print("Done")
     sys.exit(0)
