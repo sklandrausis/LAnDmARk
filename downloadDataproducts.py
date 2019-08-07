@@ -31,7 +31,7 @@ if __name__ == "__main__":
                 print("Flagged abort", progess[stageID]["Flagged abort"])
                 print("File count", progess[stageID]["File count"])
                 print("Percent done", progess[stageID]["Percent done"])
-                y_vec[-1] = get_progess[stageID]
+                y_vec[-1] = progess[stageID]
                 print("Location", progess[stageID]["Location"], "\n")
 
                 line1 = live_plotter(x_vec,y_vec,line1)
