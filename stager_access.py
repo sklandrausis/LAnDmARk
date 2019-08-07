@@ -170,13 +170,10 @@ def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
             os.system('tar -xvf ' + outname + " -C " + dir_to + "/")
             os.system('rm -r ' + outname)
 
-    calDIR =  dir_to + "/" + "calibrators/"
-    calDIR_raw = [name for name in os.listdir(calDIR)][0].split("_")[0]
-
     for filename in os.listdir(dir_to):
         for calSASid in SASidsCalibrator:
             if 'L' + str(calSASid) in filename:
-                os.system("mv " + dir_to + "/" + filename + "  " + dir_to + "/" + "calibrators/" + str(calDIR_raw) + "_RAW" + "/")
+                os.system("mv " + dir_to + "/" + filename + "  " + dir_to + "/" + "calibrators/" + str(calSASid) + "_RAW/")
 
         for tarSASid in SASidsTarget:
             if 'L' + str(tarSASid) in filename:
