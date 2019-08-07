@@ -1,7 +1,9 @@
 import time
-
 from parsers._configparser import getConfigs
 from stager_access import *
+from pylive import live_plotter
+import numpy as np
+
 
 if __name__ == "__main__":
     tmpStagesIDs = set([])
