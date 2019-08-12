@@ -181,7 +181,7 @@ if __name__=="__main__":
                 parset_file[parset_file.index(line)] = line.replace(line, "! aoflagger       =   " + aoflagger + "  ## path to your aoflagger executable\n")
 
             elif "! cal_solutions" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! cal_solutions       =   " +  calibratorDir + id + "_RESULTS" + "/cal_values/cal_solutions.h5 \n")
+                parset_file[parset_file.index(line)] = line.replace(line, "! cal_solutions       =   " +  calibratorDir + str(SASidsCalibrator[targetSASids.index(id)]) + "_RESULTS" + "/cal_values/cal_solutions.h5 \n")
 
             elif "! job_directory" in line:
                 parset_file[parset_file.index(line)] = line.replace(line, "! job_directory            =  " + targetDir + id + "_RESULTS" + "  ## directory of the prefactor outputs\n")
