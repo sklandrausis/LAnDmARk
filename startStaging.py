@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import coloredlogs, logging
 from awlofar.database.Context import context
 from awlofar.toolbox.LtaStager import LtaStager, LtaStagerError
@@ -262,6 +263,7 @@ if __name__ == "__main__":
 
 
     logging.info("Processing target")
+    start_data_selection_time = time.time()
     stagingTarget = Staging(SASidsTarget, False, "config.cfg")
     stagingTarget.query()
     tmpTargetLogs = stagingTarget.getLogs()
@@ -270,6 +272,8 @@ if __name__ == "__main__":
     logging.info("Processing calibrators")
     stagingCalibrator = Staging(SASidsCalibrator, True, "config.cfg")
     stagingCalibrator.query()
+    end_data_selection_time = time.time()
+    print("Data selection time", end_data_selection_time - start_data_selection_time)
     tmpCalibratorLogs = stagingCalibrator.getLogs()
 
     workingDir = getConfigs("Paths", "WorkingPath", "config.cfg")
@@ -312,7 +316,10 @@ if __name__ == "__main__":
     plotDataGoodnes(stagingTarget.getDataGoodnes(), stagingCalibrator.getDataGoodnes(), SASidsTarget, SASidsCalibrator)
 
     if getConfigs("Operations", "Stage", "config.cfg") == "True":
+        start_staging_time = time.time()
         stagingTarget.startStaging()
         stagingCalibrator.startStaging()
+        end_staging_time = time.time()
+        print("Staging time", end_staging_time - start_staging_time)
 
     sys.exit(0)
