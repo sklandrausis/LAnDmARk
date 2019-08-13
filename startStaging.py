@@ -6,9 +6,16 @@ from awlofar.database.Context import context
 from awlofar.toolbox.LtaStager import LtaStager, LtaStagerError
 from awlofar.main.aweimports import *
 import matplotlib.pyplot as plt
+from matplotlib import rcParams
 import numpy as np
 
 from parsers._configparser import getConfigs
+
+rcParams["font.size"]=18
+rcParams["legend.fontsize"]="xx-large"
+rcParams["ytick.major.size"]=14
+rcParams["xtick.major.size"]=14
+rcParams["axes.labelsize"]=18
 
 coloredlogs.install(level='PRODUCTION', filename='tmp.log', filemode='w')
 logger = logging.getLogger('startStaging')
