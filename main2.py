@@ -18,7 +18,7 @@ if __name__ == "__main__":
         start_data_process_time = time.time()
         os.system("python3 " + "runPipelins.py")
         end_data_process_time = time.time()
-        print("Data selection time", end_data_process_time - start_data_process_time)
+        print("Data download time", end_data_process_time - start_data_process_time)
 
     end_time_main =time.time()
     print("Total time ", end_time_main - start_time_main)
