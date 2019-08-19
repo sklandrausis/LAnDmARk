@@ -7,20 +7,22 @@ from awlofar.toolbox.LtaStager import LtaStager, LtaStagerError
 from awlofar.main.aweimports import *
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
+import seaborn as sns
 import numpy as np
 
 from parsers._configparser import getConfigs
+
+coloredlogs.install(level='PRODUCTION', filename='tmp.log', filemode='w')
+logger = logging.getLogger('startStaging')
+logging.getLogger()
+
+sns.set()
 
 rcParams["font.size"] = 18
 rcParams["legend.fontsize"] = "xx-large"
 rcParams["ytick.major.size"] = 14
 rcParams["xtick.major.size"] = 14
 rcParams["axes.labelsize"] = 18
-rcParams["figure.facecolor"] = "Grey"
-
-coloredlogs.install(level='PRODUCTION', filename='tmp.log', filemode='w')
-logger = logging.getLogger('startStaging')
-logging.getLogger()
 
 class Staging(object):
     __slots__=("SASids", "targetName", "SURIs", "dataGoodnes", "logText", "calibrator", "calibratorsList", "stationCount", "configFile")
@@ -222,9 +224,9 @@ def plotDataGoodnes(targetGoodnes, calibratorGoodnes, SASidsTarget, SASidsCalibr
     axc = fig.add_subplot(1, 2, 2)
 
     #pt4 = axt.bar(ind - width, tStationsTarget, width/2, color='y')
-    pt1 = axt.bar(ind, cStationsTarget, width, color='r')
-    pt2 = axt.bar(ind, rStationsTarget, width, color='g')
-    pt3 = axt.bar(ind, iStationsTarget, width, color='b')
+    pt1 = axt.bar(ind, cStationsTarget, width, color='r', bottom=0)
+    pt2 = axt.bar(ind, rStationsTarget, width, color='g', bottom=cStationsTarget)
+    pt3 = axt.bar(ind, iStationsTarget, width, color='b', bottom=cStationsTarget + rStationsTarget)
     axt.set_xticks(ind)
     axt.set_xticklabels((SASidsTarget))
     axt.legend((pt1[0], pt2[0], pt3[0]), ('Core stations' , 'Remote stations', 'International stations', 'Total stations'))
@@ -234,9 +236,9 @@ def plotDataGoodnes(targetGoodnes, calibratorGoodnes, SASidsTarget, SASidsCalibr
     plt.grid()
 
     #pc4 = axc.bar(ind - width, tStationsCalibrator, width/2, color='y')
-    pc1 = axc.bar(ind, cStationsCalibrator, width, color='r')
-    pc2 = axc.bar(ind, rStationsCalibrator, width, color='g')
-    pc3 = axc.bar(ind, iStationsCalibrator, width, color='b')
+    pc1 = axc.bar(ind, cStationsCalibrator, width, color='r', bottom=0)
+    pc2 = axc.bar(ind, rStationsCalibrator, width, color='g', bottom=cStationsCalibrator)
+    pc3 = axc.bar(ind, iStationsCalibrator, width, color='b', bottom=cStationsCalibrator + rStationsCalibrator)
     axc.set_xticks(ind)
     axc.set_xticklabels((SASidsCalibrator))
     axc.legend((pc1[0], pc2[0], pc3[0]), ('Core stations', 'Remote stations', 'International stations', 'Total stations'))
