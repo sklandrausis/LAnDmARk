@@ -60,7 +60,8 @@ if __name__=="__main__":
     wcsroot = getConfigs("Paths", "wcsroot", "config.cfg")
     losotopath = getConfigs("Paths", "losotoPath", "config.cfg")
     aoflagger = getConfigs("Paths", "aoflagger", "config.cfg")
-    max_per_node = getConfigs("Data", "max_per_node", "config.cfg")
+    max_per_node = getConfigs("Cluster", "max_per_node", "config.cfg")
+    method = getConfigs("Cluster", "method", "config.cfg")
     wsclean_executable = getConfigs("Paths", "wsclean_executable", "config.cfg")
     pythonpath = getConfigs("Paths", "pythonpath", "config.cfg")
 
