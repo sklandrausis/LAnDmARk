@@ -330,6 +330,6 @@ if __name__ == "__main__":
         stagingTarget.startStaging()
         stagingCalibrator.startStaging()
         end_staging_time = time.time()
-        print("Staging time", end_staging_time - start_staging_time)
+        print("Staging ination time", end_staging_time - start_staging_time)
 
     sys.exit(0)
