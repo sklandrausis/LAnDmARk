@@ -11,11 +11,12 @@ import numpy as np
 
 from parsers._configparser import getConfigs
 
-rcParams["font.size"]=18
-rcParams["legend.fontsize"]="xx-large"
-rcParams["ytick.major.size"]=14
-rcParams["xtick.major.size"]=14
-rcParams["axes.labelsize"]=18
+rcParams["font.size"] = 18
+rcParams["legend.fontsize"] = "xx-large"
+rcParams["ytick.major.size"] = 14
+rcParams["xtick.major.size"] = 14
+rcParams["axes.labelsize"] = 18
+rcParams["figure.facecolor"] = "Grey"
 
 coloredlogs.install(level='PRODUCTION', filename='tmp.log', filemode='w')
 logger = logging.getLogger('startStaging')
@@ -205,7 +206,7 @@ def plotDataGoodnes(targetGoodnes, calibratorGoodnes, SASidsTarget, SASidsCalibr
     plt.grid()
 
     plt.subplot(1, 2, 2)
-    plt.bar(SASidsCalibrator, np.array(ratiosCalibrator) * 100, color='r')
+    plt.bar(SASidsCalibrator, np.array(ratiosCalibrator) * 100, color='g')
     plt.xticks(SASidsCalibrator, SASidsCalibrator)
     plt.xlabel("SAS id")
     plt.ylabel("Percent")
