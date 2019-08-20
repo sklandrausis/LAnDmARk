@@ -224,9 +224,10 @@ def plotDataGoodnes(targetGoodnes, calibratorGoodnes, SASidsTarget, SASidsCalibr
     axc = fig.add_subplot(1, 2, 2)
 
     #pt4 = axt.bar(ind - width, tStationsTarget, width/2, color='y')
-    pt1 = axt.bar(ind, cStationsTarget, width, color='r', bottom=0)
+    pt1 = axt.bar(ind, cStationsTarget, width, color='r', bottom=[0,0])
     pt2 = axt.bar(ind, rStationsTarget, width, color='g', bottom=cStationsTarget)
-    pt3 = axt.bar(ind, iStationsTarget, width, color='b', bottom=cStationsTarget + rStationsTarget)
+    bottom_tmp = [cStationsTarget[b] +  rStationsTarget[b] for b in range(0, len(cStationsTarget)) ]
+    pt3 = axt.bar(ind, iStationsTarget, width, color='b', bottom=bottom_tmp)
     axt.set_xticks(ind)
     axt.set_xticklabels((SASidsTarget))
     axt.legend((pt1[0], pt2[0], pt3[0]), ('Core stations' , 'Remote stations', 'International stations', 'Total stations'))
@@ -236,9 +237,10 @@ def plotDataGoodnes(targetGoodnes, calibratorGoodnes, SASidsTarget, SASidsCalibr
     plt.grid()
 
     #pc4 = axc.bar(ind - width, tStationsCalibrator, width/2, color='y')
-    pc1 = axc.bar(ind, cStationsCalibrator, width, color='r', bottom=0)
+    pc1 = axc.bar(ind, cStationsCalibrator, width, color='r', bottom=[0,0])
     pc2 = axc.bar(ind, rStationsCalibrator, width, color='g', bottom=cStationsCalibrator)
-    pc3 = axc.bar(ind, iStationsCalibrator, width, color='b', bottom=cStationsCalibrator + rStationsCalibrator)
+    bottom_tmp = [cStationsCalibrator[b] + rStationsCalibrator[b] for b in range(0, len(cStationsCalibrator))]
+    pc3 = axc.bar(ind, iStationsCalibrator, width, color='b', bottom=bottom_tmp)
     axc.set_xticks(ind)
     axc.set_xticklabels((SASidsCalibrator))
     axc.legend((pc1[0], pc2[0], pc3[0]), ('Core stations', 'Remote stations', 'International stations', 'Total stations'))
