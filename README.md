@@ -2,8 +2,7 @@
 
 **The LAnDmARk scripts where developed by:  Janis Steinbergs, Kristaps Veitners**
 
-LAnDmARk is automated data retrieval and processing tool. To retrieve data from LOFAR LTA and run calibrator and target pipeline to image FITS map. Full docomentation is avaible from:https://docs.google.com/document/d/1F74ZPqPWVU0uPr_UbUr6zfkAHD-RcSIWYVprHvPnavE/edit?usp=sharing
-
+LAnDmARk is automated data retrieval and processing tool. To retrieve data from LOFAR LTA and run calibrator and target pipeline to image FITS map. 
 ## LAnDmARk setup and run
 ### Dependencies
 1. python 3
