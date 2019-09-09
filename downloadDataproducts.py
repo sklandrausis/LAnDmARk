@@ -13,7 +13,8 @@ if __name__ == "__main__":
     x_vec = np.linspace(0,100,size+1)[0:-1]
     y_vec = np.linspace(0,100,size+1)[0:-1]
     line1 = []
-	
+
+    start_staging_time = time.time()
     while True:
         progess = get_progress()
         if progess != None:
@@ -22,7 +23,6 @@ if __name__ == "__main__":
                 tmpStagesIDs.add(id)
             print("status IDs", stagesIDs)
 
-            start_staging_time = time.time()
             for stageID in stagesIDs:
                 status = progess[stageID]["Status"]
                 print("status ID", stageID)
@@ -38,10 +38,8 @@ if __name__ == "__main__":
                 line1 = live_plotter(x_vec,y_vec,line1)
                 y_vec = np.append(y_vec[1:],0.0)
 
-            end_staging_time = time.time()
-            print("Staging time", end_staging_time - start_staging_time)
-
         else:
+            
             for id in tmpStagesIDs:
                 surl = get_surls_online(int(id))
                 SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", "config.cfg").replace(" ", "").split(",")]
