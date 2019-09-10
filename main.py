@@ -7,7 +7,9 @@ from parsers._configparser import getConfigs
 if __name__ == "__main__":
     start_time_main = time.time()
 
-    os.system("python3 " + "startStaging.py")
+    if getConfigs("Operations", "querying", "config.cfg") == "True":
+        os.system("python3 " + "startStaging.py")
+
     if getConfigs("Operations", "Retrieve", "config.cfg") == "True":
         start_data_retrive_time = time.time()
         os.system("python3 " + "downloadDataproducts.py")
