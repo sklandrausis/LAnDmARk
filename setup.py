@@ -30,7 +30,6 @@ if __name__=="__main__":
     config_file = get_args("config")
     workingDir = getConfigs("Paths", "WorkingPath", config_file)
     targetName = getConfigs("Data", "TargetName",config_file)
-    auxDir = workingDir + "/LAnDmARk_aux"
     workingDir = workingDir + targetName + "/"
     PrefactorDir = getConfigs("Paths", "PrefactorPath", config_file)
     targetSASids = getConfigs("Data", "targetSASids", config_file).replace(" ", "").split(",")
@@ -50,7 +49,7 @@ if __name__=="__main__":
     calibratorDir = workingDir + "calibrators" + "/"
     targetDir = workingDir + "targets" + "/"
     image_input_dir = workingDir + "image_input"
-    auxDir = workingDir + "/Pipeline_aux"
+    auxDir = workingDir + "/LAnDmARk_aux"
 
     # Creating directory structure
     createDirectory(workingDir)
