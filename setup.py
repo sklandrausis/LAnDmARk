@@ -16,7 +16,7 @@ def copyFiles(fileFrom, fileTo):
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='''Setup working directory tree. ''', epilog="""Setup""")
-    parser.add_argument("-c", "--config", help="Configuration cfg file", type=str, default=config_file)
+    parser.add_argument("-c", "--config", help="Configuration cfg file", type=str, default="config.cfg")
     parser.add_argument("-v", "--version", action="version", version='%(prog)s - Version 1.0')
     args = parser.parse_args()
     return args
