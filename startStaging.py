@@ -171,6 +171,11 @@ class Staging(object):
         os.system("mv " + f + " " + getConfigs("Paths", "WorkingPath", "config.cfg") + getConfigs("Data", "TargetName", "config.cfg") + "/Pipeline_aux/"  + f)
 
 def plotDataGoodnes(targetGoodnes, calibratorGoodnes, SASidsTarget, SASidsCalibrator):
+    workingDir = getConfigs("Paths", "WorkingPath", "config.cfg")
+    targetName = getConfigs("Data", "TargetName", "config.cfg")
+    workingDir = workingDir + "/" + targetName + "/"
+    auxDir = workingDir + "/LAnDmARk_aux"
+
     ratiosTarget = []
     ratiosCalibrator = []
 
@@ -215,7 +220,7 @@ def plotDataGoodnes(targetGoodnes, calibratorGoodnes, SASidsTarget, SASidsCalibr
     plt.title("Calibrator")
     plt.grid()
 
-    plt.show()
+    plt.savefig(auxDir + "/selection/" + "valid_data_per_sas_id.png")
 
     width = 0.35
     ind = np.arange(0, len(SASidsTarget))
@@ -249,7 +254,7 @@ def plotDataGoodnes(targetGoodnes, calibratorGoodnes, SASidsTarget, SASidsCalibr
     axc.set_xlabel("SAS id")
     plt.grid()
 
-    plt.show()
+    plt.savefig(auxDir + "/selection/" + "station_count_per_sas_id.png")
 
 if __name__ == "__main__":
 

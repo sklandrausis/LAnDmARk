@@ -58,6 +58,9 @@ if __name__=="__main__":
     createDirectory(targetDir)
     createDirectory(image_input_dir)
     createDirectory(auxDir)
+    createDirectory(auxDir + "/selection")
+    createDirectory(auxDir + "/stage")
+    createDirectory(auxDir + "/retrieve")
 
     lofarroot = getConfigs("Paths", "lofarroot", config_file)
     casaroot = getConfigs("Paths", "casaroot", config_file)
