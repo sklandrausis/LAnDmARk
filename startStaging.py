@@ -168,7 +168,7 @@ class Staging(object):
                 break
 
         log.write(logText)
-        os.system("mv " + f + " " + getConfigs("Paths", "WorkingPath", "config.cfg") + getConfigs("Data", "TargetName", "config.cfg") + "/Pipeline_aux/"  + f)
+        os.system("mv " + f + " " + getConfigs("Paths", "WorkingPath", "config.cfg") + getConfigs("Data", "TargetName", "config.cfg") + "/LAnDmARk_aux/" + f)
 
 def plotDataGoodnes(targetGoodnes, calibratorGoodnes, SASidsTarget, SASidsCalibrator):
     workingDir = getConfigs("Paths", "WorkingPath", "config.cfg")
