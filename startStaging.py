@@ -289,6 +289,7 @@ if __name__ == "__main__":
     tmpCalibratorLogs = stagingCalibrator.getLogs()
 
     workingDir = getConfigs("Paths", "WorkingPath", "config.cfg")
+    auxDir = workingDir + "/LAnDmARk_aux"
     targetName = getConfigs("Data", "TargetName", "config.cfg")
     workingDir = workingDir + "/" + targetName + "/"
 
@@ -317,10 +318,10 @@ if __name__ == "__main__":
     logsTMP = logsTMP + "\nProcessing calibrators\n" + tmpCalibratorLogs
     os.system("python3 " + "setup.py")
 
-    with open(workingDir + "targetSURIs.txt", "w") as targetSURIfile:
+    with open(auxDir + "targetSURIs.txt", "w") as targetSURIfile:
         targetSURIfile.write(targetSURIs)
 
-    with open(workingDir + "calibratorSURIs.txt", "w") as calibratorSURIfile:
+    with open(auxDir + "calibratorSURIs.txt", "w") as calibratorSURIfile:
         calibratorSURIfile.write(calibratorSURIs)
 
     stagingCalibrator.writeLogs(logsTMP)

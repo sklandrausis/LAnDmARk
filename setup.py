@@ -5,31 +5,38 @@ import argparse
 from parsers._configparser import setConfigs, getConfigs
 from parsers._parsetParser import ParsetParser
 
+
 def createDirectory(DirName):
     os.system("mkdir -p " + DirName)
+
 
 def copyFiles(fileFrom, fileTo):
      os.system("cp -rfu " + fileFrom + "  " + fileTo)
 
-def parseArguments():
+
+def parse_arguments():
     parser = argparse.ArgumentParser(description='''Setup working directory tree. ''', epilog="""Setup""")
-    parser.add_argument("-c", "--config", help="Configuration cfg file", type=str, default="config.cfg")
+    parser.add_argument("-c", "--config", help="Configuration cfg file", type=str, default=config_file)
     parser.add_argument("-v", "--version", action="version", version='%(prog)s - Version 1.0')
     args = parser.parse_args()
     return args
 
-def getArgs(key):
-    return str(parseArguments().__dict__[key])
+
+def get_args(key):
+    return str(parse_arguments().__dict__[key])
+
 
 if __name__=="__main__":
-    workingDir = getConfigs("Paths", "WorkingPath", "config.cfg")
-    targetName = getConfigs("Data", "TargetName","config.cfg")
+    config_file = get_args("config")
+    workingDir = getConfigs("Paths", "WorkingPath", config_file)
+    targetName = getConfigs("Data", "TargetName",config_file)
+    auxDir = workingDir + "/LAnDmARk_aux"
     workingDir = workingDir + targetName + "/"
-    PrefactorDir = getConfigs("Paths", "PrefactorPath", "config.cfg")
-    targetSASids = getConfigs("Data", "targetSASids", "config.cfg").replace(" ", "").split(",")
-    project = getConfigs("Data", "PROJECTid", "config.cfg")
+    PrefactorDir = getConfigs("Paths", "PrefactorPath", config_file)
+    targetSASids = getConfigs("Data", "targetSASids", config_file).replace(" ", "").split(",")
+    project = getConfigs("Data", "PROJECTid", config_file)
 
-    if len(getConfigs("Data", "calibratorSASids", "config.cfg")) == 0:
+    if len(getConfigs("Data", "calibratorSASids", config_file)) == 0:
         if project == "MSSS_HBA_2013":
             SASidsCalibrator = [int(id) - 1 for id in targetSASids]
 
@@ -37,7 +44,7 @@ if __name__=="__main__":
             raise Exception("SAS id for calibrator is not set in config.cfg file")
             sys.exit(1)
     else:
-        SASidsCalibrator = [int(id) for id in getConfigs("Data", "calibratorSASids", "config.cfg").replace(" ", "").split(",")]
+        SASidsCalibrator = [int(id) for id in getConfigs("Data", "calibratorSASids", config_file).replace(" ", "").split(",")]
 
     imagingDir = workingDir + "imaging_deep" + "/"
     calibratorDir = workingDir + "calibrators" + "/"
@@ -53,17 +60,17 @@ if __name__=="__main__":
     createDirectory(image_input_dir)
     createDirectory(auxDir)
 
-    lofarroot = getConfigs("Paths", "lofarroot", "config.cfg")
-    casaroot = getConfigs("Paths", "casaroot", "config.cfg")
-    pyraproot = getConfigs("Paths", "pyraproot", "config.cfg")
-    hdf5root = getConfigs("Paths", "hdf5root", "config.cfg")
-    wcsroot = getConfigs("Paths", "wcsroot", "config.cfg")
-    losotopath = getConfigs("Paths", "losotoPath", "config.cfg")
-    aoflagger = getConfigs("Paths", "aoflagger", "config.cfg")
-    max_per_node = getConfigs("Cluster", "max_per_node", "config.cfg")
-    method = getConfigs("Cluster", "method", "config.cfg")
-    wsclean_executable = getConfigs("Paths", "wsclean_executable", "config.cfg")
-    pythonpath = getConfigs("Paths", "pythonpath", "config.cfg")
+    lofarroot = getConfigs("Paths", "lofarroot", config_file)
+    casaroot = getConfigs("Paths", "casaroot", config_file)
+    pyraproot = getConfigs("Paths", "pyraproot", config_file)
+    hdf5root = getConfigs("Paths", "hdf5root", config_file)
+    wcsroot = getConfigs("Paths", "wcsroot", config_file)
+    losotopath = getConfigs("Paths", "losotoPath", config_file)
+    aoflagger = getConfigs("Paths", "aoflagger", config_file)
+    max_per_node = getConfigs("Cluster", "max_per_node", config_file)
+    method = getConfigs("Cluster", "method", config_file)
+    wsclean_executable = getConfigs("Paths", "wsclean_executable", config_file)
+    pythonpath = getConfigs("Paths", "pythonpath", config_file)
 
     # Creating imaging files
     copyFiles(PrefactorDir + 'pipeline.cfg', imagingDir)
