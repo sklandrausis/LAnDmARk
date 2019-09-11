@@ -10,12 +10,6 @@ import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     tmpStagesIDs = set([])
-
-    #real-time plot information intial
-    #size = 100
-    #x_vec = np.linspace(0,100,size+1)[0:-1]
-    #y_vec = np.linspace(0,100,size+1)[0:-1]
-    #line1 = []
 	
     #progress is 0
     i=float(0)
@@ -34,15 +28,6 @@ if __name__ == "__main__":
 
             for stageID in stagesIDs:
                 status = progess[stageID]["Status"]
-                #print("status ID", stageID)
-                #print("status", status)
-                #print("Files done", progess[stageID]["Files done"])
-                #print("User id", progess[stageID]["User id"])
-                #print("Flagged abort", progess[stageID]["Flagged abort"])
-                #print("File count", progess[stageID]["File count"])
-                #print("Percent done", progess[stageID]["Percent done"])
-                #print(progress[stageID]["Percent done"])
-                #print("Location", progess[stageID]["Location"], "\n")
                 
                 #old real-time plot
                 #y_vec[-1] = progess[stageID]["Percent done"]
