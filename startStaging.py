@@ -164,7 +164,22 @@ class Staging():
     def startStaging(self):
         for id in  self.SASids:
             stager = LtaStager()
-            stager.stage_uris(self.SURIs[str(id)])
+
+            if len(self.SURIs[str(id)]) => 5000:
+                tmp = []
+                tmp += [self.SURIs[str(id)][0:len()]]
+                tmp +=
+
+                while len(tmp) != 0:
+                    for t in tmp:
+                        if len(t) <= 5000:
+                            tmp.remove(t)
+                            stage(t)
+                        else
+                        split
+                        remove
+            else:
+                stager.stage_uris(self.SURIs[str(id)])
 
     def query(self):
         for id in self.SASids:
