@@ -322,12 +322,14 @@ if __name__ == "__main__":
 
     logsTMP = logsTMP + "\nProcessing calibrators\n" + tmpCalibratorLogs
     os.system("python3 " + "setup.py")
-
-    with open(auxDir + "/targetSURIs.txt", "w") as targetSURIfile:
-        targetSURIfile.write(targetSURIs)
-
-    with open(auxDir + "/calibratorSURIs.txt", "w") as calibratorSURIfile:
-        calibratorSURIfile.write(calibratorSURIs)
+    
+    if os.path.isfile(auxDir + "/targetSURIs.txt") == False: 
+        with open(auxDir + "/targetSURIs.txt", "w") as targetSURIfile:
+            targetSURIfile.write(targetSURIs)
+            
+    if os.path.isfile(auxDir + "/calibratorSURIs.txt") == False: 
+        with open(auxDir + "/calibratorSURIs.txt", "w") as calibratorSURIfile:
+            calibratorSURIfile.write(calibratorSURIs)
 
     stagingCalibrator.writeLogs(logsTMP)
 
