@@ -9,8 +9,22 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 import seaborn as sns
 import numpy as np
+import argparse
 
 from parsers._configparser import getConfigs
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='''Executes all scripts. ''', epilog="""Main""")
+    parser.add_argument("-c", "--config", help="Configuration cfg file", type=str, default="config.cfg")
+    parser.add_argument("-v", "--version", action="version", version='%(prog)s - Version 1.0')
+    args = parser.parse_args()
+    return args
+
+
+def get_args(key):
+    return str(parse_arguments().__dict__[key])
+
 
 coloredlogs.install(level='PRODUCTION', filename='tmp.log', filemode='w')
 logger = logging.getLogger('startStaging')
@@ -24,8 +38,8 @@ rcParams["ytick.major.size"] = 14
 rcParams["xtick.major.size"] = 14
 rcParams["axes.labelsize"] = 18
 
-class Staging(object):
-    __slots__=("SASids", "targetName", "SURIs", "dataGoodnes", "logText", "calibrator", "calibratorsList", "stationCount", "configFile")
+class Staging():
+    
     def __init__(self, SASids, calibrator, configFile):
         self.SASids = SASids
         self.SURIs = dict()
@@ -94,14 +108,14 @@ class Staging(object):
                     fileobject = ((FileObject.data_object == dataproduct) & (FileObject.isValid > 0)).max('creation_date')
 
                     if fileobject:
-                        if getConfigs("Data", "ProductType", "config.cfg") == "observation":
+                        if getConfigs("Data", "ProductType", config_file) == "observation":
                             if '/L' + str(SASid) in fileobject.URI and not "dppp" in fileobject.URI:
                                 uris.add(fileobject.URI)
                                 validFiles += 1
                                 print("File nr :", validFiles, "URI found", fileobject.URI)
                                 self.logText += "File nr : " + str(validFiles) + " URI found " + str(fileobject.URI) + "\n"
 
-                        elif getConfigs("Data", "ProductType", "config.cfg") == "pipeline":
+                        elif getConfigs("Data", "ProductType", config_file) == "pipeline":
 
                             if '/L' + str(SASid) in fileobject.URI and "dppp" in fileobject.URI:
                                 uris.add(fileobject.URI)
@@ -168,11 +182,11 @@ class Staging(object):
                 break
 
         log.write(logText)
-        os.system("mv " + f + " " + getConfigs("Paths", "WorkingPath", "config.cfg") + getConfigs("Data", "TargetName", "config.cfg") + "/LAnDmARk_aux/" + f)
+        os.system("mv " + f + " " + getConfigs("Paths", "WorkingPath", config_file) + "/" + getConfigs("Data", "TargetName", config_file) + "/LAnDmARk_aux/" + f)
 
 def plotDataGoodnes(targetGoodnes, calibratorGoodnes, SASidsTarget, SASidsCalibrator):
-    workingDir = getConfigs("Paths", "WorkingPath", "config.cfg")
-    targetName = getConfigs("Data", "TargetName", "config.cfg")
+    workingDir = getConfigs("Paths", "WorkingPath", config_file)
+    targetName = getConfigs("Data", "TargetName", config_file)
     workingDir = workingDir + "/" + targetName + "/"
     auxDir = workingDir + "/LAnDmARk_aux"
 
@@ -257,18 +271,18 @@ def plotDataGoodnes(targetGoodnes, calibratorGoodnes, SASidsTarget, SASidsCalibr
     plt.savefig(auxDir + "/selection/" + "station_count_per_sas_id.png")
 
 if __name__ == "__main__":
-
+    config_file = get_args("config")
     #Check if project is private and we are not members of project
-    project = getConfigs("Data", "PROJECTid", "config.cfg")
+    project = getConfigs("Data", "PROJECTid", config_file)
     context.set_project(project)
 
     if project != context.get_current_project().name:
         raise Exception("You are not member of project", project)
         sys.exit(1)
 
-    SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", "config.cfg").replace(" ", "").split(",")]
+    SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", config_file).replace(" ", "").split(",")]
 
-    if len(getConfigs("Data", "calibratorSASids", "config.cfg")) == 0:
+    if len(getConfigs("Data", "calibratorSASids", config_file)) == 0:
         if project == "MSSS_HBA_2013":
             SASidsCalibrator = [id - 1 for id in SASidsTarget]
 
@@ -276,66 +290,72 @@ if __name__ == "__main__":
             raise Exception("SAS id for calibrator is not set in config.cfg file")
             sys.exit(1)
     else:
-        SASidsCalibrator =  [int(id) for id in getConfigs("Data", "calibratorSASids", "config.cfg").replace(" ", "").split(",")]
+        SASidsCalibrator =  [int(id) for id in getConfigs("Data", "calibratorSASids", config_file).replace(" ", "").split(",")]
 
 
     logging.info("Processing target")
     start_data_selection_time = time.time()
-    stagingTarget = Staging(SASidsTarget, False, "config.cfg")
+    stagingTarget = Staging(SASidsTarget, False, config_file)
     stagingTarget.query()
     tmpTargetLogs = stagingTarget.getLogs()
     logsTMP = "Processing target\n" + tmpTargetLogs
 
     logging.info("Processing calibrators")
-    stagingCalibrator = Staging(SASidsCalibrator, True, "config.cfg")
+    stagingCalibrator = Staging(SASidsCalibrator, True, config_file)
     stagingCalibrator.query()
     end_data_selection_time = time.time()
     print("Data selection time", end_data_selection_time - start_data_selection_time)
     tmpCalibratorLogs = stagingCalibrator.getLogs()
 
-    workingDir = getConfigs("Paths", "WorkingPath", "config.cfg")
-    targetName = getConfigs("Data", "TargetName", "config.cfg")
+    workingDir = getConfigs("Paths", "WorkingPath", config_file)
+    targetName = getConfigs("Data", "TargetName", config_file)
     workingDir = workingDir + "/" + targetName + "/"
     auxDir = workingDir + "/LAnDmARk_aux"
 
-    targetSURIs = ""
-    calibratorSURIs = ""
+    targetSURIs = []
+    calibratorSURIs = []
 
     for id in SASidsTarget:
         for URI in stagingTarget.getSURIs()[str(id)]:
             if "sara" in URI:
-                targetSURIs += "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n"
+                targetSURIs.append("https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n")
             elif "juelich" in URI:
-                targetSURIs += "https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl=" + URI + "\n"
+                targetSURIs.append("https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl=" + URI + "\n")
             else:
-                targetSURIs += "https://lta-download.lofar.psnc.pl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n"
+                targetSURIs.append("https://lta-download.lofar.psnc.pl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n")
 
 
     for id in SASidsCalibrator:
         for URI in stagingCalibrator.getSURIs()[str(id)]:
             if "sara" in URI:
-                calibratorSURIs += "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n"
+                calibratorSURIs.append("https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n")
             elif "juelich" in URI:
-                calibratorSURIs += "https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl=" + URI + "\n"
+                calibratorSURIs.append("https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl=" + URI + "\n")
             else:
-                calibratorSURIs += "https://lta-download.lofar.psnc.pl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n"
+                calibratorSURIs.append("https://lta-download.lofar.psnc.pl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n")
 
     logsTMP = logsTMP + "\nProcessing calibrators\n" + tmpCalibratorLogs
     os.system("python3 " + "setup.py")
     
-    if os.path.isfile(auxDir + "/targetSURIs.txt") == False: 
-        with open(auxDir + "/targetSURIs.txt", "w") as targetSURIfile:
-            targetSURIfile.write(targetSURIs)
-            
-    if os.path.isfile(auxDir + "/calibratorSURIs.txt") == False: 
-        with open(auxDir + "/calibratorSURIs.txt", "w") as calibratorSURIfile:
-            calibratorSURIfile.write(calibratorSURIs)
+    for id in SASidsTarget:
+        if os.path.isfile(auxDir + "/target_" + str(id) + "_SURIs" + ".txt") == False:
+            with open(auxDir + "/target_" + str(id) + "_SURIs" + ".txt", "w") as targetSURIfile:
+                for uri in targetSURIs:
+                    if str(id) in uri:
+                        targetSURIfile.write(uri)
+
+    for id in SASidsCalibrator:
+        if os.path.isfile(auxDir + "/calibrator_" + str(id) + "_SURIs" +".txt") == False:
+            with open(auxDir + "/calibrator_" + str(id) + "_SURIs" +".txt", "w") as calibratorSURIfile:
+                for uri in calibratorSURIs:
+                    if str(id) in uri:
+                        calibratorSURIfile.write(uri)
 
     stagingCalibrator.writeLogs(logsTMP)
 
     plotDataGoodnes(stagingTarget.getDataGoodnes(), stagingCalibrator.getDataGoodnes(), SASidsTarget, SASidsCalibrator)
 
-    if getConfigs("Operations", "Stage", "config.cfg") == "True":
+    if getConfigs("Operations", "Stage", config_file) == "True":
         start_staging_time = time.time()
         stagingTarget.startStaging()
         stagingCalibrator.startStaging()

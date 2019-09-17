@@ -31,7 +31,7 @@ if __name__=="__main__":
     workingDir = getConfigs("Paths", "WorkingPath", config_file)
     targetName = getConfigs("Data", "TargetName",config_file)
     workingDir = workingDir + "/" + targetName + "/"
-    PrefactorDir = getConfigs("Paths", "PrefactorPath", config_file)
+    PrefactorDir = getConfigs("Paths", "PrefactorPath", config_file) + "/"
     targetSASids = getConfigs("Data", "targetSASids", config_file).replace(" ", "").split(",")
     project = getConfigs("Data", "PROJECTid", config_file)
 

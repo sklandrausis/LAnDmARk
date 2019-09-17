@@ -57,26 +57,6 @@ def stage(surls):
     stageid = proxy.LtaStager.add_getid(surls)
     return stageid
 
-def get_status(stageid):
-    ''' Get Status of staget files '''
-    return proxy.LtaStager.getstatus(stageid)
-
-def abort(stageid):
-    ''' Arborts staging '''
-    return proxy.LtaStager.abort(stageid)
-
-def get_surls_online(stageid):
-    ''' Get staget urls '''
-    return proxy.LtaStager.getstagedurls(stageid)
-
-def get_srm_token(stageid):
-    ''' Get srm token '''
-    return proxy.LtaStager.gettoken(stageid)
-
-def reschedule(stageid):
-    ''' Reschedule stagigng '''
-    return proxy.LtaStager.reschedule(stageid)
-
 def get_progress(status=None, exclude=False):
     ''' Get progress of staging '''
     all_requests = proxy.LtaStager.getprogress()
@@ -93,55 +73,6 @@ def get_progress(status=None, exclude=False):
         requests = all_requests
     return requests
 
-def reschedule_on_status(status=None):
-    ''' Reschedule status '''
-    if status is not None and isinstance(status, string_types) and (status == "on hold" or status == "aborted"):
-        requests = get_progress(status)
-        for key in requests.keys():
-            reschedule(int(key))
-    else:
-        print("The parameter status is either None, not a string neither of \"on hold\" nor \"aborted\".")
-
-def get_storage_info():
-    ''' Get storage info '''
-    return proxy.LtaStager.getsrmstorageinfo()
-
-def prettyprint(dictionary, indent=""):
-    ''' Pretty print progress '''
-    if isinstance(dictionary) is dict:
-        for key in sorted(dictionary.keys()):
-            item = dictionary.get(key)
-            if isinstance(item) is dict:
-                print("%s+ %s" % (indent, str(key)))
-                prettyprint(item, indent=indent + '  ')
-            else:
-                print("%s- %s\t->\t%s" % (indent, str(key), str(item)))
-    else:
-        print("stager_access: This prettyprint takes a dict only!")
-
-
-def reschedule_on_hold():
-    ''' Reschedule_on_hold '''
-    reschedule_on_status("on hold")
-
-def print_on_hold():
-    ''' Print on hold '''
-    requests = get_progress("on hold")
-    prettyprint(requests)
-
-def reschedule_aborted():
-    ''' Reschedule aborted '''
-    reschedule_on_status("aborted")
-
-def print_aborted():
-    ''' Print aborted '''
-    requests = get_progress("aborted")
-    prettyprint(requests)
-
-def print_running():
-    ''' Print running '''
-    requests = get_progress("success", True)
-    prettyprint(requests)
 
 def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
     ''' Download file '''

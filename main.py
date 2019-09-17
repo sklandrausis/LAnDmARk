@@ -1,7 +1,40 @@
 ''' Executes all scripts '''
 import os
+import sys
 import time
 import argparse
+
+from parsers._configparser import getConfigs
+
+try:
+    import coloredlogs
+except ImportError:
+    print('coloredlogs module is not installed')
+    sys.exit(1)
+
+try:
+    import awlofar
+except ImportError:
+    print('awlofar module is not installed')
+    sys.exit(1)
+
+try:
+    import matplotlib
+except ImportError:
+    print('matplotlib module is not installed')
+    sys.exit(1)
+
+try:
+    import numpy
+except ImportError:
+    print('numpy module is not installed')
+    sys.exit(1)
+
+try:
+    import seaborn
+except ImportError:
+    print('seaborn module is not installed')
+    sys.exit(1)
 
 
 def parse_arguments():
@@ -12,14 +45,12 @@ def parse_arguments():
     return args
 
 
-from parsers._configparser import getConfigs
-
-
 def get_args(key):
     return str(parse_arguments().__dict__[key])
 
 
 if __name__ == "__main__":
+
     start_time_main = time.time()
 
     config_file = get_args("config")

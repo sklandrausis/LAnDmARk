@@ -2,19 +2,28 @@ import time
 
 from parsers._configparser import getConfigs
 from stager_access import *
-
-from pylive import live_plotter
 from progress import progress
 import numpy as np
 import matplotlib.pyplot as plt
+import argparse
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='''Executes all scripts. ''', epilog="""Main""")
+    parser.add_argument("-c", "--config", help="Configuration cfg file", type=str, default="config.cfg")
+    parser.add_argument("-v", "--version", action="version", version='%(prog)s - Version 1.0')
+    args = parser.parse_args()
+    return args
+
+
+def get_args(key):
+    return str(parse_arguments().__dict__[key])
+
 
 if __name__ == "__main__":
+    config_file = get_args("config")
     tmpStagesIDs = set([])
-	
-    #progress is 0
-    i=float(0)
-	
-    #plot initial values
+    i = 0.0
     percent_done = []
     files_done = []
 
@@ -24,16 +33,9 @@ if __name__ == "__main__":
             stagesIDs = list(progess.keys())
             for id in stagesIDs:
                 tmpStagesIDs.add(id)
-            #print("status IDs", stagesIDs)
 
             for stageID in stagesIDs:
                 status = progess[stageID]["Status"]
-                
-                #old real-time plot
-                #y_vec[-1] = progess[stageID]["Percent done"]
-                #line1 = live_plotter(x_vec,y_vec,line1)
-                #y_vec = np.append(y_vec[1:],0.0)
-				
                 progress(i, 100, status='Staging in progress')
                 i=float(progess[stageID]["Percent done"])
                 f=float(progess[stageID]["Files done"])
@@ -44,7 +46,7 @@ if __name__ == "__main__":
         else:
             for id in tmpStagesIDs:
                 surl = get_surls_online(int(id))
-                SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", "config.cfg").replace(" ", "").split(",")]
+                SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", config_file).replace(" ", "").split(",")]
 
                 project = getConfigs("Data", "PROJECTid", "config.cfg")
                 if len(getConfigs("Data", "calibratorSASids", "config.cfg")) == 0:
@@ -55,9 +57,9 @@ if __name__ == "__main__":
                         raise Exception("SAS id for calibrator is not set in config.cfg file")
                         sys.exit(1)
                 else:
-                    SASidsCalibrator = [int(id) for id in getConfigs("Data", "calibratorSASids", "config.cfg").replace(" ", "").split(",")]
+                    SASidsCalibrator = [int(id) for id in getConfigs("Data", "calibratorSASids", config_file).replace(" ", "").split(",")]
 
-                download(surl, getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", "config.cfg") + "/", SASidsCalibrator, SASidsTarget, )
+                download(surl, getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", config_file) + "/", SASidsCalibrator, SASidsTarget, )
 
             break
 
