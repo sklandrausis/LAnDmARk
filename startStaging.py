@@ -10,6 +10,7 @@ from matplotlib import rcParams
 import seaborn as sns
 import numpy as np
 import argparse
+import warnings
 
 from parsers._configparser import getConfigs
 
@@ -17,6 +18,7 @@ from parsers._configparser import getConfigs
 def parse_arguments():
     parser = argparse.ArgumentParser(description='''Executes all scripts. ''', epilog="""Main""")
     parser.add_argument("-c", "--config", help="Configuration cfg file", type=str, default="config.cfg")
+    parser.add_argument("-d", "--print_logs", help="Print log", action="store_true", default=False)
     parser.add_argument("-v", "--version", action="version", version='%(prog)s - Version 1.0')
     args = parser.parse_args()
     return args
@@ -81,8 +83,9 @@ class Staging():
                     dataproduct_query = cls.observations.contains(observation)
                     dataproduct_query &= cls.isValid == 1
 
-                    print("Possibly corrupted file", len(dataproduct_query))
-                    print("Possibly staging", observation.can_be_staged, "Number of unspecified data products", observation.numberOfUnspecifiedDataProducts)
+                    if get_args("print_logs") == "True":
+                        print("Possibly corrupted file", len(dataproduct_query))
+                        print("Possibly staging", observation.can_be_staged, "Number of unspecified data products", observation.numberOfUnspecifiedDataProducts)
 
                 else:
                     logging.info("Core stations " + str(observation.nrStationsCore) + " Remote stations " + str(observation.nrStationsRemote) + " International stations " + str(observation.nrStationsInternational) + " Total stations " + str(observation.numberOfStations))
@@ -112,23 +115,30 @@ class Staging():
                             if '/L' + str(SASid) in fileobject.URI and not "dppp" in fileobject.URI:
                                 uris.add(fileobject.URI)
                                 validFiles += 1
-                                print("File nr :", validFiles, "URI found", fileobject.URI)
+                                if get_args("print_logs") == "True":
+                                    print("File nr :", validFiles, "URI found", fileobject.URI)
                                 self.logText += "File nr : " + str(validFiles) + " URI found " + str(fileobject.URI) + "\n"
+                                self.dataGoodnes[str(SASid)]["file_size"] = fileobject.filesize
+                                fileobject.filesize
 
                         elif getConfigs("Data", "ProductType", config_file) == "pipeline":
 
                             if '/L' + str(SASid) in fileobject.URI and "dppp" in fileobject.URI:
                                 uris.add(fileobject.URI)
                                 validFiles += 1
-                                print("File nr :", validFiles, "URI found", fileobject.URI)
+                                if get_args("print_logs") == "True":
+                                    print("File nr :", validFiles, "URI found", fileobject.URI)
                                 self.logText += "File nr : " + str(validFiles) + " URI found " + str(fileobject.URI) + "\n"
+                                self.dataGoodnes[str(SASid)]["file_size"] = fileobject.filesize
+
 
                         else:
                             print("Wrong data product type requested")
                             exit(1)
                     else:
                         invalidFiles += 1
-                        print("No URI found for %s with dataProductIdentifier", (dataproduct.__class__.__name__, dataproduct.dataProductIdentifier))
+                        if get_args("print_logs") == "True":
+                            print("No URI found for %s with dataProductIdentifier", (dataproduct.__class__.__name__, dataproduct.dataProductIdentifier))
                         self.logText += "No URI found for %s with dataProductIdentifier " +  str((dataproduct.__class__.__name__, dataproduct.dataProductIdentifier)) + "\n"
 
 
@@ -152,6 +162,12 @@ class Staging():
         self.SURIs[str(SASid)] = uris
         return uris
 
+    def get_total_file_size(self):
+        file_size = 0
+        for id in self.SASids:
+            file_size += self.dataGoodnes[str(id)]["file_size"]
+        return file_size
+
     def getSURIs(self):
         return self.SURIs
 
@@ -162,23 +178,15 @@ class Staging():
         return self.dataGoodnes
 
     def startStaging(self):
+        file_count = 0
         for id in  self.SASids:
-            stager = LtaStager()
+            file_count += len(self.SURIs[str(id)])
 
-            if len(self.SURIs[str(id)]) => 5000:
-                tmp = []
-                tmp += [self.SURIs[str(id)][0:len()]]
-                tmp +=
-
-                while len(tmp) != 0:
-                    for t in tmp:
-                        if len(t) <= 5000:
-                            tmp.remove(t)
-                            stage(t)
-                        else
-                        split
-                        remove
+            if file_count >= 5000:
+                warnings.warn("exceeds 5000 please remove SAS IDs from config file", Warning)
+                sys.exit(1)
             else:
+                stager = LtaStager()
                 stager.stage_uris(self.SURIs[str(id)])
 
     def query(self):
@@ -287,6 +295,7 @@ def plotDataGoodnes(targetGoodnes, calibratorGoodnes, SASidsTarget, SASidsCalibr
 
 if __name__ == "__main__":
     config_file = get_args("config")
+
     #Check if project is private and we are not members of project
     project = getConfigs("Data", "PROJECTid", config_file)
     context.set_project(project)
@@ -371,10 +380,12 @@ if __name__ == "__main__":
     plotDataGoodnes(stagingTarget.getDataGoodnes(), stagingCalibrator.getDataGoodnes(), SASidsTarget, SASidsCalibrator)
 
     if getConfigs("Operations", "Stage", config_file) == "True":
-        start_staging_time = time.time()
-        stagingTarget.startStaging()
-        stagingCalibrator.startStaging()
-        end_staging_time = time.time()
-        print("Staging ination time", end_staging_time - start_staging_time)
+
+        if stagingTarget.get_total_file_size() + stagingCalibrator.get_total_file_size() < 5000000:
+            start_staging_time = time.time()
+            stagingTarget.startStaging()
+            stagingCalibrator.startStaging()
+            end_staging_time = time.time()
+            print("Staging ination time", end_staging_time - start_staging_time)
 
     sys.exit(0)

@@ -3,7 +3,6 @@ import time
 from parsers._configparser import getConfigs
 from stager_access import *
 
-from pylive import live_plotter
 from progress import progress
 import numpy as np
 import matplotlib.pyplot as plt

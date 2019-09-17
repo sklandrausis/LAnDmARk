@@ -40,6 +40,7 @@ except ImportError:
 def parse_arguments():
     parser = argparse.ArgumentParser(description='''Executes all scripts. ''', epilog="""Main""")
     parser.add_argument("-c", "--config", help="Configuration cfg file", type=str, default="config.cfg")
+    parser.add_argument("-d", "--print_logs", help="Print log", action="store_true", default=False)
     parser.add_argument("-v", "--version", action="version", version='%(prog)s - Version 1.0')
     args = parser.parse_args()
     return args
@@ -56,7 +57,10 @@ if __name__ == "__main__":
     config_file = get_args("config")
 
     if getConfigs("Operations", "querying", config_file) == "True":
-        os.system("python3 " + "startStaging.py")
+        if get_args("print_logs") == "True":
+            os.system("python3 " + "startStaging.py -d")
+        else:
+            os.system("python3 " + "startStaging.py")
 
     if getConfigs("Operations", "Retrieve", config_file) == "True":
         start_data_retrive_time = time.time()
@@ -66,7 +70,7 @@ if __name__ == "__main__":
 
     if getConfigs("Operations", "Process", config_file) == "True":
         start_data_process_time = time.time()
-        os.system("python3 " + "runPipelins.py")
+        os.system("python3 " + "runPipelines.py")
         end_data_process_time = time.time()
         print("Data download time", end_data_process_time - start_data_process_time)
 
