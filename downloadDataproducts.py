@@ -94,7 +94,7 @@ if __name__ == "__main__":
         plt.ylabel('Files')
         plt.plot(x,y1)
         
-        plt.savefig(auxDir + "/staging/" + 'percentDone.png')
+        plt.savefig(auxDir + "/stage/" + 'percentDone.png')
         plt.clf()
 		
 	
