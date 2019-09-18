@@ -119,7 +119,6 @@ class Staging():
                                     print("File nr :", validFiles, "URI found", fileobject.URI)
                                 self.logText += "File nr : " + str(validFiles) + " URI found " + str(fileobject.URI) + "\n"
                                 self.dataGoodnes[str(SASid)]["file_size"] = fileobject.filesize
-                                fileobject.filesize
 
                         elif getConfigs("Data", "ProductType", config_file) == "pipeline":
 
@@ -177,14 +176,23 @@ class Staging():
     def getDataGoodnes(self):
         return self.dataGoodnes
 
-    def startStaging(self):
+    def get_total_file_count(self):
         file_count = 0
-        for id in  self.SASids:
+        for id in self.SASids:
             file_count += len(self.SURIs[str(id)])
 
-            if file_count >= 5000:
-                warnings.warn("exceeds 5000 please remove SAS IDs from config file", Warning)
-                sys.exit(1)
+        print(file_count)
+        return file_count
+
+    def startStaging(self):
+        for id in  self.SASids:
+
+            if len(self.SURIs[str(id)]) >= 5000:
+                warnings.warn("file count exceeds 5000 for SAS id " + str(id), Warning)
+
+            elif self.dataGoodnes[str(id)]["file_size"] >= 5000000000000:
+                warnings.warn("file size exceeds 5 TB for SAS id " + str(id), Warning)
+
             else:
                 stager = LtaStager()
                 stager.stage_uris(self.SURIs[str(id)])
@@ -381,7 +389,8 @@ if __name__ == "__main__":
 
     if getConfigs("Operations", "Stage", config_file) == "True":
 
-        if stagingTarget.get_total_file_size() + stagingCalibrator.get_total_file_size() < 5000000:
+
+        if stagingTarget.get_total_file_size() + stagingCalibrator.get_total_file_size() < 5000000000000 and stagingCalibrator.get_total_file_count() + stagingTarget.get_total_file_count() < 5000:
             if getConfigs("Operations", "which_obj") == "all" or len(getConfigs("Operations", "which_obj")) == 0:
                 start_staging_time = time.time()
                 stagingTarget.startStaging()
