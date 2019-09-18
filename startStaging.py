@@ -382,10 +382,24 @@ if __name__ == "__main__":
     if getConfigs("Operations", "Stage", config_file) == "True":
 
         if stagingTarget.get_total_file_size() + stagingCalibrator.get_total_file_size() < 5000000:
-            start_staging_time = time.time()
-            stagingTarget.startStaging()
-            stagingCalibrator.startStaging()
-            end_staging_time = time.time()
-            print("Staging ination time", end_staging_time - start_staging_time)
+            if getConfigs("Operations", "which_obj") == "all" or len(getConfigs("Operations", "which_obj")) == 0:
+                start_staging_time = time.time()
+                stagingTarget.startStaging()
+                stagingCalibrator.startStaging()
+                end_staging_time = time.time()
+                print("Staging ination time", end_staging_time - start_staging_time)
+
+            elif getConfigs("Operations", "which_obj") == "targets":
+                start_staging_time = time.time()
+                stagingTarget.startStaging()
+                end_staging_time = time.time()
+                print("Staging ination time", end_staging_time - start_staging_time)
+
+            elif getConfigs("Operations", "which_obj") == "calibrators":
+                start_staging_time = time.time()
+                stagingCalibrator.startStaging()
+                end_staging_time = time.time()
+                print("Staging ination time", end_staging_time - start_staging_time)
+
 
     sys.exit(0)
