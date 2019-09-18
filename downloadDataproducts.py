@@ -1,13 +1,10 @@
 import time
-
-from parsers._configparser import getConfigs
-from stager_access import *
-
-from progress import progress
 import numpy as np
 import matplotlib.pyplot as plt
-from parsers._configparser import getConfigs
 import argparse
+from stager_access import *
+
+from parsers._configparser import getConfigs
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='''download data products. ''', epilog="""Download""")
@@ -20,13 +17,15 @@ def parse_arguments():
 def get_args(key):
     return str(parse_arguments().__dict__[key])
 
+
+
 if __name__ == "__main__":
     tmpStagesIDs = set([])
     config_file = get_args("config")
-    
+
     #progress is 0
     i=0.0
-	
+
     #plot initial values
     percent_done = []
     files_done = []
@@ -40,13 +39,20 @@ if __name__ == "__main__":
 
             for stageID in stagesIDs:
                 status = progess[stageID]["Status"]
-				
-                progress(i, 100, status='Staging in progress')
+
                 i=float(progess[stageID]["Percent done"])
                 f=float(progess[stageID]["Files done"])
-				
                 percent_done.append(i)
                 files_done.append(f)
+
+                print("status ID", stageID)
+                print("status", status)
+                print("Files done", progess[stageID]["Files done"])
+                print("User id", progess[stageID]["User id"])
+                print("Flagged abort", progess[stageID]["Flagged abort"])
+                print("File count", progess[stageID]["File count"])
+                print("Percent done", progess[stageID]["Percent done"])
+                print("Location", progess[stageID]["Location"], "\n")
 
         else:
             for id in tmpStagesIDs:
@@ -64,11 +70,11 @@ if __name__ == "__main__":
                 else:
                     SASidsCalibrator = [int(id) for id in getConfigs("Data", "calibratorSASids", "config.cfg").replace(" ", "").split(",")]
 
-                download(surl, getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", "config.cfg") + "/", SASidsCalibrator, SASidsTarget, )
+                download(surl, getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", "config.cfg") + "/", SASidsCalibrator, SASidsTarget)
 
             break
 
-        time.sleep(1)
+        time.sleep(30)
 
     if percent_done:
         workingDir = getConfigs("Paths", "WorkingPath", config_file)

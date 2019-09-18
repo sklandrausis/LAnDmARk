@@ -181,7 +181,6 @@ class Staging():
         for id in self.SASids:
             file_count += len(self.SURIs[str(id)])
 
-        print(file_count)
         return file_count
 
     def startStaging(self):
@@ -391,20 +390,20 @@ if __name__ == "__main__":
 
 
         if stagingTarget.get_total_file_size() + stagingCalibrator.get_total_file_size() < 5000000000000 and stagingCalibrator.get_total_file_count() + stagingTarget.get_total_file_count() < 5000:
-            if getConfigs("Operations", "which_obj") == "all" or len(getConfigs("Operations", "which_obj")) == 0:
+            if getConfigs("Operations", "which_obj", config_file) == "all" or len(getConfigs("Operations", "which_obj", config_file)) == 0:
                 start_staging_time = time.time()
                 stagingTarget.startStaging()
                 stagingCalibrator.startStaging()
                 end_staging_time = time.time()
                 print("Staging ination time", end_staging_time - start_staging_time)
 
-            elif getConfigs("Operations", "which_obj") == "targets":
+            elif getConfigs("Operations", "which_obj", config_file) == "targets":
                 start_staging_time = time.time()
                 stagingTarget.startStaging()
                 end_staging_time = time.time()
                 print("Staging ination time", end_staging_time - start_staging_time)
 
-            elif getConfigs("Operations", "which_obj") == "calibrators":
+            elif getConfigs("Operations", "which_obj", config_file) == "calibrators":
                 start_staging_time = time.time()
                 stagingCalibrator.startStaging()
                 end_staging_time = time.time()

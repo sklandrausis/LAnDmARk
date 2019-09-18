@@ -57,6 +57,10 @@ def stage(surls):
     stageid = proxy.LtaStager.add_getid(surls)
     return stageid
 
+def get_surls_online(stageid):
+    ''' Get staget urls '''
+    return proxy.LtaStager.getstagedurls(stageid)
+
 def get_progress(status=None, exclude=False):
     ''' Get progress of staging '''
     all_requests = proxy.LtaStager.getprogress()
