@@ -58,13 +58,13 @@ if __name__ == "__main__":
 
     if getConfigs("Operations", "querying", config_file) == "True":
         if get_args("print_logs") == "True":
-            os.system("python3 " + "startStaging.py -d")
+            os.system("python3 " + "selectionStaging.py -d")
         else:
-            os.system("python3 " + "startStaging.py")
+            os.system("python3 " + "selectionStaging.py")
 
     if getConfigs("Operations", "Retrieve", config_file) == "True":
         start_data_retrive_time = time.time()
-        os.system("python3 " + "downloadDataproducts.py")
+        os.system("python3 " + "retrieveDataproducts.py")
         end_data_retrive_time = time.time()
         print("Data selection time", end_data_retrive_time  - start_data_retrive_time)
 
