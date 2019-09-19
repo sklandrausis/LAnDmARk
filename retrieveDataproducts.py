@@ -35,26 +35,26 @@ if __name__ == "__main__":
         if progess != None:
             if "tuple" not in str(type(progess)):
                 stagesIDs = list(progess.keys())
-                
-            for id in stagesIDs:
-                tmpStagesIDs.add(id)
+            else:
+                for id in stagesIDs:
+                    tmpStagesIDs.add(id)
 
-            for stageID in stagesIDs:
-                status = progess[stageID]["Status"]
+                for stageID in stagesIDs:
+                    status = progess[stageID]["Status"]
 
-                i=float(progess[stageID]["Percent done"])
-                f=float(progess[stageID]["Files done"])
-                percent_done.append(i)
-                files_done.append(f)
+                    i=float(progess[stageID]["Percent done"])
+                    f=float(progess[stageID]["Files done"])
+                    percent_done.append(i)
+                    files_done.append(f)
 
-                print("status ID", stageID)
-                print("status", status)
-                print("Files done", progess[stageID]["Files done"])
-                print("User id", progess[stageID]["User id"])
-                print("Flagged abort", progess[stageID]["Flagged abort"])
-                print("File count", progess[stageID]["File count"])
-                print("Percent done", progess[stageID]["Percent done"])
-                print("Location", progess[stageID]["Location"], "\n")
+                    print("status ID", stageID)
+                    print("status", status)
+                    print("Files done", progess[stageID]["Files done"])
+                    print("User id", progess[stageID]["User id"])
+                    print("Flagged abort", progess[stageID]["Flagged abort"])
+                    print("File count", progess[stageID]["File count"])
+                    print("Percent done", progess[stageID]["Percent done"])
+                    print("Location", progess[stageID]["Location"], "\n")
 
         else:
             for id in tmpStagesIDs:
