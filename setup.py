@@ -152,9 +152,9 @@ if __name__=="__main__":
             elif "! job_directory" in line:
                 parset_file[parset_file.index(line)] = line.replace(line, "! job_directory            = " + calibratorDirResults + " ## directory of the prefactor outputs\n")
             elif "! inspection_directory" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! inspection_directory            = " + "{{ result_directory }}" + "cal_values_" + id + " ## directory of the prefactor outputs\n")
+                parset_file[parset_file.index(line)] = line.replace(line, "! inspection_directory            = " + "{{ result_directory }}/" + "cal_values_" + id + " ## directory of the prefactor outputs\n")
             elif "! cal_values_directory" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! cal_values_directory            = " + "{{ result_directory }}" + "inspection_" + id + " ## directory of the prefactor outputs\n")
+                parset_file[parset_file.index(line)] = line.replace(line, "! cal_values_directory            = " + "{{ result_directory }}/" + "inspection_" + id + " ## directory of the prefactor outputs\n")
 
         with open(calibratorDir + id + "_RAW" + '/Pre-Facet-Calibrator.parset', "w") as parset_filew:
             parset_filew.write("".join(parset_file))
@@ -201,9 +201,9 @@ if __name__=="__main__":
             elif "! job_directory" in line:
                 parset_file[parset_file.index(line)] = line.replace(line, "! job_directory            =  " + targetDirResults + "  ## directory of the prefactor outputs\n")
             elif "! inspection_directory" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! inspection_directory            = " + "{{ result_directory }}" + "cal_values_" + id + " ## directory of the prefactor outputs\n")
+                parset_file[parset_file.index(line)] = line.replace(line, "! inspection_directory            = " + "{{ result_directory }}/" + "cal_values_" + id + " ## directory of the prefactor outputs\n")
             elif "! cal_values_directory" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! cal_values_directory            = " + "{{ result_directory }}" + "inspection_" + id + " ## directory of the prefactor outputs\n")
+                parset_file[parset_file.index(line)] = line.replace(line, "! cal_values_directory            = " + "{{ result_directory }}/" + "inspection_" + id + " ## directory of the prefactor outputs\n")
 
         with open(targetDir + id + "_RAW" + "/Pre-Facet-Target.parset", "w") as parset_filew:
             for line in parset_file:
