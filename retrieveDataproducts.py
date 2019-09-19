@@ -56,30 +56,29 @@ if __name__ == "__main__":
                     print("Percent done", progess[stageID]["Percent done"])
                     print("Location", progess[stageID]["Location"], "\n")
             else:
-                print("")
-
-
-        else:
-            for id in tmpStagesIDs:
-                surl = get_surls_online(int(id))
-                SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", "config.cfg").replace(" ", "").split(",")]
-
-                project = getConfigs("Data", "PROJECTid", "config.cfg")
-                if len(getConfigs("Data", "calibratorSASids", "config.cfg")) == 0:
-                    if project == "MSSS_HBA_2013":
-                        SASidsCalibrator = [id - 1 for id in SASidsTarget]
-
-                    else:
-                        raise Exception("SAS id for calibrator is not set in config.cfg file")
-                        sys.exit(1)
-                else:
-                    SASidsCalibrator = [int(id) for id in getConfigs("Data", "calibratorSASids", "config.cfg").replace(" ", "").split(",")]
-
-                download(surl, getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", "config.cfg") + "/", SASidsCalibrator, SASidsTarget)
-
-            break
+                break
 
         time.sleep(30)
+
+
+
+    for id in tmpStagesIDs:
+        surl = get_surls_online(int(id))
+        SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", "config.cfg").replace(" ", "").split(",")]
+        project = getConfigs("Data", "PROJECTid", "config.cfg")
+
+        if len(getConfigs("Data", "calibratorSASids", "config.cfg")) == 0:
+            if project == "MSSS_HBA_2013":
+                SASidsCalibrator = [id - 1 for id in SASidsTarget]
+
+            else:
+                raise Exception("SAS id for calibrator is not set in config.cfg file")
+                sys.exit(1)
+        else:
+            SASidsCalibrator = [int(id) for id in getConfigs("Data", "calibratorSASids", "config.cfg").replace(" ", "").split(",")]
+
+        download(surl, getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", "config.cfg") + "/", SASidsCalibrator, SASidsTarget)
+
 
     if percent_done:
         workingDir = getConfigs("Paths", "WorkingPath", config_file)
