@@ -133,7 +133,7 @@ if __name__=="__main__":
 
         for line in parset_file:
             if "! cal_input_path" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! cal_input_path          =  " + calibratorDir + id + "_RAW" + "  ## specify the directory where your calibrator data is stored\n")
+                parset_file[parset_file.index(line)] = line.replace(line, "! cal_inp,ut_path          =  " + calibratorDir + id + "_RAW" + "  ## specify the directory where your calibrator data is stored\n")
 
             elif "! cal_input_pattern" in line:
                 parset_file[parset_file.index(line)] = line.replace(line, "! cal_input_pattern       =  " + "L" + "*.MS"  +  "  ## regular expression pattern of all your calibrator files\n")
