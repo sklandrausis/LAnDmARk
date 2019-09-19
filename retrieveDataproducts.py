@@ -33,7 +33,9 @@ if __name__ == "__main__":
     while True:
         progess = get_progress()
         if progess != None:
-            stagesIDs = list(progess.keys())
+            if "tuple" not in str(type(progess)):
+                stagesIDs = list(progess.keys())
+                
             for id in stagesIDs:
                 tmpStagesIDs.add(id)
 
