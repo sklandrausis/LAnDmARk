@@ -35,7 +35,7 @@ if __name__ == "__main__":
         if progess != None:
             if "tuple" not in str(type(progess)):
                 stagesIDs = list(progess.keys())
-            else:
+
                 for id in stagesIDs:
                     tmpStagesIDs.add(id)
 
@@ -55,6 +55,9 @@ if __name__ == "__main__":
                     print("File count", progess[stageID]["File count"])
                     print("Percent done", progess[stageID]["Percent done"])
                     print("Location", progess[stageID]["Location"], "\n")
+            else:
+                print("")
+
 
         else:
             for id in tmpStagesIDs:
