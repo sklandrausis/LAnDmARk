@@ -49,8 +49,8 @@ if __name__=="__main__":
     calibratorDir = workingDir + "calibrators" + "/"
     targetDir = workingDir + "targets" + "/"
     auxDir = workingDir + "/LAnDmARk_aux"
-    calibratorDirResults = workingDir + "calibrators" + "calibrators_results" + "/"
-    targetDirResults = workingDir + "targets" + "targets_results" + "/"
+    calibratorDirResults = workingDir + "calibrators/" + "calibrators_results" + "/"
+    targetDirResults = workingDir + "targets/" + "targets_results" + "/"
 
     # Creating directory structure
     createDirectory(workingDir)
