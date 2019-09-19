@@ -48,19 +48,21 @@ if __name__=="__main__":
     imagingDir = workingDir + "imaging_deep" + "/"
     calibratorDir = workingDir + "calibrators" + "/"
     targetDir = workingDir + "targets" + "/"
-    image_input_dir = workingDir + "image_input"
     auxDir = workingDir + "/LAnDmARk_aux"
+    calibratorDirResults = workingDir + "calibrators" + "calibrators_results" + "/"
+    targetDirResults = workingDir + "targets" + "targets_results" + "/"
 
     # Creating directory structure
     createDirectory(workingDir)
     createDirectory(imagingDir)
     createDirectory(calibratorDir)
     createDirectory(targetDir)
-    createDirectory(image_input_dir)
     createDirectory(auxDir)
     createDirectory(auxDir + "/selection")
     createDirectory(auxDir + "/stage")
     createDirectory(auxDir + "/retrieve")
+    createDirectory(calibratorDirResults)
+    createDirectory(targetDirResults)
 
     lofarroot = getConfigs("Paths", "lofarroot", config_file)
     casaroot = getConfigs("Paths", "casaroot", config_file)
@@ -92,7 +94,7 @@ if __name__=="__main__":
 
     for line in parset_file:
         if "! data_input_path" in line:
-            parset_file[parset_file.index(line)] = line.replace(line, "! data_input_path          =  " + image_input_dir + "  ## specify the directory where your concatenated target data are stored\n")
+            parset_file[parset_file.index(line)] = line.replace(line, "! data_input_path          =  " + targetDirResults + "  ## specify the directory where your concatenated target data are stored\n")
 
         elif "! data_input_pattern" in line:
             parset_file[parset_file.index(line)] = line.replace(line, "! data_input_pattern       =  L*.pre-cal.ms    ## regular expression pattern of all your calibrator files\n")
@@ -113,7 +115,7 @@ if __name__=="__main__":
         print ("Setup for calibrator id", id)
         id = str(id)
         createDirectory(calibratorDir + id + "_RAW")
-        createDirectory(calibratorDir + id + "_RESULTS")
+        
 
         # Creating calibrator files
         copyFiles(PrefactorDir + 'pipeline.cfg', calibratorDir + id + "_RAW/")
@@ -148,7 +150,11 @@ if __name__=="__main__":
                 parset_file[parset_file.index(line)] = line.replace(line, "! aoflagger       =   " + aoflagger + "  ## path to your aoflagger executable\n")
 
             elif "! job_directory" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! job_directory            =  " + calibratorDir + id + "_RESULTS" + "  ## directory of the prefactor outputs\n")
+                parset_file[parset_file.index(line)] = line.replace(line, "! job_directory            = " + calibratorDirResults + " ## directory of the prefactor outputs\n")
+            elif "! inspection_directory" in line:
+                parset_file[parset_file.index(line)] = line.replace(line, "! inspection_directory            = " + "{{ result_directory }}" + "cal_values_" + id + " ## directory of the prefactor outputs\n")
+            elif "! cal_values_directory" in line:
+                parset_file[parset_file.index(line)] = line.replace(line, "! cal_values_directory            = " + "{{ result_directory }}" + "inspection_" + id + " ## directory of the prefactor outputs\n")
 
         with open(calibratorDir + id + "_RAW" + '/Pre-Facet-Calibrator.parset', "w") as parset_filew:
             parset_filew.write("".join(parset_file))
@@ -156,7 +162,6 @@ if __name__=="__main__":
     for id in targetSASids:
         print("Setup for target id", id)
         createDirectory(targetDir + id + "_RAW")
-        createDirectory(targetDir + id + "_RESULTS")
 
         # Creating target files
         copyFiles(PrefactorDir + 'pipeline.cfg', targetDir + id + "_RAW")
@@ -191,10 +196,14 @@ if __name__=="__main__":
                 parset_file[parset_file.index(line)] = line.replace(line, "! aoflagger       =   " + aoflagger + "  ## path to your aoflagger executable\n")
 
             elif "! cal_solutions" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! cal_solutions       =   " +  calibratorDir + str(SASidsCalibrator[targetSASids.index(id)]) + "_RESULTS" + "/cal_values/cal_solutions.h5 \n")
+                parset_file[parset_file.index(line)] = line.replace(line, "! cal_solutions       =   " +  calibratorDirResults + "/cal_values_" + str(SASidsCalibrator[targetSASids.index(id)]) + "/cal_solutions.h5 \n")
 
             elif "! job_directory" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! job_directory            =  " + targetDir + id + "_RESULTS" + "  ## directory of the prefactor outputs\n")
+                parset_file[parset_file.index(line)] = line.replace(line, "! job_directory            =  " + targetDirResults + "  ## directory of the prefactor outputs\n")
+            elif "! inspection_directory" in line:
+                parset_file[parset_file.index(line)] = line.replace(line, "! inspection_directory            = " + "{{ result_directory }}" + "cal_values_" + id + " ## directory of the prefactor outputs\n")
+            elif "! cal_values_directory" in line:
+                parset_file[parset_file.index(line)] = line.replace(line, "! cal_values_directory            = " + "{{ result_directory }}" + "inspection_" + id + " ## directory of the prefactor outputs\n")
 
         with open(targetDir + id + "_RAW" + "/Pre-Facet-Target.parset", "w") as parset_filew:
             for line in parset_file:
