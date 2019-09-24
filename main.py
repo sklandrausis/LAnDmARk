@@ -4,10 +4,10 @@ import sys
 import time
 import argparse
 from imp import find_module
+from sys import version_info
 
 from parsers._configparser import getConfigs
 
-from imp import find_module
 
 def checkPythonmod(mod):
 	"""
@@ -50,13 +50,14 @@ def get_args(key):
 
 
 if __name__ == "__main__":
+    python_version = version_info.major
 
     start_time_main = time.time()
 
     config_file = get_args("config")
     python_version = getConfigs("Paths", "pythonversion", config_file)
 
-    if python_version == "python3" or len(python_version) == 0:
+    if python_version == 3:
 
         if getConfigs("Operations", "querying", config_file) == "True":
             if get_args("print_logs") == "True":
@@ -76,7 +77,7 @@ if __name__ == "__main__":
             end_data_process_time = time.time()
             print("Data download time", end_data_process_time - start_data_process_time)
 
-    elif python_version == "python2":
+    elif python_version == 2:
         if getConfigs("Operations", "querying", config_file) == "True":
             if get_args("print_logs") == "True":
                 os.system("python2 " + "selectionStaging.py -d")
