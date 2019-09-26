@@ -53,9 +53,7 @@ if __name__ == "__main__":
     python_version = version_info.major
 
     start_time_main = time.time()
-
     config_file = get_args("config")
-    python_version = getConfigs("Paths", "pythonversion", config_file)
 
     if python_version == 3:
 

@@ -39,7 +39,7 @@ if __name__ == "__main__":
     else:
         SASidsCalibrator =  [int(id) for id in getConfigs("Data", "calibratorSASids", "config.cfg").replace(" ", "").split(",")]
 
-    if getConfigs("Operations", "which_obj") == "all" or len(getConfigs("Operations", "which_obj")) == 0:
+    if getConfigs("Operations", "which_obj", "config.cfg") == "all" or len(getConfigs("Operations", "which_obj", "config.cfg")) == 0:
         for id in SASidsCalibrator:
             parsetCalib = calibratorDir + str(id) + "_RAW/" + "Pre-Facet-Calibrator.parset"
             configCalib = calibratorDir + str(id) + "_RAW/" + "pipeline.cfg"
@@ -50,17 +50,12 @@ if __name__ == "__main__":
             configTarget = targetDir + str(id) + "_RAW/" + "pipeline.cfg"
             run_pipeline(parsetTarget, configTarget) # run target
 
-        for id in SASidsTarget:
-            dir_from = targetDir + str(id) + "_RESULTS/results/*.ms"
-            dir_to = workingDir + "image_input/"
-            os.system("cp -rvf " + dir_from + " " + dir_to)
-
         parsetImage = imageDir + "Initial-Subtract.parset"
         configImage = imageDir + "pipeline.cfg"
         run_pipeline(parsetImage, configImage) # run imaging
         sys.exit(0)
 
-    elif getConfigs("Operations", "which_obj") == "targets":
+    elif getConfigs("Operations", "which_obj", "config.cfg") == "targets":
 
         for id in SASidsTarget:
             parsetTarget = targetDir + str(id) + "_RAW/" + "Pre-Facet-Target.parset"
