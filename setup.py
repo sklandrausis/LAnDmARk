@@ -105,17 +105,13 @@ if __name__=="__main__":
         elif "wsclean_executable" in line:
             parset_file[parset_file.index(line)] = line.replace(line, "! wsclean_executable       =   " + wsclean_executable +  "  ## path to your local WSClean executable\n")
 
-        elif "! job_directory" in line:
-            parset_file[parset_file.index(line)] = line.replace(line, "! job_directory            =  " + imagingDir + "  ## directory of the prefactor outputs\n")
-
     with open(imagingDir + "/Initial-Subtract.parset", "w") as parset_filew:
         parset_filew.write("".join(parset_file))
 
     for id in SASidsCalibrator:
-        print ("Setup for calibrator id", id)
+        print("Setup for calibrator id", id)
         id = str(id)
         createDirectory(calibratorDir + id + "_RAW")
-        
 
         # Creating calibrator files
         copyFiles(PrefactorDir + 'pipeline.cfg', calibratorDir + id + "_RAW/")
@@ -148,13 +144,6 @@ if __name__=="__main__":
 
             elif "! aoflagger" in line:
                 parset_file[parset_file.index(line)] = line.replace(line, "! aoflagger       =   " + aoflagger + "  ## path to your aoflagger executable\n")
-
-            elif "! job_directory" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! job_directory            = " + calibratorDirResults + " ## directory of the prefactor outputs\n")
-            elif "! inspection_directory" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! inspection_directory            = " + "{{ results_directory }}/" + "inspection_" + id + " ## directory of the prefactor outputs\n")
-            elif "! cal_values_directory" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! cal_values_directory            = " + "{{ results_directory }}/" + "cal_values_" + id + " ## directory of the prefactor outputs\n")
 
         with open(calibratorDir + id + "_RAW" + '/Pre-Facet-Calibrator.parset', "w") as parset_filew:
             parset_filew.write("".join(parset_file))
@@ -194,16 +183,6 @@ if __name__=="__main__":
 
             elif "! aoflagger" in line:
                 parset_file[parset_file.index(line)] = line.replace(line, "! aoflagger       =   " + aoflagger + "  ## path to your aoflagger executable\n")
-
-            elif "! cal_solutions" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! cal_solutions       =   " +  calibratorDirResults + "/cal_values_" + str(SASidsCalibrator[targetSASids.index(id)]) + "/cal_solutions.h5 \n")
-
-            elif "! job_directory" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! job_directory            =  " + targetDirResults + "  ## directory of the prefactor outputs\n")
-            elif "! inspection_directory" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! inspection_directory            = " + "{{ results_directory }}/" + "inspection_" + id + " ## directory of the prefactor outputs\n")
-            elif "! cal_values_directory" in line:
-                parset_file[parset_file.index(line)] = line.replace(line, "! cal_values_directory            = " + "{{ results_directory }}/" + "cal_values_" + id + " ## directory of the prefactor outputs\n")
 
         with open(targetDir + id + "_RAW" + "/Pre-Facet-Target.parset", "w") as parset_filew:
             for line in parset_file:
