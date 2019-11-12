@@ -184,6 +184,9 @@ if __name__=="__main__":
             elif "! aoflagger" in line:
                 parset_file[parset_file.index(line)] = line.replace(line, "! aoflagger       =   " + aoflagger + "  ## path to your aoflagger executable\n")
 
+            elif "! cal_solutions" in line:
+                parset_file[parset_file.index(line)] = line.replace(line, "! cal_solutions             =  " + calibratorDir + str(SASidsCalibrator[targetSASids.index(id)]) + "_RAW/Pre-Facet-Calibrator/results/cal_values/cal_solutions.h5" + "\n")
+
         with open(targetDir + id + "_RAW" + "/Pre-Facet-Target.parset", "w") as parset_filew:
             for line in parset_file:
                 parset_filew.write(line)
