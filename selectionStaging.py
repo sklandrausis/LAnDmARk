@@ -263,7 +263,8 @@ def plotDataGoodnes(targetGoodnes, calibratorGoodnes, SASidsTarget, SASidsCalibr
     plt.ylabel("Percent")
     plt.title("Calibrator")
     plt.grid()
-
+    
+    plt.show()
     plt.savefig(auxDir + "/selection/" + "valid_data_per_sas_id.png")
 
     width = 0.35
@@ -297,7 +298,8 @@ def plotDataGoodnes(targetGoodnes, calibratorGoodnes, SASidsTarget, SASidsCalibr
     axc.set_title("Calibrator")
     axc.set_xlabel("SAS id")
     plt.grid()
-
+    
+    plt.show()
     plt.savefig(auxDir + "/selection/" + "station_count_per_sas_id.png")
 
 if __name__ == "__main__":

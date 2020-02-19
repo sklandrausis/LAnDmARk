@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from PyQt5.QtWidgets import (QWidget, QGridLayout, QApplication, QDesktopWidget, QPushButton, QLabel, QComboBox, QInputDialog)
+from PyQt5.QtWidgets import (QWidget, QGridLayout, QApplication, QDesktopWidget, QPushButton, QLabel, QComboBox, QLineEdit)
 from PyQt5.QtGui import QFont
 
 
@@ -77,17 +77,111 @@ class Landmark_GUI(QWidget):
         self.grid.addWidget(self.process_label, 0, 8)
         self.grid.addWidget(self.process_combobox, 0, 9)
 
-        self.which_obj_label = QLabel("Which obj:")
+        self.which_obj_label = QLabel("Which obj")
         self.which_combobox = QComboBox()
         self.which_combobox.addItems(["calibrators", "target", "all"])
         self.grid.addWidget(self.which_obj_label, 0, 10)
         self.grid.addWidget(self.which_combobox, 0, 11)
 
-        self.config_label = QLabel("Config")
-        self.parset_label = QLabel("Parset")
+        self.data_label = QLabel("Data:")
+        self.grid.addWidget(self.data_label, 1, 1)
 
-        self.grid.addWidget(self.config_label, 1,1)
-        self.grid.addWidget(self.parset_label, 1,2)
+        self.calibratorSASids_label = QLabel("Calibrator SAS ids")
+        self.calibratorSASids_input = QLineEdit()
+        self.grid.addWidget(self.calibratorSASids_label, 1, 2)
+        self.grid.addWidget(self.calibratorSASids_input, 1, 3)
+
+        self.targetSASids_label = QLabel("Target SAS ids")
+        self.targetSASids_input = QLineEdit()
+        self.grid.addWidget(self.targetSASids_label, 1, 4)
+        self.grid.addWidget(self.targetSASids_input, 1, 5)
+
+        self.Target_name_label = QLabel("Target Name")
+        self.Target_name_input = QLineEdit()
+        self.grid.addWidget(self.Target_name_label, 1, 6)
+        self.grid.addWidget(self.Target_name_input, 1, 7)
+
+        self.PROJECTid_label = QLabel("Project id")
+        self.PROJECTid_input = QLineEdit()
+        self.grid.addWidget(self.PROJECTid_label, 1, 8)
+        self.grid.addWidget(self.PROJECTid_input, 1, 9)
+
+        self.product_type_label = QLabel("Product Type")
+        self.product_type_combobox = QComboBox()
+        self.product_type_combobox.addItems(["observation", "pipeline"])
+        self.grid.addWidget(self.product_type_label, 1, 10)
+        self.grid.addWidget(self.product_type_combobox, 1, 11)
+
+        self.cluster_label = QLabel("Cluster:")
+        self.grid.addWidget(self.cluster_label, 2, 1)
+
+        self.max_per_node = QLabel("Max per node")
+        self.max_per_node_input = QLineEdit()
+        self.grid.addWidget(self.max_per_node, 2, 2)
+        self.grid.addWidget(self.max_per_node_input, 2, 3)
+
+        self.method_label = QLabel("Method")
+        self.method_input = QLineEdit()
+        self.grid.addWidget(self.method_label, 2, 4)
+        self.grid.addWidget(self.method_input, 2, 5)
+
+        self.paths_label = QLabel("Paths:")
+        self.grid.addWidget(self.paths_label, 3, 1)
+
+        self.WorkingPath_label = QLabel("WorkingPath")
+        self.WorkingPath_input = QLineEdit()
+        self.grid.addWidget(self.WorkingPath_label, 3, 2)
+        self.grid.addWidget(self.WorkingPath_input, 3, 3)
+
+        self.PrefactorPath_label = QLabel("PrefactorPath")
+        self.PrefactorPath_input = QLineEdit()
+        self.grid.addWidget(self.PrefactorPath_label, 3, 4)
+        self.grid.addWidget(self.PrefactorPath_input, 3, 5)
+
+        self.lofarroot_label = QLabel("lofarroot")
+        self.lofarroot_input = QLineEdit()
+        self.grid.addWidget(self.lofarroot_label, 3, 6)
+        self.grid.addWidget(self.lofarroot_input, 3, 7)
+
+        self.casaroot_label = QLabel("casaroot")
+        self.casaroot_input = QLineEdit()
+        self.grid.addWidget(self.casaroot_label, 3, 8)
+        self.grid.addWidget(self.casaroot_input, 3, 9)
+
+        self.pyraproot_label = QLabel("pyraproot")
+        self.pyraproot_input = QLineEdit()
+        self.grid.addWidget(self.pyraproot_label, 3, 10)
+        self.grid.addWidget(self.pyraproot_input, 3, 11)
+
+        self.hdf5root_label = QLabel("hdf5root")
+        self.hdf5root_input = QLineEdit()
+        self.grid.addWidget(self.hdf5root_label, 3, 12)
+        self.grid.addWidget(self.hdf5root_input, 3, 13)
+
+        self.wcsroot_label = QLabel("wcsroot")
+        self.wcsroot_input = QLineEdit()
+        self.grid.addWidget(self.wcsroot_label, 3, 14)
+        self.grid.addWidget(self.wcsroot_input, 3, 15)
+
+        self.losotoPath_label = QLabel("losotoPath")
+        self.losotoPath_input = QLineEdit()
+        self.grid.addWidget(self.losotoPath_label, 3, 16)
+        self.grid.addWidget(self.losotoPath_input, 3, 17)
+
+        self.aoflagger_label = QLabel("aoflagger")
+        self.aoflagger_input = QLineEdit()
+        self.grid.addWidget(self.aoflagger_label, 3, 18)
+        self.grid.addWidget(self.aoflagger_input, 3, 19)
+
+        self.wsclean_executable_label = QLabel("wsclean executable")
+        self.wsclean_executable_input = QLineEdit()
+        self.grid.addWidget(self.wsclean_executable_label, 3, 20)
+        self.grid.addWidget(self.wsclean_executable_input, 3, 21)
+
+        self.pythonpath_label = QLabel("pythonpath")
+        self.pythonpath_input = QLineEdit()
+        self.grid.addWidget(self.pythonpath_label, 3, 22)
+        self.grid.addWidget(self.pythonpath_input, 3, 23)
 
 
 def main():
