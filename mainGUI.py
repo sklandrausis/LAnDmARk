@@ -2,20 +2,20 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from PyQt5.QtWidgets import (QWidget, QGridLayout, QApplication, QDesktopWidget, QPushButton, QLabel, QComboBox, QLineEdit)
+from PyQt5.QtWidgets import (QWidget, QGridLayout, QApplication, QDesktopWidget, QPushButton, QLabel, QComboBox, QLineEdit, QMessageBox)
 from PyQt5.QtGui import QFont
+
+from parsers._configparser import setConfigs
 
 
 class Landmark_GUI(QWidget):
     def __init__(self):
         super().__init__()
-
         self.setWindowTitle("Main")
         self.center()
         self.grid = QGridLayout()
         self.setLayout(self.grid)
         self.grid.setSpacing(10)
-
         self.create_init_view()
 
     def center(self):
@@ -42,6 +42,7 @@ class Landmark_GUI(QWidget):
         self.grid.addWidget(self.init_label, 1,1)
 
     def setup(self):
+        self.setWindowTitle("Setup")
         self.grid.removeWidget(self.init_label)
         self.init_label.clear()
 
@@ -50,17 +51,21 @@ class Landmark_GUI(QWidget):
         self.querying_label = QLabel("Querying")
         self.querying_combobox = QComboBox()
         self.querying_combobox.addItems(["True", "False"])
+        self.querying_combobox.setFixedWidth(100)
 
         self.stage_label = QLabel("Stage")
         self.stage_combobox = QComboBox()
+        self.stage_combobox.setFixedWidth(100)
         self.stage_combobox.addItems(["True", "False"])
 
         self.retrive_label = QLabel("Retrieve")
         self.retrive_combobox = QComboBox()
+        self.retrive_combobox.setFixedWidth(100)
         self.retrive_combobox.addItems(["True", "False",])
 
         self.process_label = QLabel("Process")
         self.process_combobox = QComboBox()
+        self.process_combobox.setFixedWidth(100)
         self.process_combobox.addItems(["False", "True",])
 
         self.grid.addWidget(self.opertion_label, 0, 1)
@@ -88,21 +93,25 @@ class Landmark_GUI(QWidget):
 
         self.calibratorSASids_label = QLabel("Calibrator SAS ids")
         self.calibratorSASids_input = QLineEdit()
+        self.calibratorSASids_input.setFixedWidth(100)
         self.grid.addWidget(self.calibratorSASids_label, 1, 2)
         self.grid.addWidget(self.calibratorSASids_input, 1, 3)
 
         self.targetSASids_label = QLabel("Target SAS ids")
         self.targetSASids_input = QLineEdit()
+        self.targetSASids_input.setFixedWidth(100)
         self.grid.addWidget(self.targetSASids_label, 1, 4)
         self.grid.addWidget(self.targetSASids_input, 1, 5)
 
         self.Target_name_label = QLabel("Target Name")
         self.Target_name_input = QLineEdit()
+        self.Target_name_input.setFixedWidth(100)
         self.grid.addWidget(self.Target_name_label, 1, 6)
         self.grid.addWidget(self.Target_name_input, 1, 7)
 
         self.PROJECTid_label = QLabel("Project id")
         self.PROJECTid_input = QLineEdit()
+        self.PROJECTid_input.setFixedWidth(100)
         self.grid.addWidget(self.PROJECTid_label, 1, 8)
         self.grid.addWidget(self.PROJECTid_input, 1, 9)
 
@@ -117,71 +126,131 @@ class Landmark_GUI(QWidget):
 
         self.max_per_node = QLabel("Max per node")
         self.max_per_node_input = QLineEdit()
+        self.max_per_node_input.setText(str(20))
+        self.max_per_node_input.setFixedWidth(100)
         self.grid.addWidget(self.max_per_node, 2, 2)
         self.grid.addWidget(self.max_per_node_input, 2, 3)
 
         self.method_label = QLabel("Method")
         self.method_input = QLineEdit()
+        self.method_input.setFixedWidth(100)
+        self.method_input.setText('local')
         self.grid.addWidget(self.method_label, 2, 4)
         self.grid.addWidget(self.method_input, 2, 5)
 
-        self.paths_label = QLabel("Paths:")
-        self.grid.addWidget(self.paths_label, 3, 1)
-
         self.WorkingPath_label = QLabel("WorkingPath")
         self.WorkingPath_input = QLineEdit()
-        self.grid.addWidget(self.WorkingPath_label, 3, 2)
-        self.grid.addWidget(self.WorkingPath_input, 3, 3)
+        self.WorkingPath_input.setFixedWidth(400)
+        self.grid.addWidget(self.WorkingPath_label, 0, 12)
+        self.grid.addWidget(self.WorkingPath_input, 1, 12)
 
         self.PrefactorPath_label = QLabel("PrefactorPath")
         self.PrefactorPath_input = QLineEdit()
-        self.grid.addWidget(self.PrefactorPath_label, 3, 4)
-        self.grid.addWidget(self.PrefactorPath_input, 3, 5)
+        self.PrefactorPath_input.setFixedWidth(400)
+        self.grid.addWidget(self.PrefactorPath_label, 2, 12)
+        self.grid.addWidget(self.PrefactorPath_input, 3, 12)
 
         self.lofarroot_label = QLabel("lofarroot")
         self.lofarroot_input = QLineEdit()
-        self.grid.addWidget(self.lofarroot_label, 3, 6)
-        self.grid.addWidget(self.lofarroot_input, 3, 7)
+        self.lofarroot_input.setFixedWidth(400)
+        self.lofarroot_input.setText("/opt/cep/lofim/daily/Tue/lofar_build/install/gnucxx11_opt")
+        self.grid.addWidget(self.lofarroot_label, 4, 12)
+        self.grid.addWidget(self.lofarroot_input, 5, 12)
 
         self.casaroot_label = QLabel("casaroot")
         self.casaroot_input = QLineEdit()
-        self.grid.addWidget(self.casaroot_label, 3, 8)
-        self.grid.addWidget(self.casaroot_input, 3, 9)
+        self.casaroot_input.setFixedWidth(400)
+        self.casaroot_input.setText("/opt/cep/casacore/casacore_current")
+        self.grid.addWidget(self.casaroot_label, 6, 12)
+        self.grid.addWidget(self.casaroot_input, 7, 12)
 
         self.pyraproot_label = QLabel("pyraproot")
         self.pyraproot_input = QLineEdit()
-        self.grid.addWidget(self.pyraproot_label, 3, 10)
-        self.grid.addWidget(self.pyraproot_input, 3, 11)
+        self.pyraproot_input.setText("/opt/cep/casacore/python-casacore_current/lib64/python2.7/site-packages")
+        self.pyraproot_input.setFixedWidth(400)
+        self.grid.addWidget(self.pyraproot_label, 8, 12)
+        self.grid.addWidget(self.pyraproot_input, 9, 12)
 
         self.hdf5root_label = QLabel("hdf5root")
         self.hdf5root_input = QLineEdit()
-        self.grid.addWidget(self.hdf5root_label, 3, 12)
-        self.grid.addWidget(self.hdf5root_input, 3, 13)
+        self.hdf5root_input.setFixedWidth(400)
+        self.grid.addWidget(self.hdf5root_label, 10, 12)
+        self.grid.addWidget(self.hdf5root_input, 11, 12)
 
         self.wcsroot_label = QLabel("wcsroot")
         self.wcsroot_input = QLineEdit()
-        self.grid.addWidget(self.wcsroot_label, 3, 14)
-        self.grid.addWidget(self.wcsroot_input, 3, 15)
+        self.wcsroot_input.setFixedWidth(400)
+        self.grid.addWidget(self.wcsroot_label, 12, 12)
+        self.grid.addWidget(self.wcsroot_input, 13, 12)
 
         self.losotoPath_label = QLabel("losotoPath")
         self.losotoPath_input = QLineEdit()
-        self.grid.addWidget(self.losotoPath_label, 3, 16)
-        self.grid.addWidget(self.losotoPath_input, 3, 17)
+        self.losotoPath_input.setFixedWidth(400)
+        self.losotoPath_input.setText('/data/scratch/iacobelli/losoto_Nov21_latest_commit_a7790a6/')
+        self.grid.addWidget(self.losotoPath_label, 14, 12)
+        self.grid.addWidget(self.losotoPath_input, 15, 12)
 
         self.aoflagger_label = QLabel("aoflagger")
         self.aoflagger_input = QLineEdit()
-        self.grid.addWidget(self.aoflagger_label, 3, 18)
-        self.grid.addWidget(self.aoflagger_input, 3, 19)
+        self.aoflagger_input.setText('/opt/cep/aoflagger/aoflagger-2.10.0/build/bin/aoflagger')
+        self.grid.addWidget(self.aoflagger_label, 16, 12)
+        self.grid.addWidget(self.aoflagger_input, 17, 12)
 
         self.wsclean_executable_label = QLabel("wsclean executable")
         self.wsclean_executable_input = QLineEdit()
-        self.grid.addWidget(self.wsclean_executable_label, 3, 20)
-        self.grid.addWidget(self.wsclean_executable_input, 3, 21)
+        self.wsclean_executable_input.setText('/opt/cep/wsclean/wsclean-2.8/bin/wsclean')
+        self.grid.addWidget(self.wsclean_executable_label, 18, 12)
+        self.grid.addWidget(self.wsclean_executable_input, 19, 12)
 
         self.pythonpath_label = QLabel("pythonpath")
         self.pythonpath_input = QLineEdit()
-        self.grid.addWidget(self.pythonpath_label, 3, 22)
-        self.grid.addWidget(self.pythonpath_input, 3, 23)
+        self.pythonpath_input.setText('/opt/cep/wsclean/wsclean-2.8/bin/wsclean')
+        self.grid.addWidget(self.pythonpath_label, 20, 12)
+        self.grid.addWidget(self.pythonpath_input, 21, 12)
+
+        self.task_file_label = QLabel("task_file")
+        self.task_file_input = QLineEdit()
+        self.task_file_input.setText('%(lofarroot)s/share/pipeline/tasks.cfg')
+        self.grid.addWidget(self.task_file_label, 22, 12)
+        self.grid.addWidget(self.task_file_input, 23, 12)
+
+        save_button = QPushButton("Save LAnDmARk configuration", self)
+        save_button.setStyleSheet("background-color: green")
+        save_button.clicked.connect(self.save_configuration)
+        self.grid.addWidget(save_button, 4, 0)
+
+    def save_configuration(self):
+        config_file = "config.cfg"
+
+        setConfigs("Data", "targetSASids", self.targetSASids_input.text(), config_file)
+        setConfigs("Data", "calibratorsasids", self.calibratorSASids_input.text(), config_file)
+        setConfigs("Data", "targetname", self.Target_name_input.text(), config_file)
+        setConfigs("Data", "projectid", self.PROJECTid_input.text(), config_file)
+        setConfigs("Data", "producttype", self.product_type_combobox.currentText(), config_file)
+
+        setConfigs("Operations", "querying", self.querying_combobox.currentText(), config_file)
+        setConfigs("Operations", "stage", self.stage_combobox.currentText(), config_file)
+        setConfigs("Operations", "retrieve", self.retrive_combobox.currentText(), config_file)
+        setConfigs("Operations", "process", self.process_combobox.currentText(), config_file)
+
+        setConfigs("Cluster", "max_per_node", self.max_per_node_input.text(), config_file)
+        setConfigs("Cluster", "method", self.method_input.text(), config_file)
+
+        setConfigs("Paths", "workingpath", self.WorkingPath_input.text(), config_file)
+        setConfigs("Paths", "prefactorpath", self.PrefactorPath_input.text(), config_file)
+        setConfigs("Paths", "lofarroot", self.lofarroot_input.text(), config_file)
+        setConfigs("Paths", "casaroot", self.casaroot_input.text(), config_file)
+        setConfigs("Paths", "pyraproot", self.pyraproot_input.text(), config_file)
+        setConfigs("Paths", "hdf5root", self.hdf5root_input.text(), config_file)
+        setConfigs("Paths", "wcsroot", self.wcsroot_input.text(), config_file)
+        setConfigs("Paths", "losotopath", self.losotoPath_input.text(), config_file)
+        setConfigs("Paths", "aoflagger", self.aoflagger_input.text(), config_file)
+        setConfigs("Paths", "wsclean_executable", self.wsclean_executable_input.text(), config_file)
+        setConfigs("Paths", "pythonpath", self.pythonpath_input.text(), config_file)
+        setConfigs("Paths", "task_file", self.task_file_input.text(), config_file)
+
+        print("Saving LAnDmARk configuration")
+        QMessageBox.about(self, "", "LAnDmARk configuration has been saved")
 
 
 def main():
