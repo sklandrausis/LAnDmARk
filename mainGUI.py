@@ -2,15 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from sys import version_info
-import os
-import time
 from PyQt5.QtWidgets import (QWidget, QGridLayout, QApplication, QDesktopWidget, QPushButton, QLabel, QComboBox, QLineEdit, QMessageBox)
 from PyQt5.QtGui import QFont
 from PyQt5 import QtCore
 import pyqtgraph as pg
 from stager_access import *
 from parsers._configparser import setConfigs, getConfigs
+import selectionStaging
 
 
 class Landmark_GUI(QWidget):
@@ -125,40 +123,121 @@ class Landmark_GUI(QWidget):
             w.destroy()
             self.grid.removeWidget(w)
 
-        import collections
-        import numpy as np
-        sampleinterval = 0.1
-        timewindow = 10
-        self._interval = int(sampleinterval * 1000)
-        self._bufsize = int(timewindow / sampleinterval)
-        self.databuffer = collections.deque([0.0] * self._bufsize, self._bufsize)
-        self.x = np.linspace(-timewindow, 0.0, self._bufsize)
-        self.y = np.zeros(self._bufsize, dtype=np.float)
-        self.plt = pg.PlotWidget()
-        self.plt.plot(title='Dynamic Plotting with PyQtGraph')
-        #self.plt.resize(*size)
-        self.plt.showGrid(x=True, y=True)
-        self.plt.setLabel('left', 'amplitude', 'V')
-        self.plt.setLabel('bottom', 'time', 's')
-        self.curve = self.plt.plot(self.x, self.y, pen=(255, 0, 0))
-        self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self.updateplot)
-        self.timer.start(self._interval)
-        self.grid.addWidget(self.plt)
+        config_file = "config.cfg"
 
+        if getConfigs("Operations", "Stage", config_file) == "True":
+            SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", config_file).replace(" ", "").split(",")]
+            project = getConfigs("Data", "PROJECTid", config_file)
 
-    def getdata(self):
-        import math, random
-        frequency = 0.5
-        noise = random.normalvariate(0., 1.)
-        new = 10. * math.sin(time.time() * frequency * 2 * math.pi) + noise
-        return new
+            if len(getConfigs("Data", "calibratorSASids", config_file)) == 0:
+                if project == "MSSS_HBA_2013":
+                    SASidsCalibrator = [id - 1 for id in SASidsTarget]
 
-    def updateplot(self):
-            self.databuffer.append(self.getdata())
-            self.y[:] = self.databuffer
-            self.curve.setData(self.x, self.y)
-            #self.processEvents()
+                else:
+                    raise Exception("SAS id for calibrator is not set in config.cfg file")
+                    sys.exit(1)
+            else:
+                SASidsCalibrator = [int(id) for id in getConfigs("Data", "calibratorSASids", config_file).replace(" ", "").split(",")]
+
+            stagingTarget = selectionStaging.Staging(SASidsTarget, False, config_file)
+            stagingTarget.query()
+            stagingCalibrator = selectionStaging.Staging(SASidsCalibrator, True, config_file)
+            stagingCalibrator.query()
+
+            workingDir = getConfigs("Paths", "WorkingPath", config_file)
+            targetName = getConfigs("Data", "TargetName", config_file)
+            workingDir = workingDir + "/" + targetName + "/"
+            auxDir = workingDir + "/LAnDmARk_aux"
+
+            targetSURIs = []
+            calibratorSURIs = []
+
+            for id in SASidsTarget:
+                for URI in stagingTarget.getSURIs()[str(id)]:
+                    if "sara" in URI:
+                        targetSURIs.append(
+                            "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n")
+                    elif "juelich" in URI:
+                        targetSURIs.append(
+                            "https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl=" + URI + "\n")
+                    else:
+                        targetSURIs.append(
+                            "https://lta-download.lofar.psnc.pl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n")
+
+            for id in SASidsCalibrator:
+                for URI in stagingCalibrator.getSURIs()[str(id)]:
+                    if "sara" in URI:
+                        calibratorSURIs.append(
+                            "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n")
+                    elif "juelich" in URI:
+                        calibratorSURIs.append(
+                            "https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl=" + URI + "\n")
+                    else:
+                        calibratorSURIs.append(
+                            "https://lta-download.lofar.psnc.pl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n")
+
+            if stagingTarget.get_total_file_size() + stagingCalibrator.get_total_file_size() < 5000000000000 and stagingCalibrator.get_total_file_count() + stagingTarget.get_total_file_count() < 5000:
+                if getConfigs("Operations", "which_obj", config_file) == "all" or len(getConfigs("Operations", "which_obj", config_file)) == 0:
+                    stagingTarget.startStaging()
+                    stagingCalibrator.startStaging()
+
+                elif getConfigs("Operations", "which_obj", config_file) == "targets":
+                    stagingTarget.startStaging()
+
+                elif getConfigs("Operations", "which_obj", config_file) == "calibrators":
+                    stagingCalibrator.startStaging()
+
+            self.plt = pg.PlotWidget()
+            self.plt.setBackground([255, 255, 255, 1])
+            self.plt.plot(title='Staged files')
+            self.plt.showGrid(x=True, y=True)
+            self.plt.setLabel('left', 'staged file count')
+            self.plt.setLabel('bottom', 'time')
+            self.plt.resize(*(1000,1000))
+            self.time = []
+            progess = get_progress()
+            stagesIDs = list(progess.keys())
+            self.curves = []
+            self.stages_files_counts = []
+            for index in range(0, len(stagesIDs)):
+                staged_file_count_for_stageID = []
+                self.stages_files_counts.append(staged_file_count_for_stageID)
+                curve = self.plt.plot(self.time, self.stages_files_counts[index], pen=(255 - index*10, 0, 0))
+                self.curves.append(curve)
+            self.timer = QtCore.QTimer()
+            self.timer.timeout.connect(self.update_plot)
+            self.timer.start(3000)
+            self.grid.addWidget(self.plt, 1,1)
+
+    def get_staging_progress(self):
+        progess = get_progress()
+        progress_dict = {}
+        if progess != None:
+            if "tuple" not in str(type(progess)):
+                stagesIDs = list(progess.keys())
+                for stageID in stagesIDs:
+                    staged_file_count = progess[stageID]["File count"]
+                    progress_dict[str(stageID)] = str(staged_file_count)
+
+        return progress_dict
+
+    def update_plot(self):
+        progress_dict = self.get_staging_progress()
+
+        if len(progress_dict) == 0:
+            self.timer.stop()
+        else:
+            if len(self.time) == 0:
+                self.time.append(30)
+            else:
+                self.time.append(self.time[-1] + 30)
+
+            for index in range(0, len(self.get_staging_progress())):
+                stageId = list(self.get_staging_progress().keys())[index]
+                staged_file_count_for_id = self.get_staging_progress()[stageId]
+                self.stages_files_counts[index].append(staged_file_count_for_id)
+                curve = self.curves[index]
+                curve.setData(self.time, self.stages_files_counts[index])
 
     def setup(self):
         self.setWindowTitle("Setup")

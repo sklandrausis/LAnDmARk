@@ -60,6 +60,7 @@ class Staging():
         uris = set()
         self.dataGoodnes[str(SASid)] = dict()
         logging.info("SAS id " + str(SASid))
+        config_file = get_args("config")
 
         self.logText += "SAS id " + str(SASid) + "\n"
         if self.calibrator == False:
@@ -302,10 +303,11 @@ def plotDataGoodnes(targetGoodnes, calibratorGoodnes, SASidsTarget, SASidsCalibr
     plt.show()
     plt.savefig(auxDir + "/selection/" + "station_count_per_sas_id.png")
 
-if __name__ == "__main__":
+
+def main():
     config_file = get_args("config")
 
-    #Check if project is private and we are not members of project
+    # Check if project is private and we are not members of project
     project = getConfigs("Data", "PROJECTid", config_file)
     context.set_project(project)
 
@@ -323,8 +325,8 @@ if __name__ == "__main__":
             raise Exception("SAS id for calibrator is not set in config.cfg file")
             sys.exit(1)
     else:
-        SASidsCalibrator =  [int(id) for id in getConfigs("Data", "calibratorSASids", config_file).replace(" ", "").split(",")]
-
+        SASidsCalibrator = [int(id) for id in
+                            getConfigs("Data", "calibratorSASids", config_file).replace(" ", "").split(",")]
 
     logging.info("Processing target")
     start_data_selection_time = time.time()
@@ -353,23 +355,25 @@ if __name__ == "__main__":
             if "sara" in URI:
                 targetSURIs.append("https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n")
             elif "juelich" in URI:
-                targetSURIs.append("https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl=" + URI + "\n")
+                targetSURIs.append(
+                    "https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl=" + URI + "\n")
             else:
                 targetSURIs.append("https://lta-download.lofar.psnc.pl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n")
-
 
     for id in SASidsCalibrator:
         for URI in stagingCalibrator.getSURIs()[str(id)]:
             if "sara" in URI:
-                calibratorSURIs.append("https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n")
+                calibratorSURIs.append(
+                    "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n")
             elif "juelich" in URI:
-                calibratorSURIs.append("https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl=" + URI + "\n")
+                calibratorSURIs.append(
+                    "https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl=" + URI + "\n")
             else:
                 calibratorSURIs.append("https://lta-download.lofar.psnc.pl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n")
 
     logsTMP = logsTMP + "\nProcessing calibrators\n" + tmpCalibratorLogs
     os.system("python3 " + "setup.py")
-    
+
     for id in SASidsTarget:
         if os.path.isfile(auxDir + "/target_" + str(id) + "_SURIs" + ".txt") == False:
             with open(auxDir + "/target_" + str(id) + "_SURIs" + ".txt", "w") as targetSURIfile:
@@ -378,8 +382,8 @@ if __name__ == "__main__":
                         targetSURIfile.write(uri)
 
     for id in SASidsCalibrator:
-        if os.path.isfile(auxDir + "/calibrator_" + str(id) + "_SURIs" +".txt") == False:
-            with open(auxDir + "/calibrator_" + str(id) + "_SURIs" +".txt", "w") as calibratorSURIfile:
+        if os.path.isfile(auxDir + "/calibrator_" + str(id) + "_SURIs" + ".txt") == False:
+            with open(auxDir + "/calibrator_" + str(id) + "_SURIs" + ".txt", "w") as calibratorSURIfile:
                 for uri in calibratorSURIs:
                     if str(id) in uri:
                         calibratorSURIfile.write(uri)
@@ -390,9 +394,9 @@ if __name__ == "__main__":
 
     if getConfigs("Operations", "Stage", config_file) == "True":
 
-
         if stagingTarget.get_total_file_size() + stagingCalibrator.get_total_file_size() < 5000000000000 and stagingCalibrator.get_total_file_count() + stagingTarget.get_total_file_count() < 5000:
-            if getConfigs("Operations", "which_obj", config_file) == "all" or len(getConfigs("Operations", "which_obj", config_file)) == 0:
+            if getConfigs("Operations", "which_obj", config_file) == "all" or len(
+                    getConfigs("Operations", "which_obj", config_file)) == 0:
                 start_staging_time = time.time()
                 stagingTarget.startStaging()
                 stagingCalibrator.startStaging()
@@ -411,5 +415,8 @@ if __name__ == "__main__":
                 end_staging_time = time.time()
                 print("Staging ination time", end_staging_time - start_staging_time)
 
-
     sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()
