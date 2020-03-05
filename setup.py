@@ -3,7 +3,6 @@ import sys
 import argparse
 
 from parsers._configparser import setConfigs, getConfigs
-from parsers._parsetParser import ParsetParser
 
 
 def createDirectory(DirName):

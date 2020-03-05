@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import (QWidget, QGridLayout, QApplication, QDesktopWidget,
 from PyQt5.QtGui import QFont
 from PyQt5 import QtCore
 import pyqtgraph as pg
+import threading
 from stager_access import *
 from parsers._configparser import setConfigs, getConfigs
 import selectionStaging
@@ -122,22 +123,31 @@ class Landmark_GUI(QWidget):
             w.close()
             w.destroy()
             self.grid.removeWidget(w)
+            del w
 
         config_file = "config.cfg"
 
-        if getConfigs("Operations", "Stage", config_file) == "True":
-            SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", config_file).replace(" ", "").split(",")]
-            project = getConfigs("Data", "PROJECTid", config_file)
+        SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", config_file).replace(" ", "").split(",")]
+        project = getConfigs("Data", "PROJECTid", config_file)
 
-            if len(getConfigs("Data", "calibratorSASids", config_file)) == 0:
-                if project == "MSSS_HBA_2013":
-                    SASidsCalibrator = [id - 1 for id in SASidsTarget]
+        if len(getConfigs("Data", "calibratorSASids", config_file)) == 0:
+            if project == "MSSS_HBA_2013":
+                SASidsCalibrator = [id - 1 for id in SASidsTarget]
 
-                else:
-                    raise Exception("SAS id for calibrator is not set in config.cfg file")
-                    sys.exit(1)
             else:
-                SASidsCalibrator = [int(id) for id in getConfigs("Data", "calibratorSASids", config_file).replace(" ", "").split(",")]
+                raise Exception("SAS id for calibrator is not set in config.cfg file")
+                sys.exit(1)
+        else:
+            SASidsCalibrator = [int(id) for id in getConfigs("Data", "calibratorSASids", config_file).replace(" ", "").split(",")]
+
+        which_obj = getConfigs("Operations", "which_obj", config_file)
+
+        if getConfigs("Operations", "querying", config_file) == "True":
+            processThread = threading.Thread(target=self.query_data, args=(which_obj, SASidsCalibrator, SASidsTarget))
+            processThread.start()
+            processThread.join()
+
+        if getConfigs("Operations", "Stage", config_file) == "True":
 
             stagingTarget = selectionStaging.Staging(SASidsTarget, False, config_file)
             stagingTarget.query()
@@ -217,9 +227,33 @@ class Landmark_GUI(QWidget):
                 stagesIDs = list(progess.keys())
                 for stageID in stagesIDs:
                     staged_file_count = progess[stageID]["File count"]
-                    progress_dict[str(stageID)] = str(staged_file_count)
+                    progress_dict[stageID] = float(staged_file_count)
 
         return progress_dict
+
+    def query_data(self, which_obj, SASidsCalibrator=[], SASidsTarget=[]):
+        config_file = "config.cfg"
+        if which_obj == "calibrators":
+            if len(SASidsCalibrator) != 0:
+                stagingCalibrator = selectionStaging.Staging(SASidsCalibrator, True, config_file)
+                stagingCalibrator.query()
+            else:
+                QMessageBox.warning(self, "Warning", "Sas ID for calibrator cannot be empty")
+
+        elif which_obj == "target":
+            if len(SASidsTarget) != 0:
+                stagingTarget = selectionStaging.Staging(SASidsTarget, False, config_file)
+                stagingTarget.query()
+            else:
+                QMessageBox.warning(self, "Warning", "Sas ID for target cannot be empty")
+        else:
+            if len(SASidsCalibrator) != 0 or len(SASidsTarget) != 0:
+                stagingTarget = selectionStaging.Staging(SASidsTarget, False, config_file)
+                stagingTarget.query()
+                stagingCalibrator = selectionStaging.Staging(SASidsCalibrator, True, config_file)
+                stagingCalibrator.query()
+            else:
+                QMessageBox.warning(self, "Warning", "Sas ID for target and calibrator cannot be empty")
 
     def update_plot(self):
         progress_dict = self.get_staging_progress()

@@ -18,7 +18,6 @@ def get_args(key):
     return str(parse_arguments().__dict__[key])
 
 
-
 if __name__ == "__main__":
     tmpStagesIDs = set([])
     config_file = get_args("config")
@@ -59,8 +58,6 @@ if __name__ == "__main__":
                 break
 
         time.sleep(30)
-
-
 
     for id in tmpStagesIDs:
         surl = get_surls_online(int(id))
