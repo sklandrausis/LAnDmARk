@@ -2,14 +2,22 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import time
 from PyQt5.QtWidgets import (QWidget, QGridLayout, QApplication, QDesktopWidget, QPushButton, QLabel, QComboBox, QLineEdit, QMessageBox)
 from PyQt5.QtGui import QFont
 from PyQt5 import QtCore
 import pyqtgraph as pg
-import threading
 from stager_access import *
 from parsers._configparser import setConfigs, getConfigs
 import selectionStaging
+import query_socket
+from threading import Thread
+
+
+import re
+import socket
+import os
+import struct
 
 
 class Landmark_GUI(QWidget):
@@ -125,6 +133,7 @@ class Landmark_GUI(QWidget):
             self.grid.removeWidget(w)
             del w
 
+        time.sleep(10)
         config_file = "config.cfg"
 
         SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", config_file).replace(" ", "").split(",")]
@@ -143,9 +152,13 @@ class Landmark_GUI(QWidget):
         which_obj = getConfigs("Operations", "which_obj", config_file)
 
         if getConfigs("Operations", "querying", config_file) == "True":
-            processThread = threading.Thread(target=self.query_data, args=(which_obj, SASidsCalibrator, SASidsTarget))
-            processThread.start()
-            processThread.join()
+            self.querying_progress = QLabel("ABC")
+
+            self.timer = QtCore.QTimer()
+            self.timer.timeout.connect(self.update_querying_progress)
+            self.timer.start(3000)
+            self.grid.addWidget(self.querying_progress, 1, 1)
+            self.query_data(which_obj, SASidsCalibrator, SASidsTarget)
 
         if getConfigs("Operations", "Stage", config_file) == "True":
 
@@ -231,12 +244,28 @@ class Landmark_GUI(QWidget):
 
         return progress_dict
 
+    def update_querying_progress(self):
+        host = "127.0.0.1"
+        port = 9001
+        
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.bind((host, port))
+
+        data, addr = sock.recvfrom(2048)
+        data = str(data)
+        print(data)
+        sock.close()
+        self.querying_progress.setText(self.querying_progress.text() + data)
+
     def query_data(self, which_obj, SASidsCalibrator=[], SASidsTarget=[]):
         config_file = "config.cfg"
         if which_obj == "calibrators":
             if len(SASidsCalibrator) != 0:
-                stagingCalibrator = selectionStaging.Staging(SASidsCalibrator, True, config_file)
-                stagingCalibrator.query()
+                print("abcdefghijgg2")
+                Thread(target=query_socket.Staging, args=([167226], True, "config.cfg")).start()
+                print("abcdefghijgg")
+                #stagingCalibrator = selectionStaging.Staging(SASidsCalibrator, True, config_file)
+                #stagingCalibrator.query()
             else:
                 QMessageBox.warning(self, "Warning", "Sas ID for calibrator cannot be empty")
 

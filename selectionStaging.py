@@ -395,8 +395,7 @@ def main():
     if getConfigs("Operations", "Stage", config_file) == "True":
 
         if stagingTarget.get_total_file_size() + stagingCalibrator.get_total_file_size() < 5000000000000 and stagingCalibrator.get_total_file_count() + stagingTarget.get_total_file_count() < 5000:
-            if getConfigs("Operations", "which_obj", config_file) == "all" or len(
-                    getConfigs("Operations", "which_obj", config_file)) == 0:
+            if getConfigs("Operations", "which_obj", config_file) == "all" or len(getConfigs("Operations", "which_obj", config_file)) == 0:
                 start_staging_time = time.time()
                 stagingTarget.startStaging()
                 stagingCalibrator.startStaging()
