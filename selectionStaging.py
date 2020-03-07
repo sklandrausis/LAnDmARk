@@ -131,7 +131,6 @@ class Staging():
                                 self.logText += "File nr : " + str(validFiles) + " URI found " + str(fileobject.URI) + "\n"
                                 self.dataGoodnes[str(SASid)]["file_size"] = fileobject.filesize
 
-
                         else:
                             print("Wrong data product type requested")
                             exit(1)

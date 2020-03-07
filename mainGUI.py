@@ -7,17 +7,12 @@ from PyQt5.QtWidgets import (QWidget, QGridLayout, QApplication, QDesktopWidget,
 from PyQt5.QtGui import QFont
 from PyQt5 import QtCore
 import pyqtgraph as pg
+import threading
 from stager_access import *
+
 from parsers._configparser import setConfigs, getConfigs
 import selectionStaging
-import query_socket
-from threading import Thread
-
-
-import re
-import socket
-import os
-import struct
+from querying import Querying
 
 
 class Landmark_GUI(QWidget):
@@ -133,9 +128,7 @@ class Landmark_GUI(QWidget):
             self.grid.removeWidget(w)
             del w
 
-        time.sleep(10)
         config_file = "config.cfg"
-
         SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", config_file).replace(" ", "").split(",")]
         project = getConfigs("Data", "PROJECTid", config_file)
 
@@ -152,85 +145,51 @@ class Landmark_GUI(QWidget):
         which_obj = getConfigs("Operations", "which_obj", config_file)
 
         if getConfigs("Operations", "querying", config_file) == "True":
-            self.querying_progress = QLabel("ABC")
+            self.querying_message = QLabel("")
+            self.grid.addWidget(self.querying_message, 1, 1)
 
-            self.timer = QtCore.QTimer()
-            self.timer.timeout.connect(self.update_querying_progress)
-            self.timer.start(3000)
-            self.grid.addWidget(self.querying_progress, 1, 1)
-            self.query_data(which_obj, SASidsCalibrator, SASidsTarget)
+            if which_obj == "calibrators":
+                q1 = Querying(SASidsCalibrator, True, config_file)
+                q2 = None
+            elif which_obj == "target":
+                q1 = None
+                q2 = Querying(SASidsTarget, False, config_file)
+            else:
+                q1 = Querying(SASidsCalibrator, True, config_file)
+                q2 = Querying(SASidsTarget, False, config_file)
 
-        if getConfigs("Operations", "Stage", config_file) == "True":
+            self.query_station_count(q1, q2)
+            self.query_data_products(q1, q2)
 
-            stagingTarget = selectionStaging.Staging(SASidsTarget, False, config_file)
-            stagingTarget.query()
-            stagingCalibrator = selectionStaging.Staging(SASidsCalibrator, True, config_file)
-            stagingCalibrator.query()
+    def query_station_count(self, q1, q2):
+        if q1 is None:
+            msg = q2.get_station_count()
+            self.querying_message.setText(msg)
+        elif q2 is None:
+            msg = q1.get_station_count()
+            self.querying_message.setText(msg)
+        else:
+            msg1 = q1.get_station_count()
+            self.querying_message.setText(msg1)
 
-            workingDir = getConfigs("Paths", "WorkingPath", config_file)
-            targetName = getConfigs("Data", "TargetName", config_file)
-            workingDir = workingDir + "/" + targetName + "/"
-            auxDir = workingDir + "/LAnDmARk_aux"
+            msg2 = q2.get_station_count()
+            self.querying_message.setText(self.querying_message.text() + "\n" + msg2)
 
-            targetSURIs = []
-            calibratorSURIs = []
+    def query_data_products(self, q1, q2):
+        if q1 is None:
+            msg2 = q2.get_data_products()
+            self.querying_message.setText(self.querying_message.text() + "\n" + msg2)
 
-            for id in SASidsTarget:
-                for URI in stagingTarget.getSURIs()[str(id)]:
-                    if "sara" in URI:
-                        targetSURIs.append(
-                            "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n")
-                    elif "juelich" in URI:
-                        targetSURIs.append(
-                            "https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl=" + URI + "\n")
-                    else:
-                        targetSURIs.append(
-                            "https://lta-download.lofar.psnc.pl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n")
+        elif q2 is None:
+            msg1 = q1.get_data_products()
+            self.querying_message.setText(self.querying_message.text() + "\n" + msg1)
 
-            for id in SASidsCalibrator:
-                for URI in stagingCalibrator.getSURIs()[str(id)]:
-                    if "sara" in URI:
-                        calibratorSURIs.append(
-                            "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n")
-                    elif "juelich" in URI:
-                        calibratorSURIs.append(
-                            "https://lofar-download.fz-juelich.de/webserver-lofar/SRMFifoGet.py?surl=" + URI + "\n")
-                    else:
-                        calibratorSURIs.append(
-                            "https://lta-download.lofar.psnc.pl/lofigrid/SRMFifoGet.py?surl=" + URI + "\n")
+        else:
+            msg1 = q1.get_data_products()
+            self.querying_message.setText(self.querying_message.text() + "\n" + msg1)
 
-            if stagingTarget.get_total_file_size() + stagingCalibrator.get_total_file_size() < 5000000000000 and stagingCalibrator.get_total_file_count() + stagingTarget.get_total_file_count() < 5000:
-                if getConfigs("Operations", "which_obj", config_file) == "all" or len(getConfigs("Operations", "which_obj", config_file)) == 0:
-                    stagingTarget.startStaging()
-                    stagingCalibrator.startStaging()
-
-                elif getConfigs("Operations", "which_obj", config_file) == "targets":
-                    stagingTarget.startStaging()
-
-                elif getConfigs("Operations", "which_obj", config_file) == "calibrators":
-                    stagingCalibrator.startStaging()
-
-            self.plt = pg.PlotWidget()
-            self.plt.setBackground([255, 255, 255, 1])
-            self.plt.plot(title='Staged files')
-            self.plt.showGrid(x=True, y=True)
-            self.plt.setLabel('left', 'staged file count')
-            self.plt.setLabel('bottom', 'time')
-            self.plt.resize(*(1000,1000))
-            self.time = []
-            progess = get_progress()
-            stagesIDs = list(progess.keys())
-            self.curves = []
-            self.stages_files_counts = []
-            for index in range(0, len(stagesIDs)):
-                staged_file_count_for_stageID = []
-                self.stages_files_counts.append(staged_file_count_for_stageID)
-                curve = self.plt.plot(self.time, self.stages_files_counts[index], pen=(255 - index*10, 0, 0))
-                self.curves.append(curve)
-            self.timer = QtCore.QTimer()
-            self.timer.timeout.connect(self.update_plot)
-            self.timer.start(3000)
-            self.grid.addWidget(self.plt, 1,1)
+            msg2 = q2.get_data_products()
+            self.querying_message.setText(self.querying_message.text() + "\n" + msg2)
 
     def get_staging_progress(self):
         progess = get_progress()
@@ -243,46 +202,6 @@ class Landmark_GUI(QWidget):
                     progress_dict[stageID] = float(staged_file_count)
 
         return progress_dict
-
-    def update_querying_progress(self):
-        host = "127.0.0.1"
-        port = 9001
-        
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.bind((host, port))
-
-        data, addr = sock.recvfrom(2048)
-        data = str(data)
-        print(data)
-        sock.close()
-        self.querying_progress.setText(self.querying_progress.text() + data)
-
-    def query_data(self, which_obj, SASidsCalibrator=[], SASidsTarget=[]):
-        config_file = "config.cfg"
-        if which_obj == "calibrators":
-            if len(SASidsCalibrator) != 0:
-                print("abcdefghijgg2")
-                Thread(target=query_socket.Staging, args=([167226], True, "config.cfg")).start()
-                print("abcdefghijgg")
-                #stagingCalibrator = selectionStaging.Staging(SASidsCalibrator, True, config_file)
-                #stagingCalibrator.query()
-            else:
-                QMessageBox.warning(self, "Warning", "Sas ID for calibrator cannot be empty")
-
-        elif which_obj == "target":
-            if len(SASidsTarget) != 0:
-                stagingTarget = selectionStaging.Staging(SASidsTarget, False, config_file)
-                stagingTarget.query()
-            else:
-                QMessageBox.warning(self, "Warning", "Sas ID for target cannot be empty")
-        else:
-            if len(SASidsCalibrator) != 0 or len(SASidsTarget) != 0:
-                stagingTarget = selectionStaging.Staging(SASidsTarget, False, config_file)
-                stagingTarget.query()
-                stagingCalibrator = selectionStaging.Staging(SASidsCalibrator, True, config_file)
-                stagingCalibrator.query()
-            else:
-                QMessageBox.warning(self, "Warning", "Sas ID for target and calibrator cannot be empty")
 
     def update_plot(self):
         progress_dict = self.get_staging_progress()
