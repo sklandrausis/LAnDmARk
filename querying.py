@@ -12,7 +12,7 @@ class Querying:
         self.targetName = getConfigs("Data", "TargetName", self.config_file)
         self.observations = {s: "" for s in self.SASids}
         self.cls = CorrelatedDataProduct
-        self.uris = set()
+        self.uris = dict()
 
         for SASid in self.SASids:
             query_observations = (getattr(Process, "observationId") == SASid) & (Process.isValid > 0)
@@ -36,6 +36,7 @@ class Querying:
         message = ""
 
         for SASid in self.SASids:
+            self.uris[SASid] = []
             invalid_files = 0
             valid_files = 0
             observation = self.observations[SASid]
@@ -50,14 +51,13 @@ class Querying:
                 if fileobject:
                     if getConfigs("Data", "ProductType", self.config_file) == "observation":
                         if '/L' + str(SASid) in fileobject.URI and not "dppp" in fileobject.URI:
-                            self.uris.add(fileobject.URI)
+                            self.uris[SASid].append(fileobject.URI)
                             valid_files += 1
-                            print("File nr :", valid_files, "URI found", fileobject.URI)
 
                     elif getConfigs("Data", "ProductType", self.config_file) == "pipeline":
 
                         if '/L' + str(SASid) in fileobject.URI and "dppp" in fileobject.URI:
-                            self.uris.add(fileobject.URI)
+                            self.uris[SASid].append(fileobject.URI)
                             valid_files += 1
 
                     else:
@@ -76,3 +76,6 @@ class Querying:
                        " invalid files are " + str(invalid_files) + "\n"
 
         return message
+
+    def get_SURI(self):
+        return self.uris

@@ -184,7 +184,7 @@ class Staging():
         return file_count
 
     def startStaging(self):
-        for id in  self.SASids:
+        for id in self.SASids:
 
             if len(self.SURIs[str(id)]) >= 5000:
                 warnings.warn("file count exceeds 5000 for SAS id " + str(id), Warning)

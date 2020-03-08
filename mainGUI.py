@@ -2,16 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import time
 from PyQt5.QtWidgets import (QWidget, QGridLayout, QApplication, QDesktopWidget, QPushButton, QLabel, QComboBox, QLineEdit, QMessageBox)
 from PyQt5.QtGui import QFont
 from PyQt5 import QtCore
 import pyqtgraph as pg
-import threading
-from stager_access import *
+import time
+from stager_access import get_progress
+from awlofar.toolbox.LtaStager import LtaStager
 
 from parsers._configparser import setConfigs, getConfigs
-import selectionStaging
 from querying import Querying
 
 
@@ -144,7 +143,7 @@ class Landmark_GUI(QWidget):
 
         which_obj = getConfigs("Operations", "which_obj", config_file)
 
-        if getConfigs("Operations", "querying", config_file) == "True":
+        if getConfigs("Operations", "querying", config_file) == "True" and getConfigs("Operations", "stage", config_file) == "False" :
             self.querying_message = QLabel("")
             self.grid.addWidget(self.querying_message, 1, 1)
 
@@ -160,6 +159,72 @@ class Landmark_GUI(QWidget):
 
             self.query_station_count(q1, q2)
             self.query_data_products(q1, q2)
+
+        elif getConfigs("Operations", "querying", config_file) == "True" and getConfigs("Operations", "stage", config_file) == "True":
+            self.querying_message = QLabel("")
+            self.grid.addWidget(self.querying_message, 1, 1)
+
+            self.plt = pg.PlotWidget()
+            self.plt.setBackground([255, 255, 255, 1])
+            self.plt.plot(title='Staged files')
+            self.plt.showGrid(x=True, y=True)
+            self.plt.setLabel('left', 'staged file count')
+            self.plt.setLabel('bottom', 'time')
+            self.plt.resize(*(1000,1000))
+            self.time = [0]
+
+            self.grid.addWidget(self.plt, 1, 2)
+
+            if which_obj == "calibrators":
+                q1 = Querying(SASidsCalibrator, True, config_file)
+                q2 = None
+            elif which_obj == "target":
+                q1 = None
+                q2 = Querying(SASidsTarget, False, config_file)
+            else:
+                q1 = Querying(SASidsCalibrator, True, config_file)
+                q2 = Querying(SASidsTarget, False, config_file)
+
+            self.query_data_products(q1, q2)
+
+            if q1 is None:
+                target_SURI = q2.get_SURI()
+            else:
+                target_SURI = ""
+
+            if q2 is None:
+                calibrator_SURI = q1.get_SURI()
+            else:
+                calibrator_SURI = ""
+
+            if target_SURI is "":
+                self.start_staging(calibrator_SURI, SASidsCalibrator)
+            if calibrator_SURI is "":
+                self.start_staging(target_SURI, SASidsTarget)
+
+            progress = get_progress()
+            if progress is None:
+                time.sleep(10)
+
+            else:
+                stagesIDs = list(progress.keys())
+
+            self.curves = []
+            self.stages_files_counts = []
+            for index in range(0, len(stagesIDs)):
+                staged_file_count_for_stageID = [0]
+                self.stages_files_counts.append(staged_file_count_for_stageID)
+                curve = self.plt.plot(self.time, self.stages_files_counts[index], pen=(255 - index * 10, 0, 0))
+                self.curves.append(curve)
+
+            self.timer = QtCore.QTimer()
+            self.timer.timeout.connect(self.update_plot)
+            self.timer.start(1000)
+
+    def start_staging(self, SURIs, SASids):
+        for id in SASids:
+            stagger = LtaStager()
+            stagger.stage_uris(SURIs[id])
 
     def query_station_count(self, q1, q2):
         if q1 is None:
@@ -200,6 +265,12 @@ class Landmark_GUI(QWidget):
                 for stageID in stagesIDs:
                     staged_file_count = progess[stageID]["File count"]
                     progress_dict[stageID] = float(staged_file_count)
+            else:
+                print("timer stop 1")
+                self.timer.stop()
+        else:
+            print("timer stop 2")
+            self.timer.stop()
 
         return progress_dict
 
@@ -207,9 +278,11 @@ class Landmark_GUI(QWidget):
         progress_dict = self.get_staging_progress()
 
         if len(progress_dict) == 0:
+            print("timer stop 3")
             self.timer.stop()
+
         else:
-            if len(self.time) == 0:
+            if len(self.time) == 1:
                 self.time.append(30)
             else:
                 self.time.append(self.time[-1] + 30)
@@ -446,4 +519,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

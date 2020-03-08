@@ -49,6 +49,7 @@ print("%s - stager_access: Creating proxy" % (datetime.datetime.now()))
 proxy = xmlrpclib.ServerProxy("https://" + user + ':' + passw + "@webportal.astron.nl/service-public/xmlrpc")
 LtaStager = proxy.LtaStager
 
+
 def stage(surls):
     ''' Stage urls'''
 
@@ -57,9 +58,11 @@ def stage(surls):
     stageid = proxy.LtaStager.add_getid(surls)
     return stageid
 
+
 def get_surls_online(stageid):
     ''' Get staget urls '''
     return proxy.LtaStager.getstagedurls(stageid)
+
 
 def get_progress(status=None, exclude=False):
     ''' Get progress of staging '''
