@@ -187,19 +187,19 @@ class Landmark_GUI(QWidget):
 
             self.query_data_products(q1, q2)
 
-            if q1 is None:
-                target_SURI = q2.get_SURI()
-            else:
-                target_SURI = ""
-
-            if q2 is None:
+            if q1 is not None:
                 calibrator_SURI = q1.get_SURI()
             else:
                 calibrator_SURI = ""
 
-            if target_SURI is "":
+            if q2 is not None:
+                target_SURI = q2.get_SURI()
+            else:
+                target_SURI = ""
+
+            if calibrator_SURI is not "":
                 self.start_staging(calibrator_SURI, SASidsCalibrator)
-            if calibrator_SURI is "":
+            if target_SURI is not "":
                 self.start_staging(target_SURI, SASidsTarget)
 
             progress = get_progress()
@@ -220,6 +220,10 @@ class Landmark_GUI(QWidget):
             self.timer = QtCore.QTimer()
             self.timer.timeout.connect(self.update_plot)
             self.timer.start(1000)
+
+            progress = get_progress()
+            if progress is None:
+                self.timer.stop()
 
     def start_staging(self, SURIs, SASids):
         for id in SASids:
@@ -257,19 +261,17 @@ class Landmark_GUI(QWidget):
             self.querying_message.setText(self.querying_message.text() + "\n" + msg2)
 
     def get_staging_progress(self):
-        progess = get_progress()
+        progress = get_progress()
         progress_dict = {}
-        if progess != None:
-            if "tuple" not in str(type(progess)):
-                stagesIDs = list(progess.keys())
+        if progress is not None:
+            if "tuple" not in str(type(progress)):
+                stagesIDs = list(progress.keys())
                 for stageID in stagesIDs:
-                    staged_file_count = progess[stageID]["File count"]
+                    staged_file_count = progress[stageID]["File count"]
                     progress_dict[stageID] = float(staged_file_count)
             else:
-                print("timer stop 1")
                 self.timer.stop()
         else:
-            print("timer stop 2")
             self.timer.stop()
 
         return progress_dict
@@ -277,15 +279,21 @@ class Landmark_GUI(QWidget):
     def update_plot(self):
         progress_dict = self.get_staging_progress()
 
-        if len(progress_dict) == 0:
-            print("timer stop 3")
+        progress = get_progress()
+        if progress is None:
+            self.timer.stop()
+
+        elif len(progress_dict) == 0:
+            self.timer.stop()
+
+        elif len(list(self.get_staging_progress().keys())) == 0:
             self.timer.stop()
 
         else:
             if len(self.time) == 1:
                 self.time.append(30)
             else:
-                self.time.append(self.time[-1] + 30)
+                self.time.append(self.time[-1] + 1)
 
             for index in range(0, len(self.get_staging_progress())):
                 stageId = list(self.get_staging_progress().keys())[index]
