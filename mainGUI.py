@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import os
 from PyQt5.QtWidgets import (QWidget, QGridLayout, QApplication, QDesktopWidget, QPushButton, QLabel, QComboBox, QLineEdit, QMessageBox)
 from PyQt5.QtGui import QFont
 from PyQt5 import QtCore
@@ -9,6 +10,7 @@ import pyqtgraph as pg
 import time
 from stager_access import get_progress
 from awlofar.toolbox.LtaStager import LtaStager
+from awlofar.database.Context import context
 
 from parsers._configparser import setConfigs, getConfigs
 from querying import Querying
@@ -48,67 +50,151 @@ class Landmark_GUI(QWidget):
         self.init_label.setFont(init_label_font)
         self.grid.addWidget(self.init_label, 1,1)
 
-    def validate_setup(self, targetSASid, targetname, projectID, max_per_node, method, WorkingPath, PrefactorPath, lofarroot, casaroot, pyraproot, losotoPath, aoflagger, wsclean_executable, pythonpath, task_file):
+    def validate_setup(self):
         valid_count = 0
-        if len(targetSASid) == 0:
-            valid_count += 1
-            QMessageBox.warning(self, "Warning", "Target SAS id cannot be empty")
 
-        if len(targetname) == 0:
-            valid_count += 1
-            QMessageBox.warning(self, "Warning", "Target name cannot be empty")
+        if self.querying_combobox.currentText() == "True" or self.stage_combobox.currentText() == "True" or self.retrive_combobox.currentText() == "True":
+            if len(self.WorkingPath_input.text()) == 0:
+                valid_count += 1
+                QMessageBox.warning(self, "Warning", "Working path cannot be empty")
+            else:
+                if not os.path.isdir(self.WorkingPath_input.text()):
+                    valid_count += 1
+                    QMessageBox.warning(self, "Warning", "Working path is not existing")
 
-        if len(projectID) == 0:
-            valid_count += 1
-            QMessageBox.warning(self, "Warning", "Project ID cannot be empty")
+            if len(self.PROJECTid_input.text()) == 0:
+                valid_count += 1
+                QMessageBox.warning(self, "Warning", "Project ID cannot be empty")
+            else:
+                project = self.PROJECTid_input.text()
+                context.set_project(project)
 
-        if len(max_per_node) == 0:
-            valid_count += 1
-            QMessageBox.warning(self, "Warning", "max_per_node cannot be empty")
+                if project != context.get_current_project().name:
+                    valid_count += 1
+                    QMessageBox.warning(self, "Warning", "You are not member of project")
 
-        if len(method) == 0:
-            valid_count += 1
-            QMessageBox.warning(self, "Warning", "method cannot be empty")
+                else:
+                    if self.which_combobox.currentText() == "calibrators":
+                        if len(self.calibratorSASids_input.text()) == 0:
+                            if project != "MSSS_HBA_2013":
+                                valid_count += 1
+                                QMessageBox.warning(self, "Warning", "If project is not MSSS_HBA_2013 SAS id for calibrator must be specified")
+                            if len(self.targetSASids_input.text()) == 0:
+                                valid_count += 1
+                                QMessageBox.warning(self, "Warning", "Target SAS id must be specified")
 
-        if len(WorkingPath) == 0:
-            valid_count += 1
-            QMessageBox.warning(self, "Warning", "Working Pathcannot be empty")
+                    elif self.which_combobox.currentText() == "target":
+                        if len(self.targetSASids_input.text()) == 0:
+                            valid_count += 1
+                            QMessageBox.warning(self, "Warning", "Target SAS id must be specified")
+                        if len(self.Target_name_input.text()) == 0:
+                            valid_count += 1
+                            QMessageBox.warning(self, "Warning", "Target name must be specified")
+                    else:
+                        if len(self.calibratorSASids_input.text()) == 0:
+                            if project != "MSSS_HBA_2013":
+                                valid_count += 1
+                                QMessageBox.warning(self, "Warning", "If project is not MSSS_HBA_2013 SAS id for calibrator must be specified")
 
-        if len(PrefactorPath) == 0:
-            valid_count += 1
-            QMessageBox.warning(self, "Warning", "PrefactorPath cannot be empty")
+                            if len(self.targetSASids_input.text()) == 0:
+                                valid_count += 1
+                                QMessageBox.warning(self, "Warning", "Target SAS id must be specified")
 
-        if len(lofarroot) == 0:
-            valid_count += 1
-            QMessageBox.warning(self, "Warning", "lofarroot cannot be empty")
+                        if len(self.targetSASids_input.text()) == 0:
+                            valid_count += 1
+                            QMessageBox.warning(self, "Warning", "Target SAS id must be specified")
+                        if len(self.Target_name_input.text()) == 0:
+                            valid_count += 1
+                            QMessageBox.warning(self, "Warning", "Target name must be specified")
 
-        if len(casaroot) == 0:
-            valid_count += 1
-            QMessageBox.warning(self, "Warning", "casaroot cannot be empty")
+        elif self.process_combobox.currentText() == "True":
+            if len(self.WorkingPath_input.text()) == 0:
+                valid_count += 1
+                QMessageBox.warning(self, "Warning", "Working path cannot be empty")
+            else:
+                if not os.path.isdir(self.WorkingPath_input.text()):
+                    valid_count += 1
+                    QMessageBox.warning(self, "Warning", "Working path is not existing")
 
-        if len(pyraproot) == 0:
-            valid_count += 1
-            QMessageBox.warning(self, "Warning", "pyraproot cannot be empty")
+            if len(self.PrefactorPath_input.text()) == 0:
+                valid_count += 1
+                QMessageBox.warning(self, "Warning", "Working path cannot be empty")
+            else:
+                if not os.path.isdir(self.PrefactorPath_input.text()):
+                    valid_count += 1
+                    QMessageBox.warning(self, "Warning", "Working path is not existing")
 
-        if len(losotoPath) == 0:
-            valid_count += 1
-            QMessageBox.warning(self, "Warning", "losotoPath cannot be empty")
+            if len(self.lofarroot_input.text()) == 0:
+                valid_count += 1
+                QMessageBox.warning(self, "Warning", "LOFAR root cannot be empty")
+            else:
+                if not os.path.isdir(self.lofarroot_input.text()):
+                    valid_count += 1
+                    QMessageBox.warning(self, "Warning", "LOFAR root is not existing")
 
-        if len(aoflagger) == 0:
-            valid_count += 1
-            QMessageBox.warning(self, "Warning", "aoflagger cannot be empty")
+            if len(self.casaroot_input.text()) == 0:
+                valid_count += 1
+                QMessageBox.warning(self, "Warning", "CASA root cannot be empty")
+            else:
+                if not os.path.isdir(self.casaroot_input.text()):
+                    valid_count += 1
+                    QMessageBox.warning(self, "Warning", "CASA root is not existing")
 
-        if len(wsclean_executable) == 0:
-            valid_count += 1
-            QMessageBox.warning(self, "Warning", "wsclean_executable cannot be empty")
+            if len(self.pyraproot_input.text()) == 0:
+                valid_count += 1
+                QMessageBox.warning(self, "Warning", "Pyrap root cannot be empty")
+            else:
+                if not os.path.isdir(self.pyraproot_input.text()):
+                    valid_count += 1
+                    QMessageBox.warning(self, "Warning", "Pyrap root root is not existing")
 
-        if len(pythonpath) == 0:
-            valid_count += 1
-            QMessageBox.warning(self, "Warning", "pythonpath cannot be empty")
+            if len(self.losotoPath_input.text()) == 0:
+                valid_count += 1
+                QMessageBox.warning(self, "Warning", "losoto path cannot be empty")
+            else:
+                if not os.path.isdir(self.losotoPath_input.text()):
+                    valid_count += 1
+                    QMessageBox.warning(self, "Warning", "losoto path is not existing")
 
-        if len(task_file) == 0:
-            valid_count += 1
-            QMessageBox.warning(self, "Warning", "task_file cannot be empty")
+            if len(self.aoflagger_input.text()) == 0:
+                valid_count += 1
+                QMessageBox.warning(self, "Warning", "aoflagger cannot be empty")
+            else:
+                if not os.path.isfile(self.aoflagger_input.text()):
+                    valid_count += 1
+                    QMessageBox.warning(self, "Warning", "aoflagger is not existing")
+
+            if len(self.aoflagger_input.text()) == 0:
+                valid_count += 1
+                QMessageBox.warning(self, "Warning", "aoflagger cannot be empty")
+            else:
+                if not os.path.isfile(self.aoflagger_input.text()):
+                    valid_count += 1
+                    QMessageBox.warning(self, "Warning", "aoflagger is not existing")
+
+            if len(self.wsclean_executable_input.text()) == 0:
+                valid_count += 1
+                QMessageBox.warning(self, "Warning", "wsclean executable cannot be empty")
+            else:
+                if not os.path.isfile(self.wsclean_executable_input.text()):
+                    valid_count += 1
+                    QMessageBox.warning(self, "Warning", "wsclean executable is not existing")
+
+            if len(self.task_file_input.text()) == 0:
+                valid_count += 1
+                QMessageBox.warning(self, "Warning", "task file cannot be empty")
+            else:
+                if not os.path.isfile(self.task_file_input.text()):
+                    valid_count += 1
+                    QMessageBox.warning(self, "Warning", "task file is not existing")
+
+            if len(self.pythonpath_input.text()) == 0:
+                valid_count += 1
+                QMessageBox.warning(self, "Warning", "python path cannot be empty")
+            else:
+                if not os.path.isdir(self.pythonpath_input.text()):
+                    valid_count += 1
+                    QMessageBox.warning(self, "Warning", "python path is not existing")
 
         if valid_count == 0:
             valid = True
@@ -483,7 +569,7 @@ class Landmark_GUI(QWidget):
         self.setup_wigets = set([self.opertion_label, self.querying_label, self.querying_combobox, self.stage_label, self.stage_combobox, self.retrive_label, self.retrive_combobox, self.process_label, self.process_combobox, self.which_obj_label, self.which_combobox, self.data_label, self.calibratorSASids_label, self.calibratorSASids_input, self.targetSASids_label, self.targetSASids_input, self.Target_name_label, self.Target_name_input, self.PROJECTid_label, self.PROJECTid_input, self.product_type_label, self.product_type_combobox, self.cluster_label, self.max_per_node, self.max_per_node_input, self.method_label, self.method_input, self.WorkingPath_label, self.WorkingPath_input, self.PrefactorPath_label, self.PrefactorPath_input, self.lofarroot_label, self.lofarroot_input, self.casaroot_label, self.casaroot_input, self.pyraproot_label, self.pyraproot_input, self.hdf5root_label, self.hdf5root_input, self.wcsroot_label, self.wcsroot_input, self.losotoPath_label, self.losotoPath_input, self.aoflagger_label, self.aoflagger_input, self.wsclean_executable_label, self.wsclean_executable_input, self.pythonpath_label, self.pythonpath_input, self.task_file_label, self.task_file_input, self.save_button])
 
     def save_configuration(self):
-        if self.validate_setup(self.targetSASids_input.text(), self.Target_name_input.text(), self.PROJECTid_input.text(), self.max_per_node_input.text(), self.method_input.text(), self.WorkingPath_input.text(), self.PrefactorPath_input.text(), self.lofarroot_input.text(), self.casaroot_input.text(), self.pyraproot_input.text(), self.losotoPath_input.text(), self.aoflagger_input.text(), self.wsclean_executable_input.text(), self.pythonpath_input.text(), self.task_file_input.text()   ):
+        if self.validate_setup():
             config_file = "config.cfg"
 
             setConfigs("Data", "targetSASids", self.targetSASids_input.text(), config_file)
