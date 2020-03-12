@@ -34,7 +34,7 @@ class Querying:
 
     def get_data_products(self):
         message = ""
-
+        print("f")
         for SASid in self.SASids:
             self.uris[SASid] = []
             invalid_files = 0
@@ -52,6 +52,7 @@ class Querying:
                     if getConfigs("Data", "ProductType", self.config_file) == "observation":
                         if '/L' + str(SASid) in fileobject.URI and not "dppp" in fileobject.URI:
                             self.uris[SASid].append(fileobject.URI)
+                            print(fileobject.URI)
                             valid_files += 1
 
                     elif getConfigs("Data", "ProductType", self.config_file) == "pipeline":

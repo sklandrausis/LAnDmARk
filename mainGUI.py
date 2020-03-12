@@ -204,48 +204,80 @@ class Landmark_GUI(QWidget):
 
     def run_landmark(self):
         self.setWindowTitle("Running ...")
-        for w in self.setup_wigets:
-            if type(w) is QLabel or type(w) is QLineEdit or type(w) is QComboBox:
-                w.clear()
+        run_setup = True
+        while run_setup:
+            for w in self.setup_wigets:
+                if type(w) is QLabel or type(w) is QLineEdit or type(w) is QComboBox:
+                    w.clear()
 
-            w.close()
-            w.destroy()
-            self.grid.removeWidget(w)
-            del w
+                w.close()
+                w.destroy()
+                self.grid.removeWidget(w)
+                del w
 
-        config_file = "config.cfg"
-        SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", config_file).replace(" ", "").split(",")]
-        project = getConfigs("Data", "PROJECTid", config_file)
+            show_query_progress_button = QPushButton("Show query progress")
+            show_stage_progress_button = QPushButton("Show stage progress")
+            show_retrieve_progress_button = QPushButton("Show retrieve progress")
+            show_process_progress_button = QPushButton("Show process progress")
 
-        if len(getConfigs("Data", "calibratorSASids", config_file)) == 0:
-            if project == "MSSS_HBA_2013":
-                SASidsCalibrator = [id - 1 for id in SASidsTarget]
+            self.grid.addWidget(show_query_progress_button, 1, 1)
+            self.grid.addWidget(show_stage_progress_button, 1, 2)
+            self.grid.addWidget(show_retrieve_progress_button, 1, 3)
+            self.grid.addWidget(show_process_progress_button, 1, 4)
 
-            else:
-                raise Exception("SAS id for calibrator is not set in config.cfg file")
-                sys.exit(1)
+            run_setup = False
+
         else:
-            SASidsCalibrator = [int(id) for id in getConfigs("Data", "calibratorSASids", config_file).replace(" ", "").split(",")]
 
-        which_obj = getConfigs("Operations", "which_obj", config_file)
+            config_file = "config.cfg"
+            self.SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", config_file).replace(" ", "").split(",")]
+            project = getConfigs("Data", "PROJECTid", config_file)
 
-        if getConfigs("Operations", "querying", config_file) == "True" and getConfigs("Operations", "stage", config_file) == "False" :
-            self.querying_message = QLabel("")
-            self.grid.addWidget(self.querying_message, 1, 1)
+            if len(getConfigs("Data", "calibratorSASids", config_file)) == 0:
+                if project == "MSSS_HBA_2013":
+                    self.SASidsCalibrator = [id - 1 for id in self.SASidsTarget]
 
-            if which_obj == "calibrators":
-                q1 = Querying(SASidsCalibrator, True, config_file)
-                q2 = None
-            elif which_obj == "target":
-                q1 = None
-                q2 = Querying(SASidsTarget, False, config_file)
+                else:
+                    raise Exception("SAS id for calibrator is not set in config.cfg file")
+                    sys.exit(1)
             else:
-                q1 = Querying(SASidsCalibrator, True, config_file)
-                q2 = Querying(SASidsTarget, False, config_file)
+                self.SASidsCalibrator = [int(id) for id in getConfigs("Data", "calibratorSASids", config_file).replace(" ", "").split(",")]
+            self.config_file = "config.cfg"
+            self.which_obj = getConfigs("Operations", "which_obj", config_file)
 
-            self.query_station_count(q1, q2)
-            self.query_data_products(q1, q2)
+            show_query_progress_button.clicked.connect(self.show_querying_results)
 
+            if getConfigs("Operations", "querying", config_file) == "True" and getConfigs("Operations", "stage", config_file) == "False":
+                if self.which_obj == "calibrators":
+                    self.q1 = Querying(self.SASidsCalibrator, True, self.config_file)
+                    self.q2 = None
+                elif self.which_obj == "target":
+                    self.q1 = None
+                    self.q2 = Querying(self.SASidsTarget, False, self.config_file)
+                else:
+                    self.q1 = Querying(self.SASidsCalibrator, True, self.config_file)
+                    self.q2 = Querying(self.SASidsTarget, False, self.config_file)
+
+    def show_querying_results(self):
+        querying_setup = True
+
+        while querying_setup:
+            print("a")
+            self.querying_message = QLabel("Querying in progress")
+            self.grid.addWidget(self.querying_message, 2, 1)
+            querying_setup = False
+
+        else:
+            print("b")
+            self.querying_setup_2 = True
+            while self.querying_setup_2:
+                print("c")
+                self.query_station_count(self.q1, self.q2)
+            else:
+                print("d")
+                self.query_data_products(self.q1, self.q2)
+
+        '''
         elif getConfigs("Operations", "querying", config_file) == "True" and getConfigs("Operations", "stage", config_file) == "True":
             self.querying_message = QLabel("")
             self.grid.addWidget(self.querying_message, 1, 1)
@@ -310,7 +342,7 @@ class Landmark_GUI(QWidget):
             progress = get_progress()
             if progress is None:
                 self.timer.stop()
-
+                '''
     def start_staging(self, SURIs, SASids):
         for id in SASids:
             stagger = LtaStager()
@@ -330,7 +362,10 @@ class Landmark_GUI(QWidget):
             msg2 = q2.get_station_count()
             self.querying_message.setText(self.querying_message.text() + "\n" + msg2)
 
+        self.querying_setup_2 = False
+
     def query_data_products(self, q1, q2):
+        print("e")
         if q1 is None:
             msg2 = q2.get_data_products()
             self.querying_message.setText(self.querying_message.text() + "\n" + msg2)
