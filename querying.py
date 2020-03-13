@@ -34,7 +34,6 @@ class Querying:
 
     def get_data_products(self):
         message = ""
-        print("f")
         for SASid in self.SASids:
             self.uris[SASid] = []
             invalid_files = 0

@@ -215,15 +215,20 @@ class Landmark_GUI(QWidget):
                 self.grid.removeWidget(w)
                 del w
 
-            show_query_progress_button = QPushButton("Show query progress")
-            show_stage_progress_button = QPushButton("Show stage progress")
-            show_retrieve_progress_button = QPushButton("Show retrieve progress")
-            show_process_progress_button = QPushButton("Show process progress")
+            self.show_query_progress_button = QPushButton("Show query progress")
+            self.show_stage_progress_button = QPushButton("Show stage progress")
+            self.show_retrieve_progress_button = QPushButton("Show retrieve progress")
+            self.show_process_progress_button = QPushButton("Show process progress")
 
-            self.grid.addWidget(show_query_progress_button, 1, 1)
-            self.grid.addWidget(show_stage_progress_button, 1, 2)
-            self.grid.addWidget(show_retrieve_progress_button, 1, 3)
-            self.grid.addWidget(show_process_progress_button, 1, 4)
+            self.show_query_progress_button.setDisabled(True)
+            self.show_stage_progress_button.setDisabled(True)
+            self.show_retrieve_progress_button.setDisabled(True)
+            self.show_process_progress_button.setDisabled(True)
+
+            self.grid.addWidget(self.show_query_progress_button, 1, 1)
+            self.grid.addWidget(self.show_stage_progress_button, 1, 2)
+            self.grid.addWidget(self.show_retrieve_progress_button, 1, 3)
+            self.grid.addWidget(self.show_process_progress_button, 1, 4)
 
             run_setup = False
 
@@ -245,104 +250,109 @@ class Landmark_GUI(QWidget):
             self.config_file = "config.cfg"
             self.which_obj = getConfigs("Operations", "which_obj", config_file)
 
-            show_query_progress_button.clicked.connect(self.show_querying_results)
+            self.show_query_progress_button.clicked.connect(self.show_querying_results)
+            self.show_stage_progress_button.clicked.connect(self.show_stage_results)
+
+            self.querying_done = False
 
             if getConfigs("Operations", "querying", config_file) == "True" and getConfigs("Operations", "stage", config_file) == "False":
-                if self.which_obj == "calibrators":
-                    self.q1 = Querying(self.SASidsCalibrator, True, self.config_file)
-                    self.q2 = None
-                elif self.which_obj == "target":
-                    self.q1 = None
-                    self.q2 = Querying(self.SASidsTarget, False, self.config_file)
-                else:
-                    self.q1 = Querying(self.SASidsCalibrator, True, self.config_file)
-                    self.q2 = Querying(self.SASidsTarget, False, self.config_file)
+                self.show_query_progress_button.setStyleSheet("background-color: green")
+                self.show_query_progress_button.setDisabled(False)
+                self.query()
+
+            elif getConfigs("Operations", "querying", config_file) == "True" and getConfigs("Operations", "stage", config_file) == "True":
+                self.show_query_progress_button.setStyleSheet("background-color: green")
+                self.show_stage_progress_button.setStyleSheet("background-color: blue")
+                self.show_query_progress_button.setDisabled(False)
+                self.query()
+
+    def query(self):
+        if self.which_obj == "calibrators":
+            self.q1 = Querying(self.SASidsCalibrator, True, self.config_file)
+            self.q2 = None
+        elif self.which_obj == "target":
+            self.q1 = None
+            self.q2 = Querying(self.SASidsTarget, False, self.config_file)
+        else:
+            self.q1 = Querying(self.SASidsCalibrator, True, self.config_file)
+            self.q2 = Querying(self.SASidsTarget, False, self.config_file)
 
     def show_querying_results(self):
         querying_setup = True
 
         while querying_setup:
-            print("a")
             self.querying_message = QLabel("Querying in progress")
             self.grid.addWidget(self.querying_message, 2, 1)
             querying_setup = False
 
         else:
-            print("b")
             self.querying_setup_2 = True
             while self.querying_setup_2:
-                print("c")
                 self.query_station_count(self.q1, self.q2)
             else:
-                print("d")
-                self.query_data_products(self.q1, self.q2)
+                self.query_data_products()
 
-        '''
-        elif getConfigs("Operations", "querying", config_file) == "True" and getConfigs("Operations", "stage", config_file) == "True":
-            self.querying_message = QLabel("")
-            self.grid.addWidget(self.querying_message, 1, 1)
+        self.show_query_progress_button.setStyleSheet("background-color: gray")
+        self.show_query_progress_button.setDisabled(True)
 
-            self.plt = pg.PlotWidget()
-            self.plt.setBackground([255, 255, 255, 1])
-            self.plt.plot(title='Staged files')
-            self.plt.showGrid(x=True, y=True)
-            self.plt.setLabel('left', 'staged file count')
-            self.plt.setLabel('bottom', 'time')
-            self.plt.resize(*(1000,1000))
-            self.time = [0]
+        self.querying_done = True
 
-            self.grid.addWidget(self.plt, 1, 2)
+        self.show_stage_progress_button.setStyleSheet("background-color: green")
+        self.show_stage_progress_button.setDisabled(False)
 
-            if which_obj == "calibrators":
-                q1 = Querying(SASidsCalibrator, True, config_file)
-                q2 = None
-            elif which_obj == "target":
-                q1 = None
-                q2 = Querying(SASidsTarget, False, config_file)
-            else:
-                q1 = Querying(SASidsCalibrator, True, config_file)
-                q2 = Querying(SASidsTarget, False, config_file)
+    def show_stage_results(self):
+        self.plt = pg.PlotWidget()
+        self.plt.setBackground([255, 255, 255, 1])
+        self.plt.plot(title='Staged files')
+        self.plt.showGrid(x=True, y=True)
+        self.plt.setLabel('left', 'staged file count')
+        self.plt.setLabel('bottom', 'time',)
+        self.plt.resize(*(1000, 1000))
+        self.time = [0]
 
-            self.query_data_products(q1, q2)
+        self.grid.addWidget(self.plt, 2, 2)
+        #self.query_data_products2()
 
-            if q1 is not None:
-                calibrator_SURI = q1.get_SURI()
-            else:
-                calibrator_SURI = ""
+        if self.q1 is not None:
+            calibrator_SURI = self.q1.get_SURI()
+        else:
+            calibrator_SURI = ""
 
-            if q2 is not None:
-                target_SURI = q2.get_SURI()
-            else:
-                target_SURI = ""
+        if self.q2 is not None:
+            target_SURI = self.q2.get_SURI()
+        else:
+            target_SURI = ""
 
-            if calibrator_SURI is not "":
-                self.start_staging(calibrator_SURI, SASidsCalibrator)
-            if target_SURI is not "":
-                self.start_staging(target_SURI, SASidsTarget)
+        if calibrator_SURI is not "":
+            self.start_staging(calibrator_SURI, self.SASidsCalibrator)
+        if target_SURI is not "":
+            self.start_staging(target_SURI, self.SASidsTarget)
 
-            progress = get_progress()
-            if progress is None:
-                time.sleep(10)
+        progress = get_progress()
+        if progress is None:
+            time.sleep(10)
 
-            else:
-                stagesIDs = list(progress.keys())
+        else:
+            stagesIDs = list(progress.keys())
 
-            self.curves = []
-            self.stages_files_counts = []
-            for index in range(0, len(stagesIDs)):
-                staged_file_count_for_stageID = [0]
-                self.stages_files_counts.append(staged_file_count_for_stageID)
-                curve = self.plt.plot(self.time, self.stages_files_counts[index], pen=(255 - index * 10, 0, 0))
-                self.curves.append(curve)
+        self.curves = []
+        self.stages_files_counts = []
+        for index in range(0, len(stagesIDs)):
+            staged_file_count_for_stageID = [0]
+            self.stages_files_counts.append(staged_file_count_for_stageID)
+            curve = self.plt.plot(self.time, self.stages_files_counts[index], pen=(255 - index * 10, 0, 0))
+            self.curves.append(curve)
 
-            self.timer = QtCore.QTimer()
-            self.timer.timeout.connect(self.update_plot)
-            self.timer.start(1000)
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.update_plot)
+        self.timer.start(1000)
 
-            progress = get_progress()
-            if progress is None:
-                self.timer.stop()
-                '''
+        progress = get_progress()
+        if progress is None:
+            self.timer.stop()
+            self.show_stage_progress_button.setStyleSheet("background-color: gray")
+            self.show_stage_progress_button.setDisabled(True)
+
     def start_staging(self, SURIs, SASids):
         for id in SASids:
             stagger = LtaStager()
@@ -364,22 +374,32 @@ class Landmark_GUI(QWidget):
 
         self.querying_setup_2 = False
 
-    def query_data_products(self, q1, q2):
-        print("e")
-        if q1 is None:
-            msg2 = q2.get_data_products()
+    def query_data_products(self):
+        if self.q1 is None:
+            msg2 = self.q2.get_data_products()
             self.querying_message.setText(self.querying_message.text() + "\n" + msg2)
 
-        elif q2 is None:
-            msg1 = q1.get_data_products()
+        elif self.q2 is None:
+            msg1 = self.q1.get_data_products()
             self.querying_message.setText(self.querying_message.text() + "\n" + msg1)
 
         else:
-            msg1 = q1.get_data_products()
+            msg1 = self.q1.get_data_products()
             self.querying_message.setText(self.querying_message.text() + "\n" + msg1)
 
-            msg2 = q2.get_data_products()
+            msg2 = self.q2.get_data_products()
             self.querying_message.setText(self.querying_message.text() + "\n" + msg2)
+
+    def query_data_products2(self):
+        if self.q1 is None:
+            self.q2.get_data_products()
+
+        elif self.q2 is None:
+            self.q1.get_data_products()
+
+        else:
+            self.q1.get_data_products()
+            self.q2.get_data_products()
 
     def get_staging_progress(self):
         progress = get_progress()
@@ -392,8 +412,12 @@ class Landmark_GUI(QWidget):
                     progress_dict[stageID] = float(staged_file_count)
             else:
                 self.timer.stop()
+                self.show_stage_progress_button.setStyleSheet("background-color: gray")
+                self.show_stage_progress_button.setDisabled(True)
         else:
             self.timer.stop()
+            self.show_stage_progress_button.setStyleSheet("background-color: gray")
+            self.show_stage_progress_button.setDisabled(True)
 
         return progress_dict
 
@@ -403,25 +427,33 @@ class Landmark_GUI(QWidget):
         progress = get_progress()
         if progress is None:
             self.timer.stop()
+            self.show_stage_progress_button.setStyleSheet("background-color: gray")
+            self.show_stage_progress_button.setDisabled(True)
 
         elif len(progress_dict) == 0:
             self.timer.stop()
+            self.show_stage_progress_button.setStyleSheet("background-color: gray")
+            self.show_stage_progress_button.setDisabled(True)
 
         elif len(list(self.get_staging_progress().keys())) == 0:
             self.timer.stop()
+            self.show_stage_progress_button.setStyleSheet("background-color: gray")
+            self.show_stage_progress_button.setDisabled(True)
 
         else:
             if len(self.time) == 1:
-                self.time.append(30)
+                self.time.append(1)
             else:
                 self.time.append(self.time[-1] + 1)
-
-            for index in range(0, len(self.get_staging_progress())):
-                stageId = list(self.get_staging_progress().keys())[index]
-                staged_file_count_for_id = self.get_staging_progress()[stageId]
-                self.stages_files_counts[index].append(staged_file_count_for_id)
-                curve = self.curves[index]
-                curve.setData(self.time, self.stages_files_counts[index])
+            try:
+                for index in range(0, len(self.get_staging_progress())):
+                    stageId = list(self.get_staging_progress().keys())[index]
+                    staged_file_count_for_id = self.get_staging_progress()[stageId]
+                    self.stages_files_counts[index].append(staged_file_count_for_id)
+                    curve = self.curves[index]
+                    curve.setData(self.time, self.stages_files_counts[index])
+            except IndexError:
+                pass
 
     def setup(self):
         self.setWindowTitle("Setup")
@@ -634,7 +666,6 @@ class Landmark_GUI(QWidget):
             setConfigs("Paths", "pythonpath", self.pythonpath_input.text(), config_file)
             setConfigs("Paths", "task_file", self.task_file_input.text(), config_file)
 
-            print("Saving LAnDmARk configuration")
             QMessageBox.about(self, "", "LAnDmARk configuration has been saved")
 
 
