@@ -1,5 +1,3 @@
-from typing import Any
-
 from PyQt5.QtCore import QObject
 
 
