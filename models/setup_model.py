@@ -39,7 +39,7 @@ class SetupModel(QObject):
 
     @property
     def stage(self):
-        return self.__querying
+        return self.__stage
 
     @stage.setter
     def stage(self, stage):

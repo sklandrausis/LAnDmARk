@@ -272,8 +272,14 @@
      <height>36</height>
     </rect>
    </property>
+   <property name="inputMask">
+    <string notr="true"/>
+   </property>
    <property name="text">
     <string/>
+   </property>
+   <property name="frame">
+    <bool>true</bool>
    </property>
   </widget>
   <widget class="QLineEdit" name="calibratorSASids_input">
@@ -526,8 +532,14 @@
      <height>36</height>
     </rect>
    </property>
+   <property name="inputMask">
+    <string notr="true"/>
+   </property>
    <property name="text">
     <string>/opt/cep/lofim/daily/Tue/lofar_build/install/gnucxx11_opt</string>
+   </property>
+   <property name="placeholderText">
+    <string notr="true"/>
    </property>
   </widget>
   <widget class="QLineEdit" name="PrefactorPath_input">
@@ -1175,11 +1187,41 @@
      </disabled>
     </palette>
    </property>
+   <property name="whatsThis">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Store values in config.cfg file&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
    <property name="text">
     <string>Save LAnDmARk configuration</string>
    </property>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>which_combobox</tabstop>
+  <tabstop>hdf5root_input</tabstop>
+  <tabstop>process_combobox</tabstop>
+  <tabstop>retrieve_combobox</tabstop>
+  <tabstop>calibratorSASids_input</tabstop>
+  <tabstop>Target_name_input</tabstop>
+  <tabstop>stage_combobox</tabstop>
+  <tabstop>targetSASids_input</tabstop>
+  <tabstop>PROJECTid_input</tabstop>
+  <tabstop>product_type_combobox</tabstop>
+  <tabstop>max_per_node_input</tabstop>
+  <tabstop>method_input</tabstop>
+  <tabstop>wsclean_executable_input</tabstop>
+  <tabstop>losotoPath_input</tabstop>
+  <tabstop>pythonpath_input</tabstop>
+  <tabstop>querying_comboBox</tabstop>
+  <tabstop>task_file_input</tabstop>
+  <tabstop>lofarroot_input</tabstop>
+  <tabstop>PrefactorPath_input</tabstop>
+  <tabstop>casaroot_input</tabstop>
+  <tabstop>aoflagger_input</tabstop>
+  <tabstop>wcsroot_input</tabstop>
+  <tabstop>pyraproot_input</tabstop>
+  <tabstop>save_button</tabstop>
+  <tabstop>WorkingPath_input</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

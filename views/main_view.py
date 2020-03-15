@@ -12,4 +12,4 @@ class MainView(QMainWindow):
         self._ui.setupUi(self)
 
         self._ui.setup_button.clicked.connect(self._main_controller.setup)
-
+        self._ui.run_button.clicked.connect(self._main_controller.run)
