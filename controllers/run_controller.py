@@ -3,6 +3,7 @@ from PyQt5.QtCore import QObject
 from views.query_view import QueryView
 from services.querying_service import Querying
 from views.stage_progress_view import StageProgressPlot
+from views.retrieve_progress_view import RetrieveProgressPlot
 from static_variables import resolve_static
 from parsers._configparser import getConfigs
 
@@ -64,6 +65,10 @@ class RunController(QObject):
             self._ui.show_stage_progress_button.setStyleSheet("background-color: green")
             self._ui.show_stage_progress_button.setDisabled(False)
 
+        elif getConfigs("Operations", "querying", self.config_file) == "True" and getConfigs("Operations", "stage", self.config_file) == "True" and getConfigs("Operations", "retrieve", self.config_file) == "True" and getConfigs("Operations", "process", self.config_file) == "False":
+            self._ui.show_stage_progress_button.setStyleSheet("background-color: green")
+            self._ui.show_stage_progress_button.setDisabled(False)
+
     def query_station_count(self, q1, q2):
         if q1 is None:
             msg = q2.get_station_count()
@@ -95,7 +100,9 @@ class RunController(QObject):
             self.query_view._ui.querying_message.setText(self.query_view._ui.querying_message.text() + "\n" + msg2)
 
     def stage_progress(self):
-        self.stage_progress_plot = StageProgressPlot()
+        self.stage_progress_plot = StageProgressPlot(self._ui)
         self.stage_progress_plot.show()
-        #q1, q2 = self.__query()
 
+    def retrieve_progress(self):
+        self.retrieve_progress_plot = RetrieveProgressPlot()
+        self.retrieve_progress_plot.show()

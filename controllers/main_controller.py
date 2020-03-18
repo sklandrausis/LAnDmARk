@@ -16,4 +16,3 @@ class MainController(QObject):
     @pyqtSlot()
     def run(self):
         self.run_view.show()
-
