@@ -1,6 +1,7 @@
+import sys
 import time
 import pyqtgraph as pg
-from awlofar.toolbox.LtaStager import LtaStager
+from awlofar.toolbox.LtaStager import LtaStager, LtaStagerError
 from services.stager_access import get_progress, download, get_surls_online
 from services.querying_service import Querying
 from parsers._configparser import getConfigs
@@ -9,15 +10,17 @@ from parsers._configparser import getConfigs
 class StageProgressPlot(pg.GraphicsWindow):
     pg.setConfigOption('background', 'w')
     pg.setConfigOption('foreground', 'k')
-    #pg.showGrid(x=True, y=True)
+    # pg.showGrid(x=True, y=True)
     ptr1 = 0
 
-    def __init__(self, _ui, **kargs):
+    def __init__(self, _ui, run_controller, **kargs):
         pg.GraphicsWindow.__init__(self, **kargs)
         self.config_file = "config.cfg"
         self.tmpStagesIDs = set([])
         self._ui = _ui
-        self.download_dir = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", "config.cfg") + "/"
+        self.run_controller = run_controller
+        self.download_dir = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + \
+                            getConfigs("Data", "TargetName", "config.cfg") + "/"
 
         self.SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", self.config_file).replace(" ", "").split(",")]
         project = getConfigs("Data", "PROJECTid", self.config_file)
@@ -35,10 +38,10 @@ class StageProgressPlot(pg.GraphicsWindow):
         parent = None
         self.setParent(parent)
         self.setWindowTitle('Staged files')
-        self.p1 = self.addPlot(labels={'left':'staged file count', 'bottom':'Time'})
+        self.p1 = self.addPlot(labels={'left': 'staged file count', 'bottom': 'Time'})
 
         q1, q2 = self.__query()
-        self.query_data_products(q1,q2)
+        self.query_data_products(q1, q2)
 
         self.time = [0]
 
@@ -81,34 +84,13 @@ class StageProgressPlot(pg.GraphicsWindow):
 
         progress = get_progress()
         if progress is None:
-            self.timer.stop()
-            self._ui.show_stage_progress_button.setStyleSheet("background-color: gray")
-            self._ui.show_stage_progress_button.setDisabled(True)
-            self._ui.show_retrieve_progress_button.setStyleSheet("background-color: green")
-            self._ui.show_retrieve_progress_button.setDisabled(False)
-            for id in self.tmpStagesIDs:
-                surl = get_surls_online(int(id))
-                download(surl, self.download_dir, self.SASidsCalibrator, self.SASidsTarget)
+            self.__retrieve()
 
         elif len(progress_dict) == 0:
-            self.timer.stop()
-            self._ui.show_stage_progress_button.setStyleSheet("background-color: gray")
-            self._ui.show_stage_progress_button.setDisabled(True)
-            self._ui.show_retrieve_progress_button.setStyleSheet("background-color: green")
-            self._ui.show_retrieve_progress_button.setDisabled(False)
-            for id in self.tmpStagesIDs:
-                surl = get_surls_online(int(id))
-                download(surl, self.download_dir, self.SASidsCalibrator, self.SASidsTarget)
+            self.__retrieve()
 
         elif len(list(self.get_staging_progress().keys())) == 0:
-            self.timer.stop()
-            self._ui.show_stage_progress_button.setStyleSheet("background-color: gray")
-            self._ui.show_stage_progress_button.setDisabled(True)
-            self._ui.show_retrieve_progress_button.setStyleSheet("background-color: green")
-            self._ui.show_retrieve_progress_button.setDisabled(False)
-            for id in self.tmpStagesIDs:
-                surl = get_surls_online(int(id))
-                download(surl, self.download_dir, self.SASidsCalibrator, self.SASidsTarget)
+            self.__retrieve()
 
         else:
             if len(self.time) == 1:
@@ -122,8 +104,12 @@ class StageProgressPlot(pg.GraphicsWindow):
                     self.stages_files_counts[index].append(staged_file_count_for_id)
                     curve = self.curves[index]
                     curve.setData(self.time, self.stages_files_counts[index])
-            except IndexError:
-                pass
+            except KeyError as e:
+                print("Key Error", e)
+            except IndexError as e:
+                print("Index Error", e)
+            except:
+                print("Unexpected error:", sys.exc_info()[0])
 
     def get_staging_progress(self):
         progress = get_progress()
@@ -136,31 +122,17 @@ class StageProgressPlot(pg.GraphicsWindow):
                     staged_file_count = progress[stageID]["File count"]
                     progress_dict[stageID] = float(staged_file_count)
             else:
-                self.timer.stop()
-                self._ui.show_stage_progress_button.setStyleSheet("background-color: gray")
-                self._ui.show_stage_progress_button.setDisabled(True)
-                self._ui.show_retrieve_progress_button.setStyleSheet("background-color: green")
-                self._ui.show_retrieve_progress_button.setDisabled(False)
-                for id in self.tmpStagesIDs:
-                    surl = get_surls_online(int(id))
-                    download(surl, self.download_dir, self.SASidsCalibrator, self.SASidsTarget)
+                self.__retrieve()
         else:
-            self.timer.stop()
-            self._ui.show_stage_progress_button.setStyleSheet("background-color: gray")
-            self._ui.show_stage_progress_button.setDisabled(True)
-            self._ui.show_retrieve_progress_button.setStyleSheet("background-color: green")
-            self._ui.show_retrieve_progress_button.setDisabled(False)
-            for id in self.tmpStagesIDs:
-                surl = get_surls_online(int(id))
-                download(surl, self.download_dir, self.SASidsCalibrator, self.SASidsTarget)
+            self.__retrieve()
 
         return progress_dict
 
     def __query(self):
-        if getConfigs("Operations", "which_obj",  self.config_file) == "calibrators":
+        if getConfigs("Operations", "which_obj", self.config_file) == "calibrators":
             q1 = Querying(self.SASidsCalibrator, True, self.config_file)
             q2 = None
-        elif getConfigs("Operations", "which_obj",  self.config_file) == "target":
+        elif getConfigs("Operations", "which_obj", self.config_file) == "target":
             q1 = None
             q2 = Querying(self.SASidsTarget, False, self.config_file)
         else:
@@ -181,5 +153,23 @@ class StageProgressPlot(pg.GraphicsWindow):
 
     def start_staging(self, SURIs, SASids):
         for id in SASids:
-            stagger = LtaStager()
-            stagger.stage_uris(SURIs[id])
+            try:
+                stagger = LtaStager()
+                stagger.stage_uris(SURIs[id])
+            except LtaStagerError as e:
+                print("Lta Stager Error", e)
+            except:
+                print("Unexpected error:", sys.exc_info()[0])
+
+    def __retrieve(self):
+        retrieve_setup = True
+        while retrieve_setup:
+            self.timer.stop()
+            self._ui.show_stage_progress_button.setStyleSheet("background-color: gray")
+            self._ui.show_stage_progress_button.setDisabled(True)
+            retrieve_setup = False
+        else:
+            if getConfigs("Operations", "retrieve", self.config_file) == "True":
+                for id in self.tmpStagesIDs:
+                    surl = get_surls_online(int(id))
+                    download(surl, self.download_dir, self.SASidsCalibrator, self.SASidsTarget)

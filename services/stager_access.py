@@ -85,6 +85,8 @@ def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
     ''' Download file '''
     download_files = []
 
+    dir_to_tmp = dir_to
+
     for surl in surls:
 
         if "sara" in surl:
@@ -99,8 +101,19 @@ def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
         download_files.append(prefix + surl)
 
     for file in download_files:
-        os.system("wget " + file + " -P " + dir_to)
+        for calSASid in SASidsCalibrator:
+            dir_to = dir_to_tmp
+            if 'L' + str(calSASid) in file:
+                dir_to += "/" + "calibrators/" + str(calSASid) + "_RAW/"
+                os.system("wget " + file + " -P " + dir_to)
 
+        for tarSASid in SASidsTarget:
+            dir_to = dir_to_tmp
+            if 'L' + str(tarSASid) in file:
+                os.system("wget " + file + " -P " + dir_to)
+                dir_to += "/" + "targets/" + str(tarSASid) + "_RAW/"
+
+    dir_to = dir_to_tmp
     for filename in os.listdir(dir_to):
         if ".tar" in filename:
             outname = dir_to + "/" + filename.split("%")[-1]

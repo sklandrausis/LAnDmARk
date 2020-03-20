@@ -1,5 +1,4 @@
 import os
-import time
 import pyqtgraph as pg
 from parsers._configparser import getConfigs
 
@@ -65,10 +64,11 @@ class RetrieveProgressPlot(pg.GraphicsWindow):
 
         for id in list(self.retrieve_files_counts.keys()):
             if id in self.SASidsCalibrator:
-                dir = self.download_dir + "calibrators/" + id + "_RAW/"
+                dir = self.download_dir + "calibrators/" + str(id) + "_RAW/"
             elif id in self.SASidsTarget:
-                dir = self.download_dir + "targets/" + id + "_RAW/"
+                dir = self.download_dir + "targets/" + str(id) + "_RAW/"
 
-            file_count = len([f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f))])
+            file_count = len([f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f)) and ".tar" in f])
             self.retrieve_files_counts[id].append(file_count)
+            curve = self.curves[list(self.retrieve_files_counts.keys()).index(id)]
             curve.setData(self.time, self.retrieve_files_counts[id])
