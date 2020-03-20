@@ -1,9 +1,11 @@
 import sys
+import os
 from PyQt5.QtCore import QObject
 from views.query_view import QueryView
 from services.querying_service import Querying
 from views.stage_progress_view import StageProgressPlot
 from views.retrieve_progress_view import RetrieveProgressPlot
+from views.process_view import ProcessView
 from parsers._configparser import getConfigs
 
 
@@ -14,6 +16,7 @@ class RunController(QObject):
         self._ui = _ui
         self.config_file = "config.cfg"
         self.query_done = False
+        self.done_color = "background-color: green"
         self.SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", self.config_file).replace(" ", "").split(",")]
         project = getConfigs("Data", "PROJECTid", self.config_file)
 
@@ -60,6 +63,7 @@ class RunController(QObject):
                     self.query_data_products()
 
             self.query_done = True
+            self._ui.show_query_progress_button.setStyleSheet(self.done_color)
 
     def query_station_count(self,):
         if self.q1 is None:
@@ -109,3 +113,48 @@ class RunController(QObject):
     def retrieve_progress(self):
         self.retrieve_progress_plot = RetrieveProgressPlot()
         self.retrieve_progress_plot.show()
+
+    def process_progress(self):
+        self.process_progress_view = ProcessView()
+        self.process_progress_view.show()
+
+        workingDir = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + \
+                     getConfigs("Data", "TargetName", "config.cfg") + "/"
+        calibratorDir = workingDir + "calibrators" + "/"
+        targetDir = workingDir + "targets" + "/"
+        imageDir = workingDir + "imaging_deep" + "/"
+
+        if getConfigs("Operations", "which_obj", "config.cfg") == "all" or len(
+                getConfigs("Operations", "which_obj", "config.cfg")) == 0:
+            for id in self.SASidsCalibrator:
+                parsetCalib = self.calibratorDir + str(id) + "_RAW/" + "Pre-Facet-Calibrator.parset"
+                configCalib = self.calibratorDir + str(id) + "_RAW/" + "pipeline.cfg"
+                self.run_pipeline(parsetCalib, configCalib)  # run calibrator
+
+            for id in self.SASidsTarget:
+                parsetTarget = targetDir + str(id) + "_RAW/" + "Pre-Facet-Target.parset"
+                configTarget = targetDir + str(id) + "_RAW/" + "pipeline.cfg"
+                self.run_pipeline(parsetTarget, configTarget)  # run target
+
+            parsetImage = imageDir + "Initial-Subtract.parset"
+            configImage = imageDir + "pipeline.cfg"
+            self. run_pipeline(parsetImage, configImage)  # run imaging
+            sys.exit(0)
+
+        elif getConfigs("Operations", "which_obj", "config.cfg") == "targets":
+
+            for id in self.SASidsTarget:
+                parsetTarget = targetDir + str(id) + "_RAW/" + "Pre-Facet-Target.parset"
+                configTarget = targetDir + str(id) + "_RAW/" + "pipeline.cfg"
+                self.run_pipeline(parsetTarget, configTarget)  # run target
+        else:
+            for id in self.SASidsCalibrator:
+                parsetCalib = calibratorDir + str(id) + "_RAW/" + "Pre-Facet-Calibrator.parset"
+                configCalib = calibratorDir + str(id) + "_RAW/" + "pipeline.cfg"
+                self.run_pipeline(parsetCalib, configCalib)  # run calibrator
+
+    def run_pipeline(parset_file, config_file):
+        try:
+            os.system('genericpipeline.py ' + parset_file + ' -c ' + config_file + ' -d')
+        except:
+            print("Something went wrong")

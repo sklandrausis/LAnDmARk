@@ -13,8 +13,9 @@ class RunView(QMainWindow):
         self._ui.show_query_progress_button.clicked.connect(self.run_controller.query_progress)
         self._ui.show_stage_progress_button.clicked.connect(self.run_controller.stage_progress)
         self._ui.show_retrieve_progress_button.clicked.connect(self.run_controller.retrieve_progress)
+        self._ui.show_process_progress_button.clicked.connect(self.run_controller.process_progress)
         config_file = "config.cfg"
-        self.run_color = "background-color: green"
+        self.run_color = "background-color: yellow"
 
         self.__setup(getConfigs("Operations", "querying", config_file),
                      getConfigs("Operations", "stage", config_file),
