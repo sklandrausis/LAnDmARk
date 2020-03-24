@@ -124,6 +124,7 @@ class RunController(QObject):
         targetDir = workingDir + "targets" + "/"
         imageDir = workingDir + "imaging_deep" + "/"
 
+        '''
         if getConfigs("Operations", "which_obj", "config.cfg") == "all" or len(
                 getConfigs("Operations", "which_obj", "config.cfg")) == 0:
             for id in self.SASidsCalibrator:
@@ -152,6 +153,7 @@ class RunController(QObject):
                 parsetCalib = calibratorDir + str(id) + "_RAW/" + "Pre-Facet-Calibrator.parset"
                 configCalib = calibratorDir + str(id) + "_RAW/" + "pipeline.cfg"
                 self.run_pipeline(parsetCalib, configCalib)  # run calibrator
+        '''
 
     def run_pipeline(parset_file, config_file):
         try:
