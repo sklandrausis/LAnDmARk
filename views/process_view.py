@@ -78,6 +78,7 @@ class ProcessView(QMainWindow):
                 self.run_pipeline(parsetTarget, configTarget)  # run target
                 self.timer.start(80, self)
                 self.progress_bars_index += 1
+                self.log_file = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", "config.cfg") + "/" + "targets" + "pipeline_" + str(id) + ".log"
 
         else:
             self.tasks = get_pipeline_task(prefactor_path, calibrator_parset_file)
@@ -89,6 +90,7 @@ class ProcessView(QMainWindow):
                 self.run_pipeline(parsetCalib, configCalib)  # run calibrator
                 self.timer.start(80, self)
                 self.progress_bars_index += 1
+                self.log_file = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", "config.cfg") + "/" + "calibrators" + "pipeline_" + str(id) + ".log"
 
         self.timer = QBasicTimer()
         self.step = 0
@@ -129,7 +131,7 @@ class ProcessView(QMainWindow):
     def get_progress_value(self):
         return self.progress / len(self.tasks)
 
-    def run_pipeline(parset_file, config_file):
+    def run_pipeline(self, parset_file, config_file):
         try:
             os.system('genericpipeline.py ' + parset_file + ' -c ' + config_file + ' -d')
         except:
@@ -137,7 +139,7 @@ class ProcessView(QMainWindow):
 
     def get_task_from_log_file(self):
         task = ""
-        log_file = getConfigs("")
+        log_file = self.log_file
         with open(log_file) as parset_file:
             lines = parset_file.readlines()
             for line in lines:

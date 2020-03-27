@@ -5,12 +5,12 @@ import argparse
 from parsers._configparser import setConfigs, getConfigs
 
 
-def createDirectory(DirName):
-    os.system("mkdir -p " + DirName)
+def create_directory(dir_name):
+    os.system("mkdir -p " + dir_name)
 
 
-def copyFiles(fileFrom, fileTo):
-     os.system("cp -rfu " + fileFrom + "  " + fileTo)
+def copy_files(file_from, file_to):
+     os.system("cp -rfu " + file_from + "  " + file_to)
 
 
 def parse_arguments():
@@ -25,7 +25,7 @@ def get_args(key):
     return str(parse_arguments().__dict__[key])
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     config_file = get_args("config")
     workingDir = getConfigs("Paths", "WorkingPath", config_file)
     targetName = getConfigs("Data", "TargetName",config_file)
@@ -33,6 +33,7 @@ if __name__=="__main__":
     PrefactorDir = getConfigs("Paths", "PrefactorPath", config_file) + "/"
     targetSASids = getConfigs("Data", "targetSASids", config_file).replace(" ", "").split(",")
     project = getConfigs("Data", "PROJECTid", config_file)
+    task_file = getConfigs("Paths", "task_file", config_file)
 
     if len(getConfigs("Data", "calibratorSASids", config_file)) == 0:
         if project == "MSSS_HBA_2013":
@@ -52,16 +53,16 @@ if __name__=="__main__":
     targetDirResults = workingDir + "targets/" + "targets_results" + "/"
 
     # Creating directory structure
-    createDirectory(workingDir)
-    createDirectory(imagingDir)
-    createDirectory(calibratorDir)
-    createDirectory(targetDir)
-    createDirectory(auxDir)
-    createDirectory(auxDir + "/selection")
-    createDirectory(auxDir + "/stage")
-    createDirectory(auxDir + "/retrieve")
-    createDirectory(calibratorDirResults)
-    createDirectory(targetDirResults)
+    create_directory(workingDir)
+    create_directory(imagingDir)
+    create_directory(calibratorDir)
+    create_directory(targetDir)
+    create_directory(auxDir)
+    create_directory(auxDir + "/selection")
+    create_directory(auxDir + "/stage")
+    create_directory(auxDir + "/retrieve")
+    create_directory(calibratorDirResults)
+    create_directory(targetDirResults)
 
     lofarroot = getConfigs("Paths", "lofarroot", config_file)
     casaroot = getConfigs("Paths", "casaroot", config_file)
@@ -76,8 +77,8 @@ if __name__=="__main__":
     pythonpath = getConfigs("Paths", "pythonpath", config_file)
 
     # Creating imaging files
-    copyFiles(PrefactorDir + 'pipeline.cfg', imagingDir)
-    copyFiles(PrefactorDir + 'Initial-Subtract.parset', imagingDir)
+    copy_files(PrefactorDir + 'pipeline.cfg', imagingDir)
+    copy_files(PrefactorDir + 'Pre-Facet-Image.parset', imagingDir)
     setConfigs("DEFAULT", "lofarroot", lofarroot, imagingDir + "pipeline.cfg")
     setConfigs("DEFAULT", "casaroot", casaroot, imagingDir + "pipeline.cfg")
     setConfigs("DEFAULT", "pyraproot", pyraproot, imagingDir + "pipeline.cfg")
@@ -88,7 +89,7 @@ if __name__=="__main__":
     setConfigs("DEFAULT", "pythonpath", pythonpath, imagingDir + "pipeline.cfg")
     setConfigs("remote", "max_per_node", max_per_node, imagingDir + "pipeline.cfg")
 
-    with open(imagingDir + "/Initial-Subtract.parset", "r") as parset_file:
+    with open(imagingDir + "/Pre-Facet-Image.parset", "r") as parset_file:
         parset_file = parset_file.readlines()
 
     for line in parset_file:
@@ -104,17 +105,20 @@ if __name__=="__main__":
         elif "wsclean_executable" in line:
             parset_file[parset_file.index(line)] = line.replace(line, "! wsclean_executable       =   " + wsclean_executable +  "  ## path to your local WSClean executable\n")
 
-    with open(imagingDir + "/Initial-Subtract.parset", "w") as parset_filew:
+    with open(imagingDir + "/Pre-Facet-Image.parset"
+                           "", "w") as parset_filew:
         parset_filew.write("".join(parset_file))
 
     for id in SASidsCalibrator:
         print("Setup for calibrator id", id)
         id = str(id)
-        createDirectory(calibratorDir + id + "_RAW")
+        create_directory(calibratorDir + id + "_RAW")
+        job_directory = workingDir + "/" + targetName + "/" + "calibrators/calibrators_results/"
+        log_file = workingDir + "/" + targetName + "/" + "calibrators" + "pipeline_" + id + ".log"
 
         # Creating calibrator files
-        copyFiles(PrefactorDir + 'pipeline.cfg', calibratorDir + id + "_RAW/")
-        copyFiles(PrefactorDir + 'Pre-Facet-Calibrator.parset',  calibratorDir + id + "_RAW/")
+        copy_files(PrefactorDir + 'pipeline.cfg', calibratorDir + id + "_RAW/")
+        copy_files(PrefactorDir + 'Pre-Facet-Calibrator.parset',  calibratorDir + id + "_RAW/")
         setConfigs("DEFAULT", "lofarroot", lofarroot, calibratorDir + id + "_RAW" + "/pipeline.cfg")
         setConfigs("DEFAULT", "casaroot", casaroot, calibratorDir + id + "_RAW" + "/pipeline.cfg")
         setConfigs("DEFAULT", "pyraproot", pyraproot, calibratorDir + id + "_RAW" + "/pipeline.cfg")
@@ -124,6 +128,9 @@ if __name__=="__main__":
         setConfigs("DEFAULT", "working_directory", calibratorDir + id + "_RAW", calibratorDir + id + "_RAW" + "/pipeline.cfg")
         setConfigs("DEFAULT", "pythonpath", pythonpath, calibratorDir + id + "_RAW" + "/pipeline.cfg")
         setConfigs("remote", "max_per_node", max_per_node, calibratorDir + id + "_RAW" + "/pipeline.cfg")
+        setConfigs("layout", "job_directory", job_directory, calibratorDir + id + "_RAW" + "/pipeline.cfg")
+        setConfigs("DEFAULT", "task_files", task_file, calibratorDir + id + "_RAW" + "/pipeline.cfg")
+        setConfigs("logging", "log_file", log_file, calibratorDir + id + "_RAW" + "/pipeline.cfg")
 
         with open(calibratorDir + id + "_RAW" + '/Pre-Facet-Calibrator.parset', "r") as parset_file:
             parset_file = parset_file.readlines()
@@ -144,16 +151,28 @@ if __name__=="__main__":
             elif "! aoflagger" in line:
                 parset_file[parset_file.index(line)] = line.replace(line, "! aoflagger       =   " + aoflagger + "  ## path to your aoflagger executable\n")
 
+            elif "! job_directory " in line:
+                parset_file[parset_file.index(line)] = line.replace(line, "! job_directory        =   " + job_directory + "  ## directory of the prefactor outputs\n")
+
+            elif "! results_directory " in line:
+                parset_file[parset_file.index(line)] = line.replace(line, "! results_directory        =   " + "{{ job_directory }}/results" + "  ## location of the results\n")
+
+            elif "! inspection_directory " in line:
+                parset_file[parset_file.index(line)] = line.replace(line, "! inspection_directory         =   " + "{{ results_directory }}/inspection_" + id + "  ## directory where the inspection plots will be stored \n")
+
+            elif "! cal_values_directory " in line:
+                parset_file[parset_file.index(line)] = line.replace(line, "! cal_values_directory        =   " + "{{ results_directory }}/cal_values_" + id + "  ## directory where the final h5parm solution set will be stored \n")
+
         with open(calibratorDir + id + "_RAW" + '/Pre-Facet-Calibrator.parset', "w") as parset_filew:
             parset_filew.write("".join(parset_file))
 
     for id in targetSASids:
         print("Setup for target id", id)
-        createDirectory(targetDir + id + "_RAW")
+        create_directory(targetDir + id + "_RAW")
 
         # Creating target files
-        copyFiles(PrefactorDir + 'pipeline.cfg', targetDir + id + "_RAW")
-        copyFiles(PrefactorDir + 'Pre-Facet-Target.parset', targetDir + id + "_RAW")
+        copy_files(PrefactorDir + 'pipeline.cfg', targetDir + id + "_RAW")
+        copy_files(PrefactorDir + 'Pre-Facet-Target.parset', targetDir + id + "_RAW")
         setConfigs("DEFAULT", "lofarroot", lofarroot, targetDir + id + "_RAW" + "/pipeline.cfg")
         setConfigs("DEFAULT", "casaroot", casaroot, targetDir + id + "_RAW" + "/pipeline.cfg")
         setConfigs("DEFAULT", "pyraproot", pyraproot, targetDir + id + "_RAW" + "/pipeline.cfg")

@@ -40,61 +40,8 @@ class SetupController(QObject):
         self.setup_model.pythonpath = self._ui.pythonpath_input.text()
         self.setup_model.task_file = self._ui.task_file_input.text()
 
-        if self.setup_model.querying == "True" or self.setup_model.stage == "True" or self.setup_model.retrive == "True":
-            if len(self.setup_model.WorkingPath) == 0:
-                valid_count += 1
-                QMessageBox.warning(QMessageBox(), "Warning", "Working path cannot be empty")
-            else:
-                if not os.path.isdir(self.setup_model.WorkingPath):
-                    valid_count += 1
-                    QMessageBox.warning(QMessageBox(), "Warning", "Working path is not existing")
-
-            if len(self.setup_model.PROJECTid) == 0:
-                valid_count += 1
-                QMessageBox.warning(QMessageBox(), "Warning", "Project ID cannot be empty")
-            else:
-                project = self.setup_model.PROJECTid
-                context.set_project(project)
-
-                if project != context.get_current_project().name:
-                    valid_count += 1
-                    QMessageBox.warning(QMessageBox(), "Warning", "You are not member of project")
-
-                else:
-                    if self.setup_model.which_obj == "calibrators":
-                        if len(self.setup_model.calibratorSASids) == 0:
-                            if project != "MSSS_HBA_2013":
-                                valid_count += 1
-                                QMessageBox.warning(QMessageBox(), "Warning", "If project is not MSSS_HBA_2013 SAS id for calibrator must be specified")
-                            if len(self.setup_model.targetSASids) == 0:
-                                valid_count += 1
-                                QMessageBox.warning(QMessageBox(), "Warning", "Target SAS id must be specified")
-
-                    elif self.setup_model.which_obj == "target":
-                        if len(self.setup_model.targetSASids) == 0:
-                            valid_count += 1
-                            QMessageBox.warning(QMessageBox(), "Warning", "Target SAS id must be specified")
-                        if len(self.setup_model.Target_name) == 0:
-                            valid_count += 1
-                            QMessageBox.warning(QMessageBox(), "Warning", "Target name must be specified")
-                    else:
-                        if len(self.setup_model.calibratorSASids) == 0:
-                            if project != "MSSS_HBA_2013":
-                                valid_count += 1
-                                QMessageBox.warning(QMessageBox(), "Warning", "If project is not MSSS_HBA_2013 SAS id for calibrator must be specified")
-
-                            if len(self.setup_model.targetSASids) == 0:
-                                valid_count += 1
-                                QMessageBox.warning(QMessageBox(), "Warning", "Target SAS id must be specified")
-
-                        if len(self.setup_model.targetSASids) == 0:
-                            valid_count += 1
-                            QMessageBox.warning(QMessageBox(), "Warning", "Target SAS id must be specified")
-                        if len(self.setup_model.Target_name) == 0:
-                            valid_count += 1
-                            QMessageBox.warning(QMessageBox(), "Warning", "Target name must be specified")
-
-        elif self.setup_model.process == "True":
+        def process_valid():
+            valid_count = 0
             if len(self.setup_model.WorkingPath) == 0:
                 valid_count += 1
                 QMessageBox.warning(QMessageBox(), "Warning", "Working path cannot be empty")
@@ -182,6 +129,76 @@ class SetupController(QObject):
                 if not os.path.isdir(self.setup_model.pythonpath):
                     valid_count += 1
                     QMessageBox.warning(QMessageBox(), "Warning", "python path is not existing")
+            return valid_count
+
+        if self.setup_model.querying == "True" or self.setup_model.stage == "True" or self.setup_model.retrive == "True" or self.setup_model.process == "True":
+            if len(self.setup_model.WorkingPath) == 0:
+                valid_count += 1
+                QMessageBox.warning(QMessageBox(), "Warning", "Working path cannot be empty")
+            else:
+                if not os.path.isdir(self.setup_model.WorkingPath):
+                    valid_count += 1
+                    QMessageBox.warning(QMessageBox(), "Warning", "Working path is not existing")
+
+            if len(self.setup_model.PROJECTid) == 0:
+                valid_count += 1
+                QMessageBox.warning(QMessageBox(), "Warning", "Project ID cannot be empty")
+            else:
+                project = self.setup_model.PROJECTid
+                context.set_project(project)
+
+                if project != context.get_current_project().name:
+                    valid_count += 1
+                    QMessageBox.warning(QMessageBox(), "Warning", "You are not member of project")
+
+                else:
+                    if self.setup_model.which_obj == "calibrators":
+                        if len(self.setup_model.calibratorSASids) == 0:
+                            if project != "MSSS_HBA_2013":
+                                valid_count += 1
+                                QMessageBox.warning(QMessageBox(), "Warning", "If project is not MSSS_HBA_2013 SAS id for calibrator must be specified")
+                            if len(self.setup_model.targetSASids) == 0:
+                                valid_count += 1
+                                QMessageBox.warning(QMessageBox(), "Warning", "Target SAS id must be specified")
+
+                    elif self.setup_model.which_obj == "target":
+                        if len(self.setup_model.targetSASids) == 0:
+                            valid_count += 1
+                            QMessageBox.warning(QMessageBox(), "Warning", "Target SAS id must be specified")
+                        if len(self.setup_model.Target_name) == 0:
+                            valid_count += 1
+                            QMessageBox.warning(QMessageBox(), "Warning", "Target name must be specified")
+                    else:
+                        if len(self.setup_model.calibratorSASids) == 0:
+                            if project != "MSSS_HBA_2013":
+                                valid_count += 1
+                                QMessageBox.warning(QMessageBox(), "Warning", "If project is not MSSS_HBA_2013 SAS id for calibrator must be specified")
+
+                            if len(self.setup_model.targetSASids) == 0:
+                                valid_count += 1
+                                QMessageBox.warning(QMessageBox(), "Warning", "Target SAS id must be specified")
+
+                        if len(self.setup_model.targetSASids) == 0:
+                            valid_count += 1
+                            QMessageBox.warning(QMessageBox(), "Warning", "Target SAS id must be specified")
+                        if len(self.setup_model.Target_name) == 0:
+                            valid_count += 1
+                            QMessageBox.warning(QMessageBox(), "Warning", "Target name must be specified")
+
+        if self.setup_model.process == "True" and self.setup_model.which_obj == "calibrators":
+            valid_count += process_valid()
+
+        if self.setup_model.process == "True" and self.setup_model.which_obj == "target":
+            valid_count += process_valid()
+            if len(self.setup_model.targetSASids) != 0 and self.setup_model.PROJECTid == "MSSS_HBA_2013":
+                targetSASids = [t.trim() for t in self.setup_model.targetSASids.split(",")]
+
+                for id in targetSASids:
+                    calibrator_id = id -1
+                    cal_solution_file = self.setup_model.WorkingPath + "/" + self.setup_model.Target_name + "/" + "calibrators/calibrators_results/results/cal_values_" + str(calibrator_id) + "/" + "cal_solutions.h5"
+                    if not os.path.isfile(cal_solution_file):
+                        valid_count += 1
+                        QMessageBox.warning(QMessageBox(), "Warning", "calibrator solution file " + cal_solution_file + " do not exits")
 
         if valid_count == 0:
             valid = True
