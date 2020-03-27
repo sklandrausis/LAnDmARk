@@ -1,5 +1,6 @@
+import os
 from PyQt5.QtWidgets import QMainWindow, QProgressBar, QLabel
-from PyQt5.QtCore import QBasicTimer, QRect
+from PyQt5.QtCore import QBasicTimer
 from parsers._configparser import getConfigs
 
 
@@ -10,7 +11,7 @@ def get_pipeline_task(prefactor_path, parset_file):
         lines = parset_file.readlines()
         for line in lines:
             if "pipeline.steps." in line:
-                tasks_tmp = [t.strip() for t in line.split("=")[-1].replace("[", "").replace("]", "").replace("{","").replace("}", "").strip().split(",")]
+                tasks_tmp = [t.strip() for t in line.split("=")[-1].replace("[", "").replace("]", "").replace("{", "").replace("}","").strip().split(",")]
                 tasks.extend(tasks_tmp)
     return tasks
 
@@ -19,15 +20,19 @@ class ProcessView(QMainWindow):
     def __init__(self):
         super().__init__()
         self.progress_bars = []
-        self.progress_bars_index = -1
+        self.progress_bars_index = 0
         self.progress = 0
         self.config_file = "config.cfg"
+        workingDir = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", "config.cfg") + "/"
+        self.calibratorDir = workingDir + "calibrators" + "/"
+        self.targetDir = workingDir + "targets" + "/"
+        self.imageDir = workingDir + "imaging_deep" + "/"
+
 
         prefactor_path = getConfigs("Paths", "prefactorpath", self.config_file)
         calibrator_parset_file = "Pre-Facet-Calibrator.parset"
         target_parset_file = "Pre-Facet-Target.parset"
         imaging_parset_file = "Pre-Facet-Image.parset"
-
 
         self.SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", self.config_file).replace(" ", "").split(",")]
         project = getConfigs("Data", "PROJECTid", self.config_file)
@@ -63,24 +68,26 @@ class ProcessView(QMainWindow):
             self.run_pipeline(parsetImage, configImage)  # run imaging
             '''
 
-
         elif getConfigs("Operations", "which_obj", "config.cfg") == "targets":
-            target_tasks = get_pipeline_task(prefactor_path, target_parset_file)
-            '''
+            self.tasks = get_pipeline_task(prefactor_path, target_parset_file)
+            self.create_init_view(self.SASidsTarget)
 
             for id in self.SASidsTarget:
-                parsetTarget = targetDir + str(id) + "_RAW/" + "Pre-Facet-Target.parset"
-                configTarget = targetDir + str(id) + "_RAW/" + "pipeline.cfg"
+                parsetTarget = self.targetDir + str(id) + "_RAW/" + "Pre-Facet-Target.parset"
+                configTarget = self.targetDir + str(id) + "_RAW/" + "pipeline.cfg"
                 self.run_pipeline(parsetTarget, configTarget)  # run target
-                '''
+                self.timer.start(80, self)
+                self.progress_bars_index += 1
+
         else:
-            self.calibrator_tasks = get_pipeline_task(prefactor_path, calibrator_parset_file)
+            self.tasks = get_pipeline_task(prefactor_path, calibrator_parset_file)
             self.create_init_view(self.SASidsCalibrator)
 
             for id in self.SASidsCalibrator:
-                #parsetCalib = calibratorDir + str(id) + "_RAW/" + "Pre-Facet-Calibrator.parset"
-                #configCalib = calibratorDir + str(id) + "_RAW/" + "pipeline.cfg"
-                #self.run_pipeline(parsetCalib, configCalib)  # run calibrator
+                parsetCalib = self.calibratorDir + str(id) + "_RAW/" + "Pre-Facet-Calibrator.parset"
+                configCalib = self.calibratorDir + str(id) + "_RAW/" + "pipeline.cfg"
+                self.run_pipeline(parsetCalib, configCalib)  # run calibrator
+                self.timer.start(80, self)
                 self.progress_bars_index += 1
 
         self.timer = QBasicTimer()
@@ -115,12 +122,26 @@ class ProcessView(QMainWindow):
             self.timer.stop()
             return
 
-        self.progress += 1
+        self.progress = self.tasks.index(self.get_task_from_log_file())
         self.step = self.get_progress_value()
-        print(self.step)
         self.progress_bars[self.progress_bars_index].setValue(self.step)
 
-
     def get_progress_value(self):
-        return self.progress /len(self.calibrator_tasks)
+        return self.progress / len(self.tasks)
 
+    def run_pipeline(parset_file, config_file):
+        try:
+            os.system('genericpipeline.py ' + parset_file + ' -c ' + config_file + ' -d')
+        except:
+            print("Something went wrong")
+
+    def get_task_from_log_file(self):
+        task = ""
+        log_file = getConfigs("")
+        with open(log_file) as parset_file:
+            lines = parset_file.readlines()
+            for line in lines:
+                if "completed successfully" in line:
+                    task = line.split(" ")[5]
+
+        return task

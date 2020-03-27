@@ -109,7 +109,6 @@ class RunController(QObject):
         self.stage_progress_plot = StageProgressPlot(self._ui, self)
         self.stage_progress_plot.show()
 
-
     def retrieve_progress(self):
         self.retrieve_progress_plot = RetrieveProgressPlot()
         self.retrieve_progress_plot.show()
@@ -117,46 +116,3 @@ class RunController(QObject):
     def process_progress(self):
         self.process_progress_view = ProcessView()
         self.process_progress_view.show()
-
-        workingDir = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + \
-                     getConfigs("Data", "TargetName", "config.cfg") + "/"
-        calibratorDir = workingDir + "calibrators" + "/"
-        targetDir = workingDir + "targets" + "/"
-        imageDir = workingDir + "imaging_deep" + "/"
-
-        '''
-        if getConfigs("Operations", "which_obj", "config.cfg") == "all" or len(
-                getConfigs("Operations", "which_obj", "config.cfg")) == 0:
-            for id in self.SASidsCalibrator:
-                parsetCalib = self.calibratorDir + str(id) + "_RAW/" + "Pre-Facet-Calibrator.parset"
-                configCalib = self.calibratorDir + str(id) + "_RAW/" + "pipeline.cfg"
-                self.run_pipeline(parsetCalib, configCalib)  # run calibrator
-
-            for id in self.SASidsTarget:
-                parsetTarget = targetDir + str(id) + "_RAW/" + "Pre-Facet-Target.parset"
-                configTarget = targetDir + str(id) + "_RAW/" + "pipeline.cfg"
-                self.run_pipeline(parsetTarget, configTarget)  # run target
-
-            parsetImage = imageDir + "Initial-Subtract.parset"
-            configImage = imageDir + "pipeline.cfg"
-            self. run_pipeline(parsetImage, configImage)  # run imaging
-            sys.exit(0)
-
-        elif getConfigs("Operations", "which_obj", "config.cfg") == "targets":
-
-            for id in self.SASidsTarget:
-                parsetTarget = targetDir + str(id) + "_RAW/" + "Pre-Facet-Target.parset"
-                configTarget = targetDir + str(id) + "_RAW/" + "pipeline.cfg"
-                self.run_pipeline(parsetTarget, configTarget)  # run target
-        else:
-            for id in self.SASidsCalibrator:
-                parsetCalib = calibratorDir + str(id) + "_RAW/" + "Pre-Facet-Calibrator.parset"
-                configCalib = calibratorDir + str(id) + "_RAW/" + "pipeline.cfg"
-                self.run_pipeline(parsetCalib, configCalib)  # run calibrator
-        '''
-
-    def run_pipeline(parset_file, config_file):
-        try:
-            os.system('genericpipeline.py ' + parset_file + ' -c ' + config_file + ' -d')
-        except:
-            print("Something went wrong")
