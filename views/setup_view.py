@@ -5,16 +5,17 @@ from parsers._configparser import getConfigs
 
 
 class SetupView(QMainWindow):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, run_ui, *args, **kwargs):
         super(SetupView, self).__init__(*args, **kwargs)
 
         self.config_file = "config.cfg"
+        self.run_ui = run_ui
 
         self._ui = Ui_setup_view()
         self._ui.setupUi(self)
         self.init_color_setup()
 
-        self._setup_controller = SetupController(self._ui)
+        self._setup_controller = SetupController(self._ui,  self.run_ui)
         self._ui.save_button.clicked.connect(self._setup_controller.save_configuration)
 
         self._ui.querying_comboBox.currentTextChanged.connect(self._setup_controller.on_querying_combobox_changed)

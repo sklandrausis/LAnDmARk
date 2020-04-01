@@ -7,10 +7,11 @@ from parsers._configparser import setConfigs
 
 
 class SetupController(QObject):
-    def __init__(self, _ui):
+    def __init__(self, _ui, run_ui):
         super().__init__()
         self.setup_model = SetupModel()
         self._ui = _ui
+        self.run_ui = run_ui
 
     @pyqtSlot(bool, name="valid")
     def __validate_setup(self):
@@ -247,14 +248,29 @@ class SetupController(QObject):
     def on_querying_combobox_changed(self):
         if self._ui.querying_comboBox.currentText() == "True":
             self.init_color_setup()
+            self.run_ui.show_query_progress_button.setStyleSheet("background-color: yellow")
+            self.run_ui.show_query_progress_button.setDisabled(False)
+        elif self._ui.querying_comboBox.currentText() == "False":
+            self.run_ui.show_query_progress_button.setDisabled(True)
+            self.run_ui.show_query_progress_button.setStyleSheet("background-color: white")
 
     def on_stage_combobox_changed(self):
         if self._ui.stage_combobox.currentText() == "True":
             self.init_color_setup()
+            self.run_ui.show_stage_progress_button.setStyleSheet("background-color: yellow")
+            self.run_ui.show_stage_progress_button.setDisabled(False)
+        elif self._ui.stage_combobox.currentText() == "False":
+            self.run_ui.show_stage_progress_button.setDisabled(True)
+            self.run_ui.show_stage_progress_button.setStyleSheet("background-color: white")
 
     def on_retrieve_combobox_changed(self):
         if self._ui.retrieve_combobox.currentText() == "True":
             self.init_color_setup()
+            self.run_ui.show_retrieve_progress_button.setStyleSheet("background-color: yellow")
+            self.run_ui.show_retrieve_progress_button.setDisabled(False)
+        elif self._ui.retrieve_combobox.currentText() == "False":
+            self.run_ui.show_retrieve_progress_button.setDisabled(True)
+            self.run_ui.show_retrieve_progress_button.setStyleSheet("background-color: white")
 
     def on_process_combobox_changed(self):
         if self._ui.process_combobox.currentText() == "True":
@@ -272,6 +288,9 @@ class SetupController(QObject):
             self._ui.pythonpath_input.setStyleSheet("Background-color: rgb(152,251,152)")
             self._ui.task_file_input.setStyleSheet("Background-color: rgb(152,251,152)")
 
+            self.run_ui.show_process_progress_button.setStyleSheet("background-color: yellow")
+            self.run_ui.show_process_progress_button.setDisabled(False)
+
         elif self._ui.process_combobox.currentText() == "False":
             self._ui.max_per_node_input.setStyleSheet("Background-color: rgb(255,255,255)")
             self._ui.method_input.setStyleSheet("Background-color: rgb(255,255,255)")
@@ -285,3 +304,6 @@ class SetupController(QObject):
             self._ui.wsclean_executable_input.setStyleSheet("Background-color: rgb(255,255,255)")
             self._ui.pythonpath_input.setStyleSheet("Background-color: rgb(255,255,255)")
             self._ui.task_file_input.setStyleSheet("Background-color: rgb(255,255,255)")
+
+            self.run_ui.show_process_progress_button.setDisabled(True)
+            self.run_ui.show_process_progress_button.setStyleSheet("background-color: white")

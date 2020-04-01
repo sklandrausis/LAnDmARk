@@ -11,8 +11,8 @@ python_version = version_info.major
 class MainController(QObject):
     def __init__(self):
         super().__init__()
-        self.setup_view = SetupView()
         self.run_view = RunView()
+        self.setup_view = SetupView(self.run_view._ui)
 
     @pyqtSlot()
     def setup(self):
