@@ -17,8 +17,8 @@ def get_pipeline_task(prefactor_path, parset_file):
 
 
 class ProcessView(QMainWindow):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super(ProcessView, self).__init__(*args, **kwargs)
         self.progress_bars = []
         self.progress_bars_index = 0
         self.progress = 0

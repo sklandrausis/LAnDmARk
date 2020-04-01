@@ -3,8 +3,8 @@ from views.main_view_ui import Ui_main_window
 
 
 class MainView(QMainWindow):
-    def __init__(self, main_controller):
-        super().__init__()
+    def __init__(self, main_controller, *args, **kwargs):
+        super(MainView, self).__init__(*args, **kwargs)
 
         self._main_controller = main_controller
 

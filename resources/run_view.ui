@@ -1,19 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>run_view</class>
- <widget class="QMainWindow" name="run_view">
+ <widget class="QDialog" name="run_view">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>666</width>
-    <height>87</height>
+    <height>93</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Run</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
+  <widget class="QWidget" name="centralwidget" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>671</width>
+     <height>91</height>
+    </rect>
+   </property>
    <widget class="QPushButton" name="show_query_progress_button">
     <property name="enabled">
      <bool>false</bool>
@@ -79,7 +87,16 @@
     </property>
    </widget>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>3</width>
+     <height>25</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

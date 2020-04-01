@@ -5,8 +5,8 @@ from parsers._configparser import getConfigs
 
 
 class RunView(QMainWindow):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super(RunView, self).__init__(*args, **kwargs)
         self._ui = Ui_run_view()
         self._ui.setupUi(self)
         self.run_controller = RunController(self._ui)

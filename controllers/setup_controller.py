@@ -237,3 +237,51 @@ class SetupController(QObject):
             setConfigs("Paths", "pythonpath", self.setup_model.pythonpath, config_file)
             setConfigs("Paths", "task_file", self.setup_model.task_file, config_file)
             QMessageBox.about(QMessageBox(), "", "LAnDmARk configuration has been saved")
+
+    def init_color_setup(self):
+        self._ui.WorkingPath_input.setStyleSheet("Background-color: rgb(152,251,152)")
+        self._ui.Target_name_input.setStyleSheet("Background-color: rgb(152,251,152)")
+        self._ui.targetSASids_input.setStyleSheet("Background-color: rgb(152,251,152)")
+        self._ui.PROJECTid_input.setStyleSheet("Background-color: rgb(152,251,152)")
+
+    def on_querying_combobox_changed(self):
+        if self._ui.querying_comboBox.currentText() == "True":
+            self.init_color_setup()
+
+    def on_stage_combobox_changed(self):
+        if self._ui.stage_combobox.currentText() == "True":
+            self.init_color_setup()
+
+    def on_retrieve_combobox_changed(self):
+        if self._ui.retrieve_combobox.currentText() == "True":
+            self.init_color_setup()
+
+    def on_process_combobox_changed(self):
+        if self._ui.process_combobox.currentText() == "True":
+            self.init_color_setup()
+            self._ui.max_per_node_input.setStyleSheet("Background-color: rgb(152,251,152)")
+            self._ui.method_input.setStyleSheet("Background-color: rgb(152,251,152)")
+
+            self._ui.PrefactorPath_input.setStyleSheet("Background-color: rgb(152,251,152)")
+            self._ui.lofarroot_input.setStyleSheet("Background-color: rgb(152,251,152)")
+            self._ui.casaroot_input.setStyleSheet("Background-color: rgb(152,251,152)")
+            self._ui.pyraproot_input.setStyleSheet("Background-color: rgb(152,251,152)")
+            self._ui.losotoPath_input.setStyleSheet("Background-color: rgb(152,251,152)")
+            self._ui.aoflagger_input.setStyleSheet("Background-color: rgb(152,251,152)")
+            self._ui.wsclean_executable_input.setStyleSheet("Background-color: rgb(152,251,152)")
+            self._ui.pythonpath_input.setStyleSheet("Background-color: rgb(152,251,152)")
+            self._ui.task_file_input.setStyleSheet("Background-color: rgb(152,251,152)")
+
+        elif self._ui.process_combobox.currentText() == "False":
+            self._ui.max_per_node_input.setStyleSheet("Background-color: rgb(255,255,255)")
+            self._ui.method_input.setStyleSheet("Background-color: rgb(255,255,255)")
+
+            self._ui.PrefactorPath_input.setStyleSheet("Background-color: rgb(255,255,255)")
+            self._ui.lofarroot_input.setStyleSheet("Background-color: rgb(255,255,255)")
+            self._ui.casaroot_input.setStyleSheet("Background-color: rgb(255,255,255)")
+            self._ui.pyraproot_input.setStyleSheet("Background-color: rgb(255,255,255)")
+            self._ui.losotoPath_input.setStyleSheet("Background-color: rgb(255,255,255)")
+            self._ui.aoflagger_input.setStyleSheet("Background-color: rgb(255,255,255)")
+            self._ui.wsclean_executable_input.setStyleSheet("Background-color: rgb(255,255,255)")
+            self._ui.pythonpath_input.setStyleSheet("Background-color: rgb(255,255,255)")
+            self._ui.task_file_input.setStyleSheet("Background-color: rgb(255,255,255)")

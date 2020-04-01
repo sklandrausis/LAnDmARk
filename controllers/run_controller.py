@@ -1,5 +1,5 @@
 import sys
-import os
+from threading import Thread
 from PyQt5.QtCore import QObject
 from views.query_view import QueryView
 from services.querying_service import Querying
@@ -52,12 +52,14 @@ class RunController(QObject):
         querying_setup2 = True
 
         while querying_setup:
-            self.query_view.show()
+            Thread(target=self.query_view.show()).start()
             querying_setup = False
         else:
             if not self.query_done:
                 while querying_setup2:
-                    self.query_station_count()
+                    station_count_querying_thread = Thread(target=self.query_station_count())
+                    station_count_querying_thread.start()
+                    station_count_querying_thread.join()
                     querying_setup2 = False
                 else:
                     self.query_data_products()
@@ -81,29 +83,29 @@ class RunController(QObject):
 
     def query_data_products(self):
         if self.q1 is None:
-            msg2 = self.q2.get_data_products()
+            msg2 = self.q2.get_valid_file_message()
             self.query_view._ui.querying_message.setText(self.query_view._ui.querying_message.text() + "\n" + msg2)
 
         elif self.q2 is None:
-            msg1 = self.q1.get_data_products()
+            msg1 = self.q1.get_valid_file_message()
             self.query_view._ui.querying_message.setText(self.query_view._ui.querying_message.text() + "\n" + msg1)
 
         else:
-            msg1 = self.q1.get_data_products()
+            msg1 = self.q1.get_valid_file_message()
             self.query_view._ui.querying_message.setText(self.query_view._ui.querying_message.text() + "\n" + msg1)
 
-            msg2 = self.q2.get_data_products()
+            msg2 = self.q2.get_valid_file_message()
             self.query_view._ui.querying_message.setText(self.query_view._ui.querying_message.text() + "\n" + msg2)
 
     def query_data_products2(self):
         if self.q1 is None:
-            self.q2.get_data_products()
+            self.q2.get_SURI()
 
         elif self.q2 is None:
-            self.q1.get_data_products()
+            self.q1.get_SURI()
 
         else:
-            self.q1.get_data_products()
+            self.q1.get_SURI()
 
     def stage_progress(self):
         self.stage_progress_plot = StageProgressPlot(self._ui, self)

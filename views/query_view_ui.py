@@ -19,10 +19,8 @@ class Ui_query_view(object):
         self.querying_message = QtWidgets.QLabel(self.centralwidget)
         self.querying_message.setGeometry(QtCore.QRect(20, 40, 781, 481))
         self.querying_message.setObjectName("querying_message")
-        query_view.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(query_view)
         self.statusbar.setObjectName("statusbar")
-        query_view.setStatusBar(self.statusbar)
 
         self.retranslateUi(query_view)
         QtCore.QMetaObject.connectSlotsByName(query_view)

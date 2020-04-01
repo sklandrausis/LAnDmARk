@@ -9,7 +9,7 @@ python_version = version_info.major
 
 
 class MainController(QObject):
-    def __init__(self,):
+    def __init__(self):
         super().__init__()
         self.setup_view = SetupView()
         self.run_view = RunView()

@@ -13,8 +13,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_run_view(object):
     def setupUi(self, run_view):
         run_view.setObjectName("run_view")
-        run_view.resize(666, 87)
+        run_view.resize(666, 93)
         self.centralwidget = QtWidgets.QWidget(run_view)
+        self.centralwidget.setGeometry(QtCore.QRect(0, 0, 671, 76))
         self.centralwidget.setObjectName("centralwidget")
         self.show_query_progress_button = QtWidgets.QPushButton(self.centralwidget)
         self.show_query_progress_button.setEnabled(False)
@@ -34,6 +35,7 @@ class Ui_run_view(object):
         self.show_process_progress_button.setObjectName("show_process_progress_button")
         run_view.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(run_view)
+        self.statusbar.setGeometry(QtCore.QRect(0, 0, 3, 25))
         self.statusbar.setObjectName("statusbar")
         run_view.setStatusBar(self.statusbar)
 
