@@ -97,16 +97,6 @@ class RunController(QObject):
             msg2 = self.q2.get_valid_file_message()
             self.query_view._ui.querying_message.setText(self.query_view._ui.querying_message.text() + "\n" + msg2)
 
-    def query_data_products2(self):
-        if self.q1 is None:
-            self.q2.get_SURI()
-
-        elif self.q2 is None:
-            self.q1.get_SURI()
-
-        else:
-            self.q1.get_SURI()
-
     def stage_progress(self):
         self.stage_progress_plot = StageProgressPlot(self._ui, self)
         self.stage_progress_plot.show()

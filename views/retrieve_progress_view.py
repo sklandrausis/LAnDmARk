@@ -1,5 +1,6 @@
 import os
 import pyqtgraph as pg
+from PyQt5.QtWidgets import QMessageBox
 from parsers._configparser import getConfigs
 
 
@@ -62,13 +63,18 @@ class RetrieveProgressPlot(pg.GraphicsWindow):
         else:
             self.time.append(self.time[-1] + 1)
 
-        for id in list(self.retrieve_files_counts.keys()):
-            if id in self.SASidsCalibrator:
-                dir = self.download_dir + "calibrators/" + str(id) + "_RAW/"
-            elif id in self.SASidsTarget:
-                dir = self.download_dir + "targets/" + str(id) + "_RAW/"
+        for sas_id in list(self.retrieve_files_counts.keys()):
+            if sas_id in self.SASidsCalibrator:
+                directory = self.download_dir + "calibrators/" + str(sas_id) + "_RAW/"
+            elif sas_id in self.SASidsTarget:
+                directory = self.download_dir + "targets/" + str(sas_id) + "_RAW/"
 
-            file_count = len([f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f)) and ".tar" in f])
-            self.retrieve_files_counts[id].append(file_count)
-            curve = self.curves[list(self.retrieve_files_counts.keys()).index(id)]
-            curve.setData(self.time, self.retrieve_files_counts[id])
+            else:
+                QMessageBox.warning(QMessageBox(), "Warning", "Wrong sas id", "", None)
+                directory = ""
+
+            if directory != "":
+                file_count = len([f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f)) and ".tar" in f])
+                self.retrieve_files_counts[sas_id].append(file_count)
+                curve = self.curves[list(self.retrieve_files_counts.keys()).index(sas_id)]
+                curve.setData(self.time, self.retrieve_files_counts[sas_id])

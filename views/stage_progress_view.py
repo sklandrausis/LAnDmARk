@@ -40,18 +40,16 @@ class StageProgressPlot(pg.GraphicsWindow):
         self.setWindowTitle('Staged files')
         self.p1 = self.addPlot(labels={'left': 'staged file count', 'bottom': 'Time'})
 
-        q1, q2 = self.__query()
-        self.query_data_products(q1, q2)
-
+        self.q1, self.q2 = self.__query()
         self.time = [0]
 
-        if q1 is not None:
-            calibrator_SURI = q1.get_SURI()
+        if self.q1 is not None:
+            calibrator_SURI = self.q1.get_SURI()
         else:
             calibrator_SURI = ""
 
-        if q2 is not None:
-            target_SURI = q2.get_SURI()
+        if self.q2 is not None:
+            target_SURI = self.q2.get_SURI()
         else:
             target_SURI = ""
 
@@ -63,6 +61,7 @@ class StageProgressPlot(pg.GraphicsWindow):
         progress = get_progress()
         if progress is None:
             time.sleep(10)
+            stagesIDs = list(progress.keys())
 
         else:
             stagesIDs = list(progress.keys())
@@ -70,8 +69,8 @@ class StageProgressPlot(pg.GraphicsWindow):
         self.curves = []
         self.stages_files_counts = []
         for index in range(0, len(stagesIDs)):
-            staged_file_count_for_stageID = [0]
-            self.stages_files_counts.append(staged_file_count_for_stageID)
+            staged_file_count_for_stage_id = [0]
+            self.stages_files_counts.append(staged_file_count_for_stage_id)
             curve = self.p1.plot(self.time, self.stages_files_counts[index], pen=(255 - index * 10, 0, 0))
             self.curves.append(curve)
 
@@ -99,8 +98,8 @@ class StageProgressPlot(pg.GraphicsWindow):
                 self.time.append(self.time[-1] + 1)
             try:
                 for index in range(0, len(self.get_staging_progress())):
-                    stageId = list(self.get_staging_progress().keys())[index]
-                    staged_file_count_for_id = self.get_staging_progress()[stageId]
+                    stage_id = list(self.get_staging_progress().keys())[index]
+                    staged_file_count_for_id = self.get_staging_progress()[stage_id]
                     self.stages_files_counts[index].append(staged_file_count_for_id)
                     curve = self.curves[index]
                     curve.setData(self.time, self.stages_files_counts[index])
@@ -116,11 +115,11 @@ class StageProgressPlot(pg.GraphicsWindow):
         progress_dict = {}
         if progress is not None:
             if "tuple" not in str(type(progress)):
-                stagesIDs = list(progress.keys())
-                for stageID in stagesIDs:
-                    self.tmpStagesIDs.add(stageID)
-                    staged_file_count = progress[stageID]["File count"]
-                    progress_dict[stageID] = float(staged_file_count)
+                stages_ids = list(progress.keys())
+                for stage_id in stages_ids:
+                    self.tmpStagesIDs.add(stage_id)
+                    staged_file_count = progress[stage_id]["File count"]
+                    progress_dict[stage_id] = float(staged_file_count)
             else:
                 self.__retrieve()
         else:
@@ -140,26 +139,10 @@ class StageProgressPlot(pg.GraphicsWindow):
             q2 = Querying(self.SASidsTarget, False, self.config_file)
         return q1, q2
 
-    def query_data_products(self, q1, q2):
-        if q1 is None:
-            q2.get_data_products()
-
-        elif q2 is None:
-            q1.get_data_products()
-
-        else:
-            q1.get_data_products()
-            q2.get_data_products()
-
     def start_staging(self, SURIs, SASids):
         for id in SASids:
-            try:
-                stagger = LtaStager()
-                stagger.stage_uris(SURIs[id])
-            except LtaStagerError as e:
-                print("Lta Stager Error", e)
-            except:
-                print("Unexpected error:", sys.exc_info()[0])
+            stagger = LtaStager()
+            stagger.stage_uris(SURIs[id])
 
     def __retrieve(self):
         retrieve_setup = True
