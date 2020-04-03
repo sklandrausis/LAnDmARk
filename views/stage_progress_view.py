@@ -69,11 +69,15 @@ class StageProgressPlot(pg.GraphicsWindow):
 
         self.curves = []
         self.stages_files_counts = []
+        i = 0
+        symbols = ['o', 't', 't1', 't2', 't3', 's', 'p', 'h', 'star', '+', 'w']
+        colors = [(0, 0, 200), (0, 128, 0), (19, 234, 201), (195, 46, 212), (250, 194, 5), (55, 55, 55), (0, 114, 189), (217, 83, 25), (237, 177, 32), (126, 47, 142), (119, 172, 48)]
         for index in range(0, len(stagesIDs)):
             staged_file_count_for_stage_id = [0]
             self.stages_files_counts.append(staged_file_count_for_stage_id)
-            curve = self.p1.plot(self.time, self.stages_files_counts[index], pen=(255 - index * 10, 0, 0))
+            curve = self.p1.plot(self.time, self.stages_files_counts[index], symbol=symbols[i], symbolSize=30, symbolBrush=colors[i])
             self.curves.append(curve)
+            i += 1
 
         self.timer = pg.QtCore.QTimer(self)
         self.timer.timeout.connect(self.update_plot)

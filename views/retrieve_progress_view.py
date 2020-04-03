@@ -49,10 +49,14 @@ class RetrieveProgressPlot(pg.GraphicsWindow):
         self.time = [0]
         self.curves = []
 
+        i = 0
+        symbols = ['o', 't', 't1', 't2', 't3', 's', 'p', 'h', 'star', '+', 'w']
+        colors = [(0,0,200),(0,128,0), (19,234,201), (195,46,212), (250,194,5), (55,55,55), (0,114,189), (217,83,25), (237,177,32), (126,47,142), (119,172,48)]
         for id in self.retrieve_files_counts:
             self.retrieve_files_counts[id].append(0)
-            curve = self.p1.plot(self.time, self.retrieve_files_counts[id], pen=(255 - 10 * 10, 0, 0))
+            curve = self.p1.plot(self.time, self.retrieve_files_counts[id], symbol=symbols[i], symbolSize=30, symbolBrush=colors[i])
             self.curves.append(curve)
+            i += 1
 
         self.timer = pg.QtCore.QTimer(self)
         self.timer.timeout.connect(self.update_plot)
