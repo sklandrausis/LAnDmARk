@@ -1,7 +1,8 @@
 import sys
 import time
 import pyqtgraph as pg
-from awlofar.toolbox.LtaStager import LtaStager, LtaStagerError
+import pyqtgraph.exporters
+from awlofar.toolbox.LtaStager import LtaStager
 from services.stager_access import get_progress, download, get_surls_online
 from services.querying_service import Querying
 from parsers._configparser import getConfigs
@@ -153,6 +154,12 @@ class StageProgressPlot(pg.GraphicsWindow):
         retrieve_setup = True
         while retrieve_setup:
             self.timer.stop()
+            workingDir = getConfigs("Paths", "WorkingPath", self.config_file)
+            targetName = getConfigs("Data", "TargetName", self.config_file)
+            workingDir = workingDir + "/" + targetName + "/"
+            auxDir = workingDir + "/LAnDmARk_aux"
+            exporter = pg.exporters.ImageExporter(self.p1)
+            exporter.export(auxDir + "/stage/" + 'staging_progress.png')
             self._ui.show_stage_progress_button.setStyleSheet("background-color: gray")
             self._ui.show_stage_progress_button.setDisabled(True)
             retrieve_setup = False
