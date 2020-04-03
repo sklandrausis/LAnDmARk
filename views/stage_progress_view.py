@@ -10,7 +10,6 @@ from parsers._configparser import getConfigs
 class StageProgressPlot(pg.GraphicsWindow):
     pg.setConfigOption('background', 'w')
     pg.setConfigOption('foreground', 'k')
-    # pg.showGrid(x=True, y=True)
     ptr1 = 0
 
     def __init__(self, _ui, run_controller, **kargs):
@@ -38,7 +37,9 @@ class StageProgressPlot(pg.GraphicsWindow):
         parent = None
         self.setParent(parent)
         self.setWindowTitle('Staged files')
-        self.p1 = self.addPlot(labels={'left': 'staged file count', 'bottom': 'Time'})
+        self.p1 = self.addPlot(labels={'left': 'staged file count', 'bottom': 'Time (Seconds)'})
+        self.p1.showGrid(x=True, y=True)
+        self.p1.setLimits(xMin=0, yMin=0)
 
         self.q1, self.q2 = self.__query()
         self.time = [0]

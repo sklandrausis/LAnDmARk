@@ -7,7 +7,6 @@ from parsers._configparser import getConfigs
 class RetrieveProgressPlot(pg.GraphicsWindow):
     pg.setConfigOption('background', 'w')
     pg.setConfigOption('foreground', 'k')
-    #pg.showGrid(x=True, y=True)
     ptr1 = 0
 
     def __init__(self, parent=None, **kargs):
@@ -16,7 +15,9 @@ class RetrieveProgressPlot(pg.GraphicsWindow):
         self.download_dir = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", "config.cfg") + "/"
         self.setParent(parent)
         self.setWindowTitle('Retrieved files')
-        self.p1 = self.addPlot(labels={'left': 'Retrieved file count', 'bottom': 'Time'})
+        self.p1 = self.addPlot(labels={'left': 'Retrieved file count', 'bottom': 'Time (Seconds)'})
+        self.p1.showGrid(x=True, y=True)
+        self.p1.setLimits(xMin =0, yMin=0)
 
         self.SASidsTarget = [int(id) for id in getConfigs("Data", "targetSASids", self.config_file).replace(" ", "").split(",")]
         project = getConfigs("Data", "projectid", self.config_file)

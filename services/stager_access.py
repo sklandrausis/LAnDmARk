@@ -114,18 +114,27 @@ def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
                 dir_to += "/" + "targets/" + str(tarSASid) + "_RAW/"
 
     dir_to = dir_to_tmp
-    for filename in os.listdir(dir_to):
-        if ".tar" in filename:
-            outname = dir_to + "/" + filename.split("%")[-1]
-            os.rename(dir_to + "/" + filename, outname)
-            os.system('tar -xvf ' + outname + " -C " + dir_to + "/")
-            os.system('rm -r ' + outname)
+    for calSASid in SASidsCalibrator:
+        dir_to = dir_to_tmp
+        dir_to += "/" + "calibrators/" + str(calSASid) + "_RAW/"
 
-    for filename in os.listdir(dir_to):
-        for calSASid in SASidsCalibrator:
-            if 'L' + str(calSASid) in filename:
-                os.system("mv " + dir_to + "/" + filename + "  " + dir_to + "/" + "calibrators/" + str(calSASid) + "_RAW/")
+        for file in os.listdir(dir_to):
+            if 'L' + str(calSASid) in file:
+                if ".tar" in file:
+                    outname = dir_to + "/" + file.split("%")[-1]
+                    os.rename(dir_to + "/" + file, outname)
+                    os.system('tar -xvf ' + outname + " -C " + dir_to + "/")
+                    os.system('rm -r ' + outname)
 
-        for tarSASid in SASidsTarget:
-            if 'L' + str(tarSASid) in filename:
-                os.system("mv " + dir_to + "/" + filename + "  " + dir_to + "/" + "targets/" + str(tarSASid) + "_RAW/")
+    dir_to = dir_to_tmp
+    for tarSASid in SASidsTarget:
+        dir_to = dir_to_tmp
+        dir_to += "/" + "targets/" + str(tarSASid) + "_RAW/"
+
+        for file in os.listdir(dir_to):
+            if 'L' + str(tarSASid) in file:
+                if ".tar" in file:
+                    outname = dir_to + "/" + file.split("%")[-1]
+                    os.rename(dir_to + "/" + file, outname)
+                    os.system('tar -xvf ' + outname + " -C " + dir_to + "/")
+                    os.system('rm -r ' + outname)
