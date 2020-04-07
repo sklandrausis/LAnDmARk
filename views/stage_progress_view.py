@@ -139,8 +139,6 @@ class StageProgressPlot(QWidget):
                         valid = valid_q2
 
                     self.stages_files_percent[index].append(staged_file_count_for_id/valid[index])
-                    symbols = ["*", "o", "v", "^", "<", ">", "1", "2", "3", "4"]
-                    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
                     self.p1.graph.plot(self.time, self.stages_files_counts[index], colors[i] + symbols[i], label=str(stage_id))
                     self.p1.draw()
                     self.p2.graph.plot(self.time, self.stages_files_percent[index], colors[i] + symbols[i], label=str(stage_id))
