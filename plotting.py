@@ -10,7 +10,7 @@ matplotlib.use('Qt5Agg')
 
 class Plot(FigureCanvas):
 
-    def __init__(self, parent=None, width=5, height=4, dpi=300):
+    def __init__(self, parent=None, width=5, height=4, dpi=100):
         self.parent = parent
         self.grid = None
         self.fig = Figure(figsize=(width, height), dpi=dpi)
@@ -19,10 +19,17 @@ class Plot(FigureCanvas):
         FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
         self.graph = self.fig.add_subplot(111)
+        self.graph.grid(True, which='major', color='k', linestyle='-', linewidth=0.5)
+        self.graph.grid(False, which='minor')
 
-    def set_grid(self, grid):
+    def set_grid(self, grid, x, y):
         self.grid = grid
         self.toolbar = qt5agg.NavigationToolbar2QT(self, self.parent)
         self.toolbar.update()
-        self.grid.addWidget(self.toolbar, 1, 0)
+        self.grid.addWidget(self.toolbar, x, y)
+
+    def legend(self):
+        font_size = 20
+        self.legend = self.graph.legend(prop={'size': font_size})
+        self.legend.set_draggable(True, update='loc')
 

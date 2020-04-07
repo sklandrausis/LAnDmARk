@@ -35,13 +35,23 @@ class StageProgressPlot(QWidget):
         else:
             self.SASidsCalibrator = [int(id) for id in getConfigs("Data", "calibratorSASids", self.config_file).replace(" ", "").split(",")]
 
-        self.p1 = Plot(self)
-        self.p1.set_grid(self.grid)
         self.time = [0]
         self.curves = []
+
+        self.p1 = Plot(self)
+        self.p1.set_grid(self.grid, 1, 0)
+        self.p1.graph.set_xlabel("Time (seconds)")
+        self.p1.graph.set_ylabel("Stage file count")
         self.grid.addWidget(self.p1, 0, 0)
 
-        self.q1, self.q2 = self.__query()
+        self.p2 = Plot(self)
+        self.p2.set_grid(self.grid, 1, 1)
+        self.p2.graph.set_xlabel("Time (seconds)")
+        self.p2.graph.set_ylabel("Stage file percent")
+        self.grid.addWidget(self.p2, 0, 1)
+
+        self.q1 = self.run_controller.q1
+        self.q2 = self.run_controller.q2
 
         if self.q1 is not None:
             calibrator_SURI = self.q1.get_SURI()
@@ -68,16 +78,20 @@ class StageProgressPlot(QWidget):
 
         self.curves = []
         self.stages_files_counts = []
+        self.stages_files_percent = []
         symbols = ["*", "o", "v", "^", "<", ">", "1", "2", "3", "4"]
         colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
         i = 0
         for index in range(0, len(stagesIDs)):
             staged_file_count_for_stage_id = [0]
             self.stages_files_counts.append(staged_file_count_for_stage_id)
-            curve = self.p1.graph.plot(self.time, self.stages_files_counts[index], colors[i] + symbols[i])
-            self.curves.append(curve)
+            self.stages_files_percent.append(staged_file_count_for_stage_id)
+            self.p1.graph.plot(self.time, self.stages_files_counts[index], colors[i] + symbols[i], label=str(stagesIDs[index]))
+            self.p2.graph.plot(self.time, self.stages_files_percent[index], colors[i] + symbols[i],  label=str(stagesIDs[index]))
             i += 1
 
+        self.p1.legend()
+        self.p2.legend()
         self.timer = QtCore.QTimer()
         self.timer.setInterval(100)
         self.timer.timeout.connect(self.update_plot)
@@ -109,10 +123,28 @@ class StageProgressPlot(QWidget):
                     stage_id = list(self.get_staging_progress().keys())[index]
                     staged_file_count_for_id = self.get_staging_progress()[stage_id]
                     self.stages_files_counts[index].append(staged_file_count_for_id)
+                    if self.q1 is not None:
+                        valid_q1 = self.q1.valid_files
+                    else:
+                        valid_q1 = dict()
+
+                    if self.q2 is not None:
+                        valid_q2 = self.q2.valid_files
+                    else:
+                        valid_q2 = dict()
+
+                    if index in valid_q1:
+                        valid = valid_q1
+                    elif index in valid_q2:
+                        valid = valid_q2
+
+                    self.stages_files_percent[index].append(staged_file_count_for_id/valid[index])
                     symbols = ["*", "o", "v", "^", "<", ">", "1", "2", "3", "4"]
                     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
-                    self.p1.graph.plot(self.time, self.stages_files_counts[index], colors[i] + symbols[i])
+                    self.p1.graph.plot(self.time, self.stages_files_counts[index], colors[i] + symbols[i], label=str(stage_id))
                     self.p1.draw()
+                    self.p2.graph.plot(self.time, self.stages_files_percent[index], colors[i] + symbols[i], label=str(stage_id))
+                    self.p2.draw()
                     i += 1
 
             except KeyError as e:
@@ -139,18 +171,6 @@ class StageProgressPlot(QWidget):
 
         return progress_dict
 
-    def __query(self):
-        if getConfigs("Operations", "which_obj", self.config_file) == "calibrators":
-            q1 = Querying(self.SASidsCalibrator, True, self.config_file)
-            q2 = None
-        elif getConfigs("Operations", "which_obj", self.config_file) == "target":
-            q1 = None
-            q2 = Querying(self.SASidsTarget, False, self.config_file)
-        else:
-            q1 = Querying(self.SASidsCalibrator, True, self.config_file)
-            q2 = Querying(self.SASidsTarget, False, self.config_file)
-        return q1, q2
-
     def start_staging(self, SURIs, SASids):
         for id in SASids:
             stagger = LtaStager()
@@ -164,7 +184,8 @@ class StageProgressPlot(QWidget):
             targetName = getConfigs("Data", "TargetName", self.config_file)
             workingDir = workingDir + "/" + targetName + "/"
             auxDir = workingDir + "/LAnDmARk_aux"
-            self.p1.fig.savefig(auxDir + "/stage/" + 'staging_progress.png')
+            self.p1.fig.savefig(auxDir + "/stage/" + 'staging_progress_count.png')
+            self.p2.fig.savefig(auxDir + "/stage/" + 'staging_progress_percent.png')
             self._ui.show_stage_progress_button.setStyleSheet("background-color: gray")
             self._ui.show_stage_progress_button.setDisabled(True)
             retrieve_setup = False

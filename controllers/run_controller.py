@@ -235,7 +235,7 @@ class RunController(QObject):
         self.stage_progress_plot.show()
 
     def retrieve_progress(self):
-        self.retrieve_progress_plot = RetrieveProgressPlot()
+        self.retrieve_progress_plot = RetrieveProgressPlot(self)
         self.retrieve_progress_plot.show()
 
     def process_progress(self):
