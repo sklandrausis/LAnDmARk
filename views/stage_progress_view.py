@@ -1,20 +1,21 @@
 import sys
 import time
-import pyqtgraph as pg
-import pyqtgraph.exporters
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QGridLayout, QWidget
 from awlofar.toolbox.LtaStager import LtaStager
 from services.stager_access import get_progress, download, get_surls_online
 from services.querying_service import Querying
 from parsers._configparser import getConfigs
+from plotting import Plot
 
 
-class StageProgressPlot(pg.GraphicsWindow):
-    pg.setConfigOption('background', 'w')
-    pg.setConfigOption('foreground', 'k')
-    ptr1 = 0
+class StageProgressPlot(QWidget):
 
-    def __init__(self, _ui, run_controller, **kargs):
-        pg.GraphicsWindow.__init__(self, **kargs)
+    def __init__(self, _ui, run_controller, *args, **kwargs):
+        super(StageProgressPlot, self).__init__(*args, **kwargs)
+        self.grid = QGridLayout()
+        self.setLayout(self.grid)
+        self.grid.setSpacing(10)
         self.config_file = "config.cfg"
         self.tmpStagesIDs = set([])
         self._ui = _ui
@@ -31,19 +32,16 @@ class StageProgressPlot(pg.GraphicsWindow):
 
             else:
                 raise Exception("SAS id for calibrator is not set in config.cfg file")
-                sys.exit(1)
         else:
             self.SASidsCalibrator = [int(id) for id in getConfigs("Data", "calibratorSASids", self.config_file).replace(" ", "").split(",")]
 
-        parent = None
-        self.setParent(parent)
-        self.setWindowTitle('Staged files')
-        self.p1 = self.addPlot(labels={'left': 'staged file count', 'bottom': 'Time (Seconds)'})
-        self.p1.showGrid(x=True, y=True)
-        self.p1.setLimits(xMin=0, yMin=0)
+        self.p1 = Plot(self)
+        self.p1.set_grid(self.grid)
+        self.time = [0]
+        self.curves = []
+        self.grid.addWidget(self.p1, 0, 0)
 
         self.q1, self.q2 = self.__query()
-        self.time = [0]
 
         if self.q1 is not None:
             calibrator_SURI = self.q1.get_SURI()
@@ -70,19 +68,20 @@ class StageProgressPlot(pg.GraphicsWindow):
 
         self.curves = []
         self.stages_files_counts = []
+        symbols = ["*", "o", "v", "^", "<", ">", "1", "2", "3", "4"]
+        colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
         i = 0
-        symbols = ['o', 't', 't1', 't2', 't3', 's', 'p', 'h', 'star', '+', 'w']
-        colors = [(0, 0, 200), (0, 128, 0), (19, 234, 201), (195, 46, 212), (250, 194, 5), (55, 55, 55), (0, 114, 189), (217, 83, 25), (237, 177, 32), (126, 47, 142), (119, 172, 48)]
         for index in range(0, len(stagesIDs)):
             staged_file_count_for_stage_id = [0]
             self.stages_files_counts.append(staged_file_count_for_stage_id)
-            curve = self.p1.plot(self.time, self.stages_files_counts[index], symbol=symbols[i], symbolSize=30, symbolBrush=colors[i])
+            curve = self.p1.graph.plot(self.time, self.stages_files_counts[index], colors[i] + symbols[i])
             self.curves.append(curve)
             i += 1
 
-        self.timer = pg.QtCore.QTimer(self)
+        self.timer = QtCore.QTimer()
+        self.timer.setInterval(100)
         self.timer.timeout.connect(self.update_plot)
-        self.timer.start(1000)
+        self.timer.start()
 
     def update_plot(self):
         progress_dict = self.get_staging_progress()
@@ -103,12 +102,19 @@ class StageProgressPlot(pg.GraphicsWindow):
             else:
                 self.time.append(self.time[-1] + 1)
             try:
+                symbols = ["*", "o", "v", "^", "<", ">", "1", "2", "3", "4"]
+                colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
+                i = 0
                 for index in range(0, len(self.get_staging_progress())):
                     stage_id = list(self.get_staging_progress().keys())[index]
                     staged_file_count_for_id = self.get_staging_progress()[stage_id]
                     self.stages_files_counts[index].append(staged_file_count_for_id)
-                    curve = self.curves[index]
-                    curve.setData(self.time, self.stages_files_counts[index])
+                    symbols = ["*", "o", "v", "^", "<", ">", "1", "2", "3", "4"]
+                    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
+                    self.p1.graph.plot(self.time, self.stages_files_counts[index], colors[i] + symbols[i])
+                    self.p1.draw()
+                    i += 1
+
             except KeyError as e:
                 print("Key Error", e)
             except IndexError as e:
@@ -158,8 +164,7 @@ class StageProgressPlot(pg.GraphicsWindow):
             targetName = getConfigs("Data", "TargetName", self.config_file)
             workingDir = workingDir + "/" + targetName + "/"
             auxDir = workingDir + "/LAnDmARk_aux"
-            exporter = pg.exporters.ImageExporter(self.p1)
-            exporter.export(auxDir + "/stage/" + 'staging_progress.png')
+            self.p1.fig.savefig(auxDir + "/stage/" + 'staging_progress.png')
             self._ui.show_stage_progress_button.setStyleSheet("background-color: gray")
             self._ui.show_stage_progress_button.setDisabled(True)
             retrieve_setup = False
