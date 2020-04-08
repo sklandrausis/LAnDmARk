@@ -20,6 +20,7 @@ class StageProgressPlot(QWidget):
         self.tmpStagesIDs = set([])
         self._ui = _ui
         self.run_controller = run_controller
+        self.setWindowTitle('Staged files')
         self.download_dir = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + \
                             getConfigs("Data", "TargetName", "config.cfg") + "/"
 
@@ -50,8 +51,7 @@ class StageProgressPlot(QWidget):
         self.p2.graph.set_ylabel("Stage file percent")
         self.grid.addWidget(self.p2, 0, 1)
 
-        self.q1 = self.run_controller.q1
-        self.q2 = self.run_controller.q2
+        self.q1, self.q2 = self.__query()
 
         if self.q1 is not None:
             calibrator_SURI = self.q1.get_SURI()
@@ -83,9 +83,10 @@ class StageProgressPlot(QWidget):
         colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
         i = 0
         for index in range(0, len(stagesIDs)):
-            staged_file_count_for_stage_id = [0]
+            staged_file_count_for_stage_id = [0.0]
+            staged_file_percent_for_stage_id = [0.0]
             self.stages_files_counts.append(staged_file_count_for_stage_id)
-            self.stages_files_percent.append(staged_file_count_for_stage_id)
+            self.stages_files_percent.append(staged_file_percent_for_stage_id)
             self.p1.graph.plot(self.time, self.stages_files_counts[index], colors[i] + symbols[i], label=str(stagesIDs[index]))
             self.p2.graph.plot(self.time, self.stages_files_percent[index], colors[i] + symbols[i],  label=str(stagesIDs[index]))
             i += 1
@@ -118,37 +119,47 @@ class StageProgressPlot(QWidget):
             try:
                 symbols = ["*", "o", "v", "^", "<", ">", "1", "2", "3", "4"]
                 colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
+
                 i = 0
                 for index in range(0, len(self.get_staging_progress())):
                     stage_id = list(self.get_staging_progress().keys())[index]
-                    staged_file_count_for_id = self.get_staging_progress()[stage_id]
-                    self.stages_files_counts[index].append(staged_file_count_for_id)
-                    if self.q1 is not None:
-                        valid_q1 = self.q1.valid_files
-                    else:
-                        valid_q1 = dict()
+                    print(index, self.get_staging_progress(), stage_id)
 
-                    if self.q2 is not None:
-                        valid_q2 = self.q2.valid_files
-                    else:
-                        valid_q2 = dict()
+                    staged_file_count_for_id_tmp = self.get_staging_progress()[stage_id]["File count"]
 
-                    if index in valid_q1:
-                        valid = valid_q1
-                    elif index in valid_q2:
-                        valid = valid_q2
+                    print(staged_file_count_for_id_tmp, self.stages_files_counts[index], self.stages_files_percent[index])
 
-                    self.stages_files_percent[index].append(staged_file_count_for_id/valid[index])
+                    self.stages_files_counts[index].append(staged_file_count_for_id_tmp)
+
+                    print(self.time, self.stages_files_counts[index], self.stages_files_percent[index])
                     self.p1.graph.plot(self.time, self.stages_files_counts[index], colors[i] + symbols[i], label=str(stage_id))
                     self.p1.draw()
-                    self.p2.graph.plot(self.time, self.stages_files_percent[index], colors[i] + symbols[i], label=str(stage_id))
-                    self.p2.draw()
                     i += 1
 
+                j = 0
+                for index_ in range(0, len(self.get_staging_progress())):
+                    stage_id_ = list(self.get_staging_progress().keys())[index_]
+                    print(index_, self.get_staging_progress(), stage_id_)
+
+                    staged_file_percent_for_id_tmp = self.get_staging_progress()[stage_id_]["Percent done"]
+
+                    print(staged_file_percent_for_id_tmp, self.stages_files_counts[index_], self.stages_files_percent[index_])
+
+                    self.stages_files_percent[index_].append(staged_file_percent_for_id_tmp)
+
+                    print(self.time, self.stages_files_counts[index_], self.stages_files_percent[index_])
+                    self.p2.graph.plot(self.time, self.stages_files_percent[index_], colors[j] + symbols[j], label=str(stage_id_))
+                    self.p2.draw()
+                    j += 1
+
             except KeyError as e:
-                print("Key Error", e)
+                print("Key Error", e, sys.exc_info()[0])
             except IndexError as e:
-                print("Index Error", e)
+                print("Index Error", e, sys.exc_info()[0])
+            except UnboundLocalError as e:
+                print("UnboundLocalError", e, sys.exc_info()[0])
+            except ValueError as e:
+                print("ValueError", e, sys.exc_info()[0])
             except:
                 print("Unexpected error:", sys.exc_info()[0])
 
@@ -161,7 +172,9 @@ class StageProgressPlot(QWidget):
                 for stage_id in stages_ids:
                     self.tmpStagesIDs.add(stage_id)
                     staged_file_count = progress[stage_id]["File count"]
-                    progress_dict[stage_id] = float(staged_file_count)
+                    staged_file_percent = progress[stage_id]["Percent done"]
+                    progress_dict[stage_id] = {"File count": float(staged_file_count),
+                                               "Percent done": float(staged_file_percent)}
             else:
                 self.__retrieve()
         else:
@@ -192,3 +205,16 @@ class StageProgressPlot(QWidget):
                 for id in self.tmpStagesIDs:
                     surl = get_surls_online(int(id))
                     download(surl, self.download_dir, self.SASidsCalibrator, self.SASidsTarget)
+
+    def __query(self):
+        if getConfigs("Operations", "which_obj", self.config_file) == "calibrators":
+            q1 = Querying(self.SASidsCalibrator, True, self.config_file)
+            q2 = None
+        elif getConfigs("Operations", "which_obj", self.config_file) == "target":
+            q1 = None
+            q2 = Querying(self.SASidsTarget, False, self.config_file)
+        else:
+            q1 = Querying(self.SASidsCalibrator, True, self.config_file)
+            q2 = Querying(self.SASidsTarget, False, self.config_file)
+        return q1, q2
+

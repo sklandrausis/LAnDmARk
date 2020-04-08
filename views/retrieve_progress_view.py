@@ -113,7 +113,7 @@ class RetrieveProgressPlot(QWidget):
                 symbols = ["*", "o", "v", "^", "<", ">", "1", "2", "3", "4"]
                 colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
                 file_count = len([f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))
-                                  and ".tar" in f])
+                                  and ".tar" in f or ".MS" in f])
                 self.retrieve_files_counts[sas_id].append(file_count)
                 self.p1.graph.plot(self.time, self.retrieve_files_counts[sas_id], colors[i] + symbols[i], label=str(sas_id))
                 self.p1.draw()
