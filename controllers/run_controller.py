@@ -21,8 +21,8 @@ rcParams["axes.labelsize"] = 18
 
 
 class RunController(QObject):
-    def __init__(self, _ui):
-        super().__init__()
+    def __init__(self, _ui, *args, **kwargs):
+        super(RunController, self).__init__(*args, **kwargs)
         self.query_view = QueryView()
         self._ui = _ui
         self.config_file = "config.cfg"

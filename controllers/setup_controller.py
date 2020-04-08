@@ -7,8 +7,8 @@ from parsers._configparser import setConfigs
 
 
 class SetupController(QObject):
-    def __init__(self, _ui, run_ui):
-        super().__init__()
+    def __init__(self, _ui, run_ui, *args, **kwargs):
+        super(SetupController, self).__init__(*args, **kwargs)
         self.setup_model = SetupModel()
         self._ui = _ui
         self.run_ui = run_ui

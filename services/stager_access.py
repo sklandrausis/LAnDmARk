@@ -8,11 +8,11 @@ the awlofar catalog Environment.cfg, if present or can be provided in a .staging
 __version__ = "1.3"
 
 import datetime
-import glob
 import os
 from os.path import expanduser
 # Python2/3 dependent stuff
 from sys import version_info
+from parsers._configparser import getConfigs
 
 python_version = version_info.major
 if python_version == 3:
@@ -51,7 +51,7 @@ LtaStager = proxy.LtaStager
 
 
 def stage(surls):
-    ''' Stage urls'''
+    """ Stage urls"""
 
     if isinstance(surls, str):
         surls = [surls]
@@ -60,12 +60,12 @@ def stage(surls):
 
 
 def get_surls_online(stageid):
-    ''' Get staget urls '''
+    """ Get staget urls """
     return proxy.LtaStager.getstagedurls(stageid)
 
 
 def get_progress(status=None, exclude=False):
-    ''' Get progress of staging '''
+    """ Get progress of staging """
     all_requests = proxy.LtaStager.getprogress()
     if status is not None and isinstance(status, string_types):
         if python_version == 3:
@@ -82,7 +82,8 @@ def get_progress(status=None, exclude=False):
 
 
 def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
-    ''' Download file '''
+    """ Download file """
+    config_file = "config.cfg"
     download_files = []
 
     dir_to_tmp = dir_to
@@ -100,42 +101,53 @@ def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
 
         download_files.append(prefix + surl)
 
-    for calSASid in SASidsCalibrator:
+    def download_calibrator():
+        for calSASid in SASidsCalibrator:
+            dir_to = dir_to_tmp
+            dir_to += "/" + "calibrators/" + str(calSASid) + "_RAW/"
+            for file in download_files:
+                if 'L' + str(calSASid) in file:
+                    os.system("wget " + file + " -P " + dir_to)
+
         dir_to = dir_to_tmp
-        dir_to += "/" + "calibrators/" + str(calSASid) + "_RAW/"
-        for file in download_files:
-            if 'L' + str(calSASid) in file:
-                os.system("wget " + file + " -P " + dir_to)
+        for calSASid in SASidsCalibrator:
+            dir_to = dir_to_tmp
+            dir_to += "/" + "calibrators/" + str(calSASid) + "_RAW/"
 
-    for tarSASid in SASidsTarget:
+            for file in os.listdir(dir_to):
+                if 'L' + str(calSASid) in file:
+                    if ".tar" in file:
+                        outname = dir_to + "/" + file.split("%")[-1]
+                        os.rename(dir_to + "/" + file, outname)
+                        os.system('tar -xvf ' + outname + " -C " + dir_to + "/")
+                        os.system('rm -r ' + outname)
+
+    def download_target():
+        for tarSASid in SASidsTarget:
+            dir_to = dir_to_tmp
+            dir_to += "/" + "targets/" + str(tarSASid) + "_RAW/"
+            for file in download_files:
+                if 'L' + str(tarSASid) in file:
+                    os.system("wget " + file + " -P " + dir_to)
+
         dir_to = dir_to_tmp
-        dir_to += "/" + "targets/" + str(tarSASid) + "_RAW/"
-        for file in download_files:
-            if 'L' + str(tarSASid) in file:
-                os.system("wget " + file + " -P " + dir_to)
+        for tarSASid in SASidsTarget:
+            dir_to = dir_to_tmp
+            dir_to += "/" + "targets/" + str(tarSASid) + "_RAW/"
 
-    dir_to = dir_to_tmp
-    for calSASid in SASidsCalibrator:
-        dir_to = dir_to_tmp
-        dir_to += "/" + "calibrators/" + str(calSASid) + "_RAW/"
+            for file in os.listdir(dir_to):
+                if 'L' + str(tarSASid) in file:
+                    if ".tar" in file:
+                        outname = dir_to + "/" + file.split("%")[-1]
+                        os.rename(dir_to + "/" + file, outname)
+                        os.system('tar -xvf ' + outname + " -C " + dir_to + "/")
+                        os.system('rm -r ' + outname)
 
-        for file in os.listdir(dir_to):
-            if 'L' + str(calSASid) in file:
-                if ".tar" in file:
-                    outname = dir_to + "/" + file.split("%")[-1]
-                    os.rename(dir_to + "/" + file, outname)
-                    os.system('tar -xvf ' + outname + " -C " + dir_to + "/")
-                    os.system('rm -r ' + outname)
+    if getConfigs("Operations", "which_obj", config_file) == "calibrators":
+        download_calibrator()
 
-    dir_to = dir_to_tmp
-    for tarSASid in SASidsTarget:
-        dir_to = dir_to_tmp
-        dir_to += "/" + "targets/" + str(tarSASid) + "_RAW/"
-
-        for file in os.listdir(dir_to):
-            if 'L' + str(tarSASid) in file:
-                if ".tar" in file:
-                    outname = dir_to + "/" + file.split("%")[-1]
-                    os.rename(dir_to + "/" + file, outname)
-                    os.system('tar -xvf ' + outname + " -C " + dir_to + "/")
-                    os.system('rm -r ' + outname)
+    elif getConfigs("Operations", "which_obj", config_file) == "target":
+        download_target()
+    else:
+        download_calibrator()
+        download_target()

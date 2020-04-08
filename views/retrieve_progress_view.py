@@ -71,14 +71,18 @@ class RetrieveProgressPlot(QWidget):
 
         symbols = ["*", "o", "v", "^", "<", ">", "1", "2", "3", "4"]
         colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
-        i = 0
 
+        i = 0
         for sas_id in self.retrieve_files_counts:
             self.retrieve_files_counts[sas_id].append(0)
-            self.retrieve_files_percent[sas_id].append(0)
             self.p1.graph.plot(self.time, self.retrieve_files_counts[sas_id], colors[i] + symbols[i], label=str(sas_id))
-            self.p2.graph.plot(self.time, self.retrieve_files_percent[sas_id], colors[i] + symbols[i], label=str(sas_id))
             i += 1
+
+        j = 0
+        for sas_id_ in self.retrieve_files_counts:
+            self.retrieve_files_percent[sas_id_].append(0)
+            self.p2.graph.plot(self.time,  self.retrieve_files_percent[sas_id_], colors[j] + symbols[j], label=str(sas_id_))
+            j += 1
 
         self.p1.legend()
         self.p2.legend()
@@ -94,6 +98,7 @@ class RetrieveProgressPlot(QWidget):
             self.time.append(self.time[-1] + 1)
 
         i = 0
+        percent_done = []
         for sas_id in list(self.retrieve_files_counts.keys()):
             if sas_id in self.SASidsCalibrator:
                 directory = self.download_dir + "calibrators/" + str(sas_id) + "_RAW/"
@@ -114,10 +119,47 @@ class RetrieveProgressPlot(QWidget):
                 colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
                 file_count = len([f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))
                                   and ".tar" in f or ".MS" in f])
+
                 self.retrieve_files_counts[sas_id].append(file_count)
                 self.p1.graph.plot(self.time, self.retrieve_files_counts[sas_id], colors[i] + symbols[i], label=str(sas_id))
                 self.p1.draw()
-                self.retrieve_files_percent[sas_id].append(file_count/valid_files[sas_id])
-                self.p2.graph.plot(self.time, self.retrieve_files_percent[sas_id], colors[i] + symbols[i], label=str(sas_id))
+                i += 1
+        j = 0
+        for sas_id_ in list(self.retrieve_files_counts.keys()):
+            if sas_id_ in self.SASidsCalibrator:
+                directory = self.download_dir + "calibrators/" + str(sas_id_) + "_RAW/"
+            elif sas_id_ in self.SASidsTarget:
+                directory = self.download_dir + "targets/" + str(sas_id_) + "_RAW/"
+
+            else:
+                QMessageBox.warning(QMessageBox(), "Warning", "Wrong sas id", "", None)
+                directory = ""
+
+            if directory != "":
+                if sas_id_ in self.run_controller.q1.valid_files.keys():
+                    valid_files = self.run_controller.q1.valid_files
+                elif sas_id_ in self.run_controller.q2.get_SURI().keys():
+                    valid_files = self.run_controller.q2.valid_files
+
+                symbols = ["*", "o", "v", "^", "<", ">", "1", "2", "3", "4"]
+                colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
+                file_count = len([f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))
+                                  and ".tar" in f or ".MS" in f])
+
+                percent_done.append(int(file_count/valid_files[sas_id_]))
+                self.retrieve_files_percent[sas_id_].append(file_count/valid_files[sas_id_])
+                self.p2.graph.plot(self.time, self.retrieve_files_percent[sas_id_], colors[j] + symbols[j], label=str(sas_id_))
                 self.p2.draw()
                 i += 1
+
+        if sum(percent_done) == len(percent_done):
+            self.store_inspection_plots()
+
+    def store_inspection_plots(self):
+        self.timer.stop()
+        workingDir = getConfigs("Paths", "WorkingPath", self.config_file)
+        targetName = getConfigs("Data", "TargetName", self.config_file)
+        workingDir = workingDir + "/" + targetName + "/"
+        auxDir = workingDir + "/LAnDmARk_aux"
+        self.p1.fig.savefig(auxDir + "/retrieve/" + 'retrieve_progress_count.png')
+        self.p2.fig.savefig(auxDir + "/retrieve/" + 'retrieve_progress_percent.png')

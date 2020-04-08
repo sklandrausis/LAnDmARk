@@ -13,5 +13,6 @@ class MainView(QMainWindow):
 
         self._ui.setup_button.clicked.connect(self._main_controller.setup)
         self._ui.run_button.clicked.connect(self._main_controller.run)
+        self._ui.check_button.clicked.connect(self._main_controller.check)
 
         self.setWindowTitle('Main')

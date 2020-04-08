@@ -2,6 +2,7 @@ import sys
 import os
 from sys import version_info
 from PyQt5.QtCore import QObject, pyqtSlot
+from views.check_view import CheckView
 from views.setup_view import SetupView
 from views.run_view import RunView
 
@@ -9,10 +10,11 @@ python_version = version_info.major
 
 
 class MainController(QObject):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super(MainController, self).__init__(*args, **kwargs)
         self.run_view = RunView()
         self.setup_view = SetupView(self.run_view._ui)
+        self.check_view = CheckView()
 
     @pyqtSlot()
     def setup(self):
@@ -29,3 +31,7 @@ class MainController(QObject):
             sys.exit(1)
 
         self.run_view.show()
+
+    @pyqtSlot()
+    def check(self):
+        self.check_view.show()

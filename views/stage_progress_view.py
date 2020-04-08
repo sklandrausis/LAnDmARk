@@ -1,10 +1,11 @@
 import sys
+import os
 import time
+from multiprocessing import Process
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QGridLayout, QWidget
 from awlofar.toolbox.LtaStager import LtaStager
 from services.stager_access import get_progress, download, get_surls_online
-from services.querying_service import Querying
 from parsers._configparser import getConfigs
 from plotting import Plot
 
@@ -51,7 +52,7 @@ class StageProgressPlot(QWidget):
         self.p2.graph.set_ylabel("Stage file percent")
         self.grid.addWidget(self.p2, 0, 1)
 
-        self.q1, self.q2 = self.__query()
+        self.q1, self.q2 = (self.run_controller.q1, self.run_controller.q2)
 
         if self.q1 is not None:
             calibrator_SURI = self.q1.get_SURI()
@@ -64,9 +65,14 @@ class StageProgressPlot(QWidget):
             target_SURI = ""
 
         if calibrator_SURI is not "":
-            self.start_staging(calibrator_SURI, self.SASidsCalibrator)
+            #os.spawnl(os.P_DETACH, self.start_staging(calibrator_SURI, self.SASidsCalibrator))
+            p1 = Process(target=self.start_staging, args=(calibrator_SURI, self.SASidsCalibrator,))
+            p1.start()
+            p1.join()
         if target_SURI is not "":
-            self.start_staging(target_SURI, self.SASidsTarget)
+            p2 = Process(target=self.start_staging, args=(target_SURI, self.SASidsTarget,))
+            p2.start()
+            p2.join()
 
         progress = get_progress()
         if progress is None:
@@ -125,7 +131,7 @@ class StageProgressPlot(QWidget):
                     stage_id = list(self.get_staging_progress().keys())[index]
                     print(index, self.get_staging_progress(), stage_id)
 
-                    staged_file_count_for_id_tmp = self.get_staging_progress()[stage_id]["File count"]
+                    staged_file_count_for_id_tmp = self.get_staging_progress()[stage_id]["Files done"]
 
                     print(staged_file_count_for_id_tmp, self.stages_files_counts[index], self.stages_files_percent[index])
 
@@ -171,9 +177,9 @@ class StageProgressPlot(QWidget):
                 stages_ids = list(progress.keys())
                 for stage_id in stages_ids:
                     self.tmpStagesIDs.add(stage_id)
-                    staged_file_count = progress[stage_id]["File count"]
+                    staged_file_count = progress[stage_id]["Files done"]
                     staged_file_percent = progress[stage_id]["Percent done"]
-                    progress_dict[stage_id] = {"File count": float(staged_file_count),
+                    progress_dict[stage_id] = {"Files done": float(staged_file_count),
                                                "Percent done": float(staged_file_percent)}
             else:
                 self.__retrieve()
@@ -202,19 +208,8 @@ class StageProgressPlot(QWidget):
             retrieve_setup = False
         else:
             if getConfigs("Operations", "retrieve", self.config_file) == "True":
-                for id in self.tmpStagesIDs:
-                    surl = get_surls_online(int(id))
-                    download(surl, self.download_dir, self.SASidsCalibrator, self.SASidsTarget)
-
-    def __query(self):
-        if getConfigs("Operations", "which_obj", self.config_file) == "calibrators":
-            q1 = Querying(self.SASidsCalibrator, True, self.config_file)
-            q2 = None
-        elif getConfigs("Operations", "which_obj", self.config_file) == "target":
-            q1 = None
-            q2 = Querying(self.SASidsTarget, False, self.config_file)
-        else:
-            q1 = Querying(self.SASidsCalibrator, True, self.config_file)
-            q2 = Querying(self.SASidsTarget, False, self.config_file)
-        return q1, q2
-
+                for stage_id in self.tmpStagesIDs:
+                    suffix_urls = get_surls_online(int(stage_id))
+                    p = Process(target=download, args=(suffix_urls, self.download_dir, self.SASidsCalibrator, self.SASidsTarget,))
+                    p.start()
+                    p.join()
