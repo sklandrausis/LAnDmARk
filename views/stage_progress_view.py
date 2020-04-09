@@ -65,10 +65,11 @@ class StageProgressPlot(QWidget):
             target_SURI = ""
 
         if calibrator_SURI is not "":
-            #os.spawnl(os.P_DETACH, self.start_staging(calibrator_SURI, self.SASidsCalibrator))
-            p1 = Process(target=self.start_staging, args=(calibrator_SURI, self.SASidsCalibrator,))
-            p1.start()
-            p1.join()
+            #self.start_staging(calibrator_SURI, self.SASidsCalibrator)
+            os.system("python3 " + "stage.py " + str(calibrator_SURI) + " " + str(self.SASidsCalibrator))
+            #p1 = Process(target=self.start_staging, args=(calibrator_SURI, self.SASidsCalibrator,))
+            #p1.start()
+            #p1.join()
         if target_SURI is not "":
             p2 = Process(target=self.start_staging, args=(target_SURI, self.SASidsTarget,))
             p2.start()
@@ -210,6 +211,6 @@ class StageProgressPlot(QWidget):
             if getConfigs("Operations", "retrieve", self.config_file) == "True":
                 for stage_id in self.tmpStagesIDs:
                     suffix_urls = get_surls_online(int(stage_id))
-                    p = Process(target=download, args=(suffix_urls, self.download_dir, self.SASidsCalibrator, self.SASidsTarget,))
-                    p.start()
-                    p.join()
+                    #p = Process(target=download, args=(suffix_urls, self.download_dir, self.SASidsCalibrator, self.SASidsTarget,))
+                    #p.start()
+                    #p.join()
