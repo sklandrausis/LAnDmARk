@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import sys
 import argparse
 from awlofar.toolbox.LtaStager import LtaStager
@@ -5,8 +6,8 @@ from awlofar.toolbox.LtaStager import LtaStager
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='''''')
-    parser.add_argument('SURIs', type=str, nargs='+')
-    parser.add_argument('SASids', type=str, nargs='+')
+    parser.add_argument('SASids', type=str)
+    parser.add_argument('SURIs', type=str)
     arguments = parser.parse_args()
     return arguments
 
@@ -19,10 +20,16 @@ def start_staging(s_uris, sas_ids):
 
 def main():
     args = parse_arguments()
-    uris = args.SURIs
-    sas_ids = args.SASids
-    print (uris, sas_ids)
-    #start_staging(uris, sas_ids)
+    uris = args.SURIs.split("&")
+    sas_ids = [int(sas_id) for sas_id in args.SASids.split("_")]
+
+    s_uris = dict()
+    for sas_id in range(0, len(sas_ids)):
+        s_uris[sas_ids[sas_id]] = []
+        for u in uris:
+            s_uris[sas_ids[sas_id]].extend(u[0:len(u) - 1].split("#"))
+
+    start_staging(s_uris, sas_ids)
     sys.exit(0)
 
 

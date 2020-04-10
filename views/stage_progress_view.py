@@ -4,7 +4,6 @@ import time
 from multiprocessing import Process
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QGridLayout, QWidget
-from awlofar.toolbox.LtaStager import LtaStager
 from services.stager_access import get_progress, download, get_surls_online
 from parsers._configparser import getConfigs
 from plotting import Plot
@@ -65,15 +64,27 @@ class StageProgressPlot(QWidget):
             target_SURI = ""
 
         if calibrator_SURI is not "":
-            #self.start_staging(calibrator_SURI, self.SASidsCalibrator)
-            os.system("python3 " + "stage.py " + str(calibrator_SURI) + " " + str(self.SASidsCalibrator))
-            #p1 = Process(target=self.start_staging, args=(calibrator_SURI, self.SASidsCalibrator,))
-            #p1.start()
-            #p1.join()
+            sas_ids_string = ""
+            suris_string = ""
+            for sas_id in range(0, len(self.SASidsCalibrator)):
+                for uri in range(0, len(calibrator_SURI[self.SASidsCalibrator[sas_id]])):
+                    if uri == len(self.SASidsCalibrator) - 1:
+                        suris_string += list(calibrator_SURI[self.SASidsCalibrator[sas_id]])[uri]
+                    else:
+                        suris_string += list(calibrator_SURI[self.SASidsCalibrator[sas_id]])[uri] + "#"
+
+                if sas_id == len(self.SASidsCalibrator) - 1:
+                    sas_ids_string += str(self.SASidsCalibrator[sas_id])
+                else:
+                    sas_ids_string += str(self.SASidsCalibrator[sas_id]) + "_"
+                    suris_string += "&"
+
+            os.system("python3 " + "stage.py " + sas_ids_string + " " + suris_string)
         if target_SURI is not "":
-            p2 = Process(target=self.start_staging, args=(target_SURI, self.SASidsTarget,))
-            p2.start()
-            p2.join()
+            pass
+            #p2 = Process(target=self.start_staging, args=(target_SURI, self.SASidsTarget,))
+            #p2.start()
+            #p2.join()
 
         progress = get_progress()
         if progress is None:
@@ -101,7 +112,7 @@ class StageProgressPlot(QWidget):
         self.p1.legend()
         self.p2.legend()
         self.timer = QtCore.QTimer()
-        self.timer.setInterval(100)
+        self.timer.setInterval(1)
         self.timer.timeout.connect(self.update_plot)
         self.timer.start()
 
@@ -130,15 +141,8 @@ class StageProgressPlot(QWidget):
                 i = 0
                 for index in range(0, len(self.get_staging_progress())):
                     stage_id = list(self.get_staging_progress().keys())[index]
-                    print(index, self.get_staging_progress(), stage_id)
-
                     staged_file_count_for_id_tmp = self.get_staging_progress()[stage_id]["Files done"]
-
-                    print(staged_file_count_for_id_tmp, self.stages_files_counts[index], self.stages_files_percent[index])
-
                     self.stages_files_counts[index].append(staged_file_count_for_id_tmp)
-
-                    print(self.time, self.stages_files_counts[index], self.stages_files_percent[index])
                     self.p1.graph.plot(self.time, self.stages_files_counts[index], colors[i] + symbols[i], label=str(stage_id))
                     self.p1.draw()
                     i += 1
@@ -146,15 +150,8 @@ class StageProgressPlot(QWidget):
                 j = 0
                 for index_ in range(0, len(self.get_staging_progress())):
                     stage_id_ = list(self.get_staging_progress().keys())[index_]
-                    print(index_, self.get_staging_progress(), stage_id_)
-
                     staged_file_percent_for_id_tmp = self.get_staging_progress()[stage_id_]["Percent done"]
-
-                    print(staged_file_percent_for_id_tmp, self.stages_files_counts[index_], self.stages_files_percent[index_])
-
                     self.stages_files_percent[index_].append(staged_file_percent_for_id_tmp)
-
-                    print(self.time, self.stages_files_counts[index_], self.stages_files_percent[index_])
                     self.p2.graph.plot(self.time, self.stages_files_percent[index_], colors[j] + symbols[j], label=str(stage_id_))
                     self.p2.draw()
                     j += 1
@@ -188,11 +185,6 @@ class StageProgressPlot(QWidget):
             self.__retrieve()
 
         return progress_dict
-
-    def start_staging(self, SURIs, SASids):
-        for id in SASids:
-            stagger = LtaStager()
-            stagger.stage_uris(SURIs[id])
 
     def __retrieve(self):
         retrieve_setup = True
