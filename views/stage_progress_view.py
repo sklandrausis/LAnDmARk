@@ -1,10 +1,9 @@
 import sys
 import os
 import time
-from multiprocessing import Process
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QGridLayout, QWidget
-from services.stager_access import get_progress, download, get_surls_online
+from services.stager_access import get_progress, get_surls_online
 from parsers._configparser import getConfigs
 from plotting import Plot
 
@@ -41,25 +40,31 @@ class StageProgressPlot(QWidget):
 
         self.p1 = Plot(self)
         self.p1.set_grid(self.grid, 1, 0)
-        self.p1.graph.set_xlabel("Time (seconds)")
+        self.p1.graph.set_xlabel("Time (time units)")
         self.p1.graph.set_ylabel("Stage file count")
         self.grid.addWidget(self.p1, 0, 0)
 
         self.p2 = Plot(self)
         self.p2.set_grid(self.grid, 1, 1)
-        self.p2.graph.set_xlabel("Time (seconds)")
+        self.p2.graph.set_xlabel("Time (time units)")
         self.p2.graph.set_ylabel("Stage file percent")
         self.grid.addWidget(self.p2, 0, 1)
 
         self.q1, self.q2 = (self.run_controller.q1, self.run_controller.q2)
 
         if self.q1 is not None:
-            calibrator_SURI = self.q1.get_SURI()
+            if len(self.q1.valid_files) == 0:
+                calibrator_SURI = self.q1.get_SURI()
+            else:
+                calibrator_SURI = self.q1.valid_files
         else:
             calibrator_SURI = ""
 
         if self.q2 is not None:
-            target_SURI = self.q2.get_SURI()
+            if len(self.q2.valid_files) == 0:
+                target_SURI = self.q2.get_SURI()
+            else:
+                target_SURI = self.q2.valid_files
         else:
             target_SURI = ""
 
@@ -79,12 +84,25 @@ class StageProgressPlot(QWidget):
                     sas_ids_string += str(self.SASidsCalibrator[sas_id]) + "_"
                     suris_string += "&"
 
-            os.system("python3 " + "stage.py " + sas_ids_string + " " + suris_string)
+            os.system("python3 stage.py " + sas_ids_string + " " + suris_string)
+
         if target_SURI is not "":
-            pass
-            #p2 = Process(target=self.start_staging, args=(target_SURI, self.SASidsTarget,))
-            #p2.start()
-            #p2.join()
+            sas_ids_string = ""
+            suris_string = ""
+            for sas_id in range(0, len(self.SASidsTarget)):
+                for uri in range(0, len(target_SURI[self.SASidsTarget[sas_id]])):
+                    if uri == len(self.SASidsCalibrator) - 1:
+                        suris_string += list(target_SURI[self.SASidsTarget[sas_id]])[uri]
+                    else:
+                        suris_string += list(target_SURI[self.SASidsTarget[sas_id]])[uri] + "#"
+
+                if sas_id == len(self.SASidsTarget) - 1:
+                    sas_ids_string += str(self.SASidsTarget[sas_id])
+                else:
+                    sas_ids_string += str(self.SASidsTarget[sas_id]) + "_"
+                    suris_string += "&"
+
+            os.system("python3 stage.py " + sas_ids_string + " " + suris_string)
 
         progress = get_progress()
         if progress is None:
@@ -105,14 +123,14 @@ class StageProgressPlot(QWidget):
             staged_file_percent_for_stage_id = [0.0]
             self.stages_files_counts.append(staged_file_count_for_stage_id)
             self.stages_files_percent.append(staged_file_percent_for_stage_id)
-            self.p1.graph.plot(self.time, self.stages_files_counts[index], colors[i] + symbols[i], label=str(stagesIDs[index]))
-            self.p2.graph.plot(self.time, self.stages_files_percent[index], colors[i] + symbols[i],  label=str(stagesIDs[index]))
+            self.p1.graph.plot(self.time, self.stages_files_counts[index], colors[i] + symbols[i], label="stage id: " + str(stagesIDs[index]))
+            self.p2.graph.plot(self.time, self.stages_files_percent[index], colors[i] + symbols[i],  label="stage id: " + str(stagesIDs[index]))
             i += 1
 
         self.p1.legend()
         self.p2.legend()
         self.timer = QtCore.QTimer()
-        self.timer.setInterval(1)
+        self.timer.setInterval(100)
         self.timer.timeout.connect(self.update_plot)
         self.timer.start()
 
@@ -143,7 +161,7 @@ class StageProgressPlot(QWidget):
                     stage_id = list(self.get_staging_progress().keys())[index]
                     staged_file_count_for_id_tmp = self.get_staging_progress()[stage_id]["Files done"]
                     self.stages_files_counts[index].append(staged_file_count_for_id_tmp)
-                    self.p1.graph.plot(self.time, self.stages_files_counts[index], colors[i] + symbols[i], label=str(stage_id))
+                    self.p1.graph.plot(self.time, self.stages_files_counts[index], colors[i] + symbols[i], label="stage id: " + str(stage_id))
                     self.p1.draw()
                     i += 1
 
@@ -151,8 +169,8 @@ class StageProgressPlot(QWidget):
                 for index_ in range(0, len(self.get_staging_progress())):
                     stage_id_ = list(self.get_staging_progress().keys())[index_]
                     staged_file_percent_for_id_tmp = self.get_staging_progress()[stage_id_]["Percent done"]
-                    self.stages_files_percent[index_].append(staged_file_percent_for_id_tmp)
-                    self.p2.graph.plot(self.time, self.stages_files_percent[index_], colors[j] + symbols[j], label=str(stage_id_))
+                    self.stages_files_percent[index_].append(staged_file_percent_for_id_tmp * 100)
+                    self.p2.graph.plot(self.time, self.stages_files_percent[index_], colors[j] + symbols[j],  label="stage id: " + str(stage_id_))
                     self.p2.draw()
                     j += 1
 
@@ -203,6 +221,26 @@ class StageProgressPlot(QWidget):
             if getConfigs("Operations", "retrieve", self.config_file) == "True":
                 for stage_id in self.tmpStagesIDs:
                     suffix_urls = get_surls_online(int(stage_id))
-                    #p = Process(target=download, args=(suffix_urls, self.download_dir, self.SASidsCalibrator, self.SASidsTarget,))
-                    #p.start()
-                    #p.join()
+                    suffix_urls_string = ""
+                    sas_ids_string_calibrator = ""
+                    sas_ids_string_target = ""
+
+                    for s in range(0, len(suffix_urls)):
+                        if s == len(suffix_urls) -1:
+                            suffix_urls_string += suffix_urls[s]
+                        else:
+                            suffix_urls_string += suffix_urls[s] + "&"
+
+                    for sas_id in range(0, len(self.SASidsCalibrator)):
+                        if sas_id == len(self.SASidsCalibrator) - 1:
+                            sas_ids_string_calibrator += str(self.SASidsCalibrator[sas_id])
+                        else:
+                            sas_ids_string_calibrator += str(self.SASidsCalibrator[sas_id]) + "_"
+
+                    for sas_id in range(0, len(self.SASidsTarget)):
+                        if sas_id == len(self.SASidsTarget) - 1:
+                            sas_ids_string_target += str(self.SASidsTarget[sas_id])
+                        else:
+                            sas_ids_string_target += str(self.SASidsTarget[sas_id]) + "_"
+
+                    os.system("python3 retrieve.py " + suffix_urls_string + " " + self.download_dir + " " + sas_ids_string_calibrator + " " + sas_ids_string_target)
