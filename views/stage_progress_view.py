@@ -219,8 +219,8 @@ class StageProgressPlot(QWidget):
             retrieve_setup = False
         else:
             if getConfigs("Operations", "retrieve", self.config_file) == "True":
-                for stage_id in self.tmpStagesIDs:
-                    suffix_urls = get_surls_online(int(stage_id))
+                for stage_id in set(self.tmpStagesIDs):
+                    suffix_urls = list(set(get_surls_online(int(stage_id))))
                     suffix_urls_string = ""
                     sas_ids_string_calibrator = ""
                     sas_ids_string_target = ""
