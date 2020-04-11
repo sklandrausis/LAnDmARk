@@ -37,7 +37,6 @@ class RunController(QObject):
 
             else:
                 raise Exception("SAS id for calibrator is not set in config.cfg file")
-                sys.exit(1)
         else:
             self.SASidsCalibrator = [int(id) for id in getConfigs("Data", "calibratorSASids", self.config_file).replace(" ", "").split(",")]
 

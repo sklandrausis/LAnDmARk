@@ -56,7 +56,7 @@ class StageProgressPlot(QWidget):
             if len(self.q1.valid_files) == 0:
                 calibrator_SURI = self.q1.get_SURI()
             else:
-                calibrator_SURI = self.q1.valid_files
+                calibrator_SURI = self.q1.uris
         else:
             calibrator_SURI = ""
 
@@ -64,7 +64,7 @@ class StageProgressPlot(QWidget):
             if len(self.q2.valid_files) == 0:
                 target_SURI = self.q2.get_SURI()
             else:
-                target_SURI = self.q2.valid_files
+                target_SURI = self.q2.uris
         else:
             target_SURI = ""
 
@@ -84,7 +84,7 @@ class StageProgressPlot(QWidget):
                     sas_ids_string += str(self.SASidsCalibrator[sas_id]) + "_"
                     suris_string += "&"
 
-            os.system("python3 stage.py " + sas_ids_string + " " + suris_string)
+            os.system("nohup ./stage.py " + sas_ids_string + " " + suris_string + " >/dev/null 2>&1")
 
         if target_SURI is not "":
             sas_ids_string = ""
@@ -243,4 +243,4 @@ class StageProgressPlot(QWidget):
                         else:
                             sas_ids_string_target += str(self.SASidsTarget[sas_id]) + "_"
 
-                    os.system("python3 retrieve.py " + suffix_urls_string + " " + self.download_dir + " " + sas_ids_string_calibrator + " " + sas_ids_string_target)
+                    os.system("nohup ./retrieve.py  " + '"' + suffix_urls_string + '"' + "  " + self.download_dir + "  " + sas_ids_string_calibrator + "  " + sas_ids_string_target + " >/dev/null 2>&1")

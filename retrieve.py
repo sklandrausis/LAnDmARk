@@ -17,7 +17,7 @@ def parse_arguments():
 def main():
     args = parse_arguments()
     surls = args.surls.split("&")
-    dir_to = args.args
+    dir_to = args.dir_to
     SASidsCalibrator = [int(s) for s in args.SASidsCalibrator.split("_")]
     SASidsTarget = [int(s) for s in args.SASidsTarget.split("_")]
     download(surls, dir_to, SASidsCalibrator, SASidsTarget)
