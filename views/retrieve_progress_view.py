@@ -59,13 +59,13 @@ class RetrieveProgressPlot(QWidget):
 
         self.p1 = Plot(self)
         self.p1.set_grid(self.grid, 1, 0)
-        self.p1.graph.set_xlabel("Time (seconds)")
+        self.p1.graph.set_xlabel("Time (units)")
         self.p1.graph.set_ylabel("Retrieved file count")
         self.grid.addWidget(self.p1, 0, 0)
 
         self.p2 = Plot(self)
         self.p2.set_grid(self.grid, 1, 1)
-        self.p2.graph.set_xlabel("Time (seconds)")
+        self.p2.graph.set_xlabel("Time (units)")
         self.p2.graph.set_ylabel("Retrieved file percent")
         self.grid.addWidget(self.p2, 0, 1)
 
@@ -75,13 +75,13 @@ class RetrieveProgressPlot(QWidget):
         i = 0
         for sas_id in self.retrieve_files_counts:
             self.retrieve_files_counts[sas_id].append(0)
-            self.p1.graph.plot(self.time, self.retrieve_files_counts[sas_id], colors[i] + symbols[i], label=str(sas_id))
+            self.p1.graph.plot(self.time, self.retrieve_files_counts[sas_id], colors[i] + symbols[i], label="SAS id " + str(sas_id))
             i += 1
 
         j = 0
         for sas_id_ in self.retrieve_files_counts:
             self.retrieve_files_percent[sas_id_].append(0)
-            self.p2.graph.plot(self.time,  self.retrieve_files_percent[sas_id_], colors[j] + symbols[j], label=str(sas_id_))
+            self.p2.graph.plot(self.time,  self.retrieve_files_percent[sas_id_], colors[j] + symbols[j], label="SAS id " + str(sas_id_))
             j += 1
 
         self.p1.legend()
@@ -92,13 +92,14 @@ class RetrieveProgressPlot(QWidget):
         self.timer.start()
 
     def update_plot(self):
+        percent_done = []
         if len(self.time) == 1:
             self.time.append(1)
         else:
             self.time.append(self.time[-1] + 1)
 
         i = 0
-        percent_done = []
+
         for sas_id in list(self.retrieve_files_counts.keys()):
             if sas_id in self.SASidsCalibrator:
                 directory = self.download_dir + "calibrators/" + str(sas_id) + "_RAW/"
@@ -121,7 +122,7 @@ class RetrieveProgressPlot(QWidget):
                                   and ".tar" in f or ".MS" in f])
 
                 self.retrieve_files_counts[sas_id].append(file_count)
-                self.p1.graph.plot(self.time, self.retrieve_files_counts[sas_id], colors[i] + symbols[i], label=str(sas_id))
+                self.p1.graph.plot(self.time, self.retrieve_files_counts[sas_id], colors[i] + symbols[i], label="SAS id " + str(sas_id))
                 self.p1.draw()
                 i += 1
         j = 0
@@ -146,9 +147,9 @@ class RetrieveProgressPlot(QWidget):
                 file_count = len([f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))
                                   and ".tar" in f or ".MS" in f])
 
-                percent_done.append(int(file_count/valid_files[sas_id_]))
+                percent_done.append(file_count/valid_files[sas_id_])
                 self.retrieve_files_percent[sas_id_].append(file_count/valid_files[sas_id_])
-                self.p2.graph.plot(self.time, self.retrieve_files_percent[sas_id_], colors[j] + symbols[j], label=str(sas_id_))
+                self.p2.graph.plot(self.time, self.retrieve_files_percent[sas_id_], colors[j] + symbols[j], label="SAS id " + str(sas_id_))
                 self.p2.draw()
                 i += 1
 

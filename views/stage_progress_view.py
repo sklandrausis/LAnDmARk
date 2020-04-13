@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QGridLayout, QWidget
 from services.stager_access import get_progress, get_surls_online
 from parsers._configparser import getConfigs
 from plotting import Plot
+from shlex import quote as shlex_quote
 
 
 class StageProgressPlot(QWidget):
@@ -123,8 +124,8 @@ class StageProgressPlot(QWidget):
             staged_file_percent_for_stage_id = [0.0]
             self.stages_files_counts.append(staged_file_count_for_stage_id)
             self.stages_files_percent.append(staged_file_percent_for_stage_id)
-            self.p1.graph.plot(self.time, self.stages_files_counts[index], colors[i] + symbols[i], label="stage id: " + str(stagesIDs[index]))
-            self.p2.graph.plot(self.time, self.stages_files_percent[index], colors[i] + symbols[i],  label="stage id: " + str(stagesIDs[index]))
+            self.p1.graph.plot(self.time, self.stages_files_counts[index], colors[i] + symbols[i], label="Stage id: " + str(stagesIDs[index]))
+            self.p2.graph.plot(self.time, self.stages_files_percent[index], colors[i] + symbols[i],  label="Stage id: " + str(stagesIDs[index]))
             i += 1
 
         self.p1.legend()
@@ -170,7 +171,7 @@ class StageProgressPlot(QWidget):
                     stage_id_ = list(self.get_staging_progress().keys())[index_]
                     staged_file_percent_for_id_tmp = self.get_staging_progress()[stage_id_]["Percent done"]
                     self.stages_files_percent[index_].append(staged_file_percent_for_id_tmp * 100)
-                    self.p2.graph.plot(self.time, self.stages_files_percent[index_], colors[j] + symbols[j],  label="stage id: " + str(stage_id_))
+                    self.p2.graph.plot(self.time, self.stages_files_percent[index_], colors[j] + symbols[j],  label="Stage id: " + str(stage_id_))
                     self.p2.draw()
                     j += 1
 

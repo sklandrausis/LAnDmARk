@@ -1,4 +1,3 @@
-import sys
 from threading import Thread
 from PyQt5.QtCore import QObject
 import matplotlib.pyplot as plt
