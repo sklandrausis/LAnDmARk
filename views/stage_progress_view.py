@@ -6,7 +6,6 @@ from PyQt5.QtWidgets import QGridLayout, QWidget
 from services.stager_access import get_progress, get_surls_online
 from parsers._configparser import getConfigs
 from plotting import Plot
-from shlex import quote as shlex_quote
 
 
 class StageProgressPlot(QWidget):
@@ -75,7 +74,7 @@ class StageProgressPlot(QWidget):
             for sas_id in range(0, len(self.SASidsCalibrator)):
                 for uri in range(0, len(calibrator_SURI[self.SASidsCalibrator[sas_id]])):
                     if uri == len(self.SASidsCalibrator) - 1:
-                        suris_string += list(calibrator_SURI[self.SASidsCalibrator[sas_id]])[uri]
+                        suris_string += list(calibrator_SURI[self.SASidsCalibrator[sas_id]])[uri] + "#"
                     else:
                         suris_string += list(calibrator_SURI[self.SASidsCalibrator[sas_id]])[uri] + "#"
 
@@ -103,7 +102,7 @@ class StageProgressPlot(QWidget):
                     sas_ids_string += str(self.SASidsTarget[sas_id]) + "_"
                     suris_string += "&"
 
-            os.system("python3 stage.py " + sas_ids_string + " " + suris_string)
+            os.system("nohup ./stage.py " + sas_ids_string + " " + suris_string + " >/dev/null 2>&1")
 
         progress = get_progress()
         if progress is None:
@@ -170,7 +169,7 @@ class StageProgressPlot(QWidget):
                 for index_ in range(0, len(self.get_staging_progress())):
                     stage_id_ = list(self.get_staging_progress().keys())[index_]
                     staged_file_percent_for_id_tmp = self.get_staging_progress()[stage_id_]["Percent done"]
-                    self.stages_files_percent[index_].append(staged_file_percent_for_id_tmp * 100)
+                    self.stages_files_percent[index_].append(staged_file_percent_for_id_tmp)
                     self.p2.graph.plot(self.time, self.stages_files_percent[index_], colors[j] + symbols[j],  label="Stage id: " + str(stage_id_))
                     self.p2.draw()
                     j += 1

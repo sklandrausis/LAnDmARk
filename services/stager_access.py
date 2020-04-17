@@ -1,31 +1,45 @@
-''' This is the Stager API wrapper module for the Lofar LTA staging service.
-It uses an xmlrpc proxy to talk and authenticate to the remote service. Your account credentials will be read from
-the awlofar catalog Environment.cfg, if present or can be provided in a .stagingrc file in your home directory.
-!! Please do not talk directly to the xmlrpc interface, but use this module to access the provided functionality.
-!! This is to ensure that when we change the remote interface, your scripts don't break and you will only have to
-!! upgrade this module.'''
+#! /usr/bin/env python3
 
-__version__ = "1.3"
+# Copyright 2019 Stichting Nederlandse Wetenschappelijk Onderzoek Instituten,
+# ASTRON Netherlands Institute for Radio Astronomy
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-import datetime
+
+# This is the Stager API wrapper module for the Lofar LTA staging service.
+#
+# It uses an xmlrpc proxy to talk and authenticate to the remote service. Your account credentials will be read from
+# the awlofar catalog Environment.cfg, if present or can be provided in a .stagingrc file in your home directory.
+#
+# !! Please do not talk directly to the xmlrpc interface, but use this module to access the provided functionality.
+# !! This is to ensure that when we change the remote interface, your scripts don't break and you will only have to
+# !! upgrade this module.
+
+__version__ = "1.5"
+
 import os
+import datetime
 from os.path import expanduser
+
 # Python2/3 dependent stuff
 from sys import version_info
-from parsers._configparser import getConfigs
-
 python_version = version_info.major
 if python_version == 3:
     import xmlrpc.client as xmlrpclib
-
     string_types = str
 else:
     import xmlrpclib
-
     string_types = basestring
 
-user = None
-passw = None
+from parsers._configparser import getConfigs
+
 try:
     f = expanduser("~/.awe/Environment.cfg")
     with open(f, 'r') as file:
@@ -49,23 +63,27 @@ print("%s - stager_access: Creating proxy" % (datetime.datetime.now()))
 proxy = xmlrpclib.ServerProxy("https://" + user + ':' + passw + "@webportal.astron.nl/service-public/xmlrpc")
 LtaStager = proxy.LtaStager
 
-
-def stage(surls):
-    """ Stage urls"""
-
+def stage(surls, send_notifications=True):
+    """ Stage list of SURLs, optionally enable/disable email notifications """
     if isinstance(surls, str):
         surls = [surls]
-    stageid = proxy.LtaStager.add_getid(surls)
+    stageid = proxy.LtaStager.add_getid(surls, send_notifications)
     return stageid
 
 
 def get_surls_online(stageid):
-    """ Get staget urls """
+    """ Get a list of all files that are already online for a running request with given ID  """
     return proxy.LtaStager.getstagedurls(stageid)
 
 
 def get_progress(status=None, exclude=False):
-    """ Get progress of staging """
+    """ Get a detailed list of all running requests and their current progress.
+        As a normal user, this only returns your own requests.
+        :param status: If set to a valid status then only requests with that
+        status are returned.
+        :param exclude: If set to True then the requests with status 'status' are
+        excluded.
+    """
     all_requests = proxy.LtaStager.getprogress()
     if status is not None and isinstance(status, string_types):
         if python_version == 3:
