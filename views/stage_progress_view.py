@@ -241,4 +241,4 @@ class StageProgressPlot(QWidget):
                         else:
                             sas_ids_string_target += str(self.SASidsTarget[sas_id]) + "_"
 
-                    #os.system("nohup ./retrieve.py  " + '"' + suffix_urls_string + '"' + "  " + self.download_dir + "  " + sas_ids_string_calibrator + "  " + sas_ids_string_target + " >/dev/null 2>&1")
+                    os.system("nohup ./retrieve.py  " + '"' + suffix_urls_string + '"' + "  " + self.download_dir + "  " + sas_ids_string_calibrator + "  " + sas_ids_string_target + " >/dev/null 2>&1")
