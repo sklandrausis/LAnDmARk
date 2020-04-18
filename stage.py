@@ -14,20 +14,23 @@ def parse_arguments():
 
 def start_staging(s_uris, sas_ids):
     for sas_id in sas_ids:
+        print(s_uris[sas_id])
         stagger = LtaStager()
-        stagger.stage_uris(s_uris[sas_id])
+        stagger.stage_uris(set(s_uris[sas_id]))
 
 
 def main():
     args = parse_arguments()
-    uris = args.SURIs.split("&")
+    uris = args.SURIs[0:len(args.SURIs) - 1].split("#")
     sas_ids = [int(sas_id) for sas_id in args.SASids.split("_")]
 
     s_uris = dict()
     for sas_id in range(0, len(sas_ids)):
-        s_uris[sas_ids[sas_id]] = []
-        for u in uris:
-            s_uris[sas_ids[sas_id]].extend(u[0:len(u) - 1].split("#"))
+        s_uris[sas_ids[sas_id]] = set()
+
+        for uri in uris:
+            if "L" + str(sas_ids[sas_id]) in uri:
+                s_uris[sas_ids[sas_id]].add(uri)
 
     start_staging(s_uris, sas_ids)
     sys.exit(0)

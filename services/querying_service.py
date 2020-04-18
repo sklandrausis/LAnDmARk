@@ -33,7 +33,7 @@ class Querying:
                                     "International stations": observation.nrStationsInternational,
                                     "Total stations": observation.numberOfStations}
 
-        return(station_count)
+        return station_count
 
     def get_station_count_message(self):
         message = ""

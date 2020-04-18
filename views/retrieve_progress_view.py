@@ -1,4 +1,5 @@
 import os
+import datetime
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QMessageBox, QGridLayout, QWidget
 from plotting import Plot
@@ -55,17 +56,17 @@ class RetrieveProgressPlot(QWidget):
                 self.retrieve_files_counts[sas_id] = []
                 self.retrieve_files_percent[sas_id] = []
 
-        self.time = [0]
+        self.time = [datetime.datetime.now().strftime("%H:%M")]
 
         self.p1 = Plot(self)
         self.p1.set_grid(self.grid, 1, 0)
-        self.p1.graph.set_xlabel("Time (units)")
+        self.p1.graph.set_xlabel("Time")
         self.p1.graph.set_ylabel("Retrieved file count")
         self.grid.addWidget(self.p1, 0, 0)
 
         self.p2 = Plot(self)
         self.p2.set_grid(self.grid, 1, 1)
-        self.p2.graph.set_xlabel("Time (units)")
+        self.p2.graph.set_xlabel("Time")
         self.p2.graph.set_ylabel("Retrieved file percent")
         self.grid.addWidget(self.p2, 0, 1)
 
@@ -96,7 +97,7 @@ class RetrieveProgressPlot(QWidget):
         if len(self.time) == 1:
             self.time.append(1)
         else:
-            self.time.append(self.time[-1] + 1)
+            self.time.append(datetime.datetime.now().strftime("%H:%M"))
 
         i = 0
 

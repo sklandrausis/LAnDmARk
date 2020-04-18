@@ -1,6 +1,7 @@
 import sys
 import os
 import time
+import datetime
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QGridLayout, QWidget
 from services.stager_access import get_progress, get_surls_online
@@ -35,18 +36,18 @@ class StageProgressPlot(QWidget):
         else:
             self.SASidsCalibrator = [int(id) for id in getConfigs("Data", "calibratorSASids", self.config_file).replace(" ", "").split(",")]
 
-        self.time = [0]
+        self.time = [datetime.datetime.now().strftime("%H:%M")]
         self.curves = []
 
         self.p1 = Plot(self)
         self.p1.set_grid(self.grid, 1, 0)
-        self.p1.graph.set_xlabel("Time (time units)")
+        self.p1.graph.set_xlabel("Time")
         self.p1.graph.set_ylabel("Stage file count")
         self.grid.addWidget(self.p1, 0, 0)
 
         self.p2 = Plot(self)
         self.p2.set_grid(self.grid, 1, 1)
-        self.p2.graph.set_xlabel("Time (time units)")
+        self.p2.graph.set_xlabel("Time")
         self.p2.graph.set_ylabel("Stage file percent")
         self.grid.addWidget(self.p2, 0, 1)
 
@@ -82,7 +83,6 @@ class StageProgressPlot(QWidget):
                     sas_ids_string += str(self.SASidsCalibrator[sas_id])
                 else:
                     sas_ids_string += str(self.SASidsCalibrator[sas_id]) + "_"
-                    suris_string += "&"
 
             os.system("nohup ./stage.py " + sas_ids_string + " " + suris_string + " >/dev/null 2>&1")
 
@@ -148,10 +148,8 @@ class StageProgressPlot(QWidget):
             self.__retrieve()
 
         else:
-            if len(self.time) == 1:
-                self.time.append(1)
-            else:
-                self.time.append(self.time[-1] + 1)
+            self.time.append(datetime.datetime.now().strftime("%H:%M"))
+
             try:
                 symbols = ["*", "o", "v", "^", "<", ">", "1", "2", "3", "4"]
                 colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
@@ -243,4 +241,4 @@ class StageProgressPlot(QWidget):
                         else:
                             sas_ids_string_target += str(self.SASidsTarget[sas_id]) + "_"
 
-                    os.system("nohup ./retrieve.py  " + '"' + suffix_urls_string + '"' + "  " + self.download_dir + "  " + sas_ids_string_calibrator + "  " + sas_ids_string_target + " >/dev/null 2>&1")
+                    #os.system("nohup ./retrieve.py  " + '"' + suffix_urls_string + '"' + "  " + self.download_dir + "  " + sas_ids_string_calibrator + "  " + sas_ids_string_target + " >/dev/null 2>&1")
