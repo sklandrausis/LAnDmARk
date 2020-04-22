@@ -1,5 +1,6 @@
 import sys
 import os
+import subprocess
 import time
 import datetime
 from PyQt5 import QtCore
@@ -84,7 +85,7 @@ class StageProgressPlot(QWidget):
                 else:
                     sas_ids_string += str(self.SASidsCalibrator[sas_id]) + "_"
 
-            os.system("nohup ./stage.py " + sas_ids_string + " " + suris_string + " >/dev/null 2>&1")
+            subprocess.Popen(["nohup", "./stage.py", sas_ids_string, suris_string])
 
         if target_SURI is not "":
             sas_ids_string = ""
@@ -102,7 +103,7 @@ class StageProgressPlot(QWidget):
                     sas_ids_string += str(self.SASidsTarget[sas_id]) + "_"
                     suris_string += "&"
 
-            os.system("nohup ./stage.py " + sas_ids_string + " " + suris_string + " >/dev/null 2>&1")
+            subprocess.Popen(["nohup", "./stage.py", sas_ids_string, suris_string])
 
         progress = get_progress()
         if progress is None:
@@ -217,28 +218,29 @@ class StageProgressPlot(QWidget):
             retrieve_setup = False
         else:
             if getConfigs("Operations", "retrieve", self.config_file) == "True":
+                sas_ids_string_calibrator = ""
+                sas_ids_string_target = ""
+
+                for sas_id in range(0, len(self.SASidsCalibrator)):
+                    if sas_id == len(self.SASidsCalibrator) - 1:
+                        sas_ids_string_calibrator += str(self.SASidsCalibrator[sas_id])
+                    else:
+                        sas_ids_string_calibrator += str(self.SASidsCalibrator[sas_id]) + "_"
+
+                for sas_id in range(0, len(self.SASidsTarget)):
+                    if sas_id == len(self.SASidsTarget) - 1:
+                        sas_ids_string_target += str(self.SASidsTarget[sas_id])
+                    else:
+                        sas_ids_string_target += str(self.SASidsTarget[sas_id]) + "_"
+
                 for stage_id in set(self.tmpStagesIDs):
                     suffix_urls = list(set(get_surls_online(int(stage_id))))
                     suffix_urls_string = ""
-                    sas_ids_string_calibrator = ""
-                    sas_ids_string_target = ""
 
                     for s in range(0, len(suffix_urls)):
                         if s == len(suffix_urls) -1:
                             suffix_urls_string += suffix_urls[s]
                         else:
-                            suffix_urls_string += suffix_urls[s] + "&"
+                            suffix_urls_string += suffix_urls[s] + "#"
 
-                    for sas_id in range(0, len(self.SASidsCalibrator)):
-                        if sas_id == len(self.SASidsCalibrator) - 1:
-                            sas_ids_string_calibrator += str(self.SASidsCalibrator[sas_id])
-                        else:
-                            sas_ids_string_calibrator += str(self.SASidsCalibrator[sas_id]) + "_"
-
-                    for sas_id in range(0, len(self.SASidsTarget)):
-                        if sas_id == len(self.SASidsTarget) - 1:
-                            sas_ids_string_target += str(self.SASidsTarget[sas_id])
-                        else:
-                            sas_ids_string_target += str(self.SASidsTarget[sas_id]) + "_"
-
-                    os.system("nohup ./retrieve.py  " + '"' + suffix_urls_string + '"' + "  " + self.download_dir + "  " + sas_ids_string_calibrator + "  " + sas_ids_string_target + " >/dev/null 2>&1")
+                    subprocess.Popen(["nohup", "./retrieve.py", '"' + suffix_urls_string + '"', self.download_dir, sas_ids_string_calibrator, sas_ids_string_target])

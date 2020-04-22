@@ -13,11 +13,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_query_view(object):
     def setupUi(self, query_view):
         query_view.setObjectName("query_view")
-        query_view.resize(815, 600)
+        query_view.resize(815, 137)
         self.centralwidget = QtWidgets.QWidget(query_view)
         self.centralwidget.setObjectName("centralwidget")
         self.querying_message = QtWidgets.QLabel(self.centralwidget)
-        self.querying_message.setGeometry(QtCore.QRect(20, 40, 781, 481))
+        self.querying_message.setGeometry(QtCore.QRect(10, 20, 771, 131))
         self.querying_message.setObjectName("querying_message")
         query_view.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(query_view)
