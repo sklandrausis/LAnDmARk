@@ -243,4 +243,4 @@ class StageProgressPlot(QWidget):
                         else:
                             suffix_urls_string += suffix_urls[s] + "#"
 
-                    subprocess.Popen(["nohup", "./retrieve.py", '"' + suffix_urls_string + '"', self.download_dir, sas_ids_string_calibrator, sas_ids_string_target])
+                subprocess.Popen(["nohup", "./retrieve.py", '"' + suffix_urls_string + '"', self.download_dir, sas_ids_string_calibrator, sas_ids_string_target])

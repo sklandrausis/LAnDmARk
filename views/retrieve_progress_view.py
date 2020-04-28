@@ -94,10 +94,7 @@ class RetrieveProgressPlot(QWidget):
 
     def update_plot(self):
         percent_done = []
-        if len(self.time) == 1:
-            self.time.append(1)
-        else:
-            self.time.append(datetime.datetime.now().strftime("%H:%M"))
+        self.time.append(datetime.datetime.now().strftime("%H:%M"))
 
         i = 0
 
