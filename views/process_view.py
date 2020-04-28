@@ -27,6 +27,8 @@ class ProcessView(QMainWindow):
         self.calibratorDir = workingDir + "calibrators" + "/"
         self.targetDir = workingDir + "targets" + "/"
         self.imageDir = workingDir + "imaging_deep" + "/"
+        self.timer = QBasicTimer()
+        self.step = 0
 
 
         prefactor_path = getConfigs("Paths", "prefactorpath", self.config_file)
@@ -92,8 +94,6 @@ class ProcessView(QMainWindow):
                 self.progress_bars_index += 1
                 self.log_file = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", "config.cfg") + "/" + "calibrators" + "pipeline_" + str(id) + ".log"
 
-        self.timer = QBasicTimer()
-        self.step = 0
         self.startProgress()
 
     def create_init_view(self, SAS_ids):
