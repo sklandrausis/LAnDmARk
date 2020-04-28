@@ -1,11 +1,11 @@
 from __future__ import unicode_literals
 import matplotlib
+matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.backends.backend_qt5agg as qt5agg
 from matplotlib.figure import Figure
 from PyQt5 import QtWidgets
 
-matplotlib.use('Qt5Agg')
 
 
 class Plot(FigureCanvas):
