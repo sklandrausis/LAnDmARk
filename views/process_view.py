@@ -1,6 +1,6 @@
 import os
 from PyQt5.QtWidgets import QMainWindow, QProgressBar, QLabel
-from PyQt5.QtCore import QBasicTimer
+from PyQt5 import QtCore
 from parsers._configparser import getConfigs
 
 
@@ -27,9 +27,9 @@ class ProcessView(QMainWindow):
         self.calibratorDir = workingDir + "calibrators" + "/"
         self.targetDir = workingDir + "targets" + "/"
         self.imageDir = workingDir + "imaging_deep" + "/"
-        self.timer = QBasicTimer()
+        self.timer = QtCore.QTimer()
+        self.timer.setInterval(100)
         self.step = 0
-
 
         prefactor_path = getConfigs("Paths", "prefactorpath", self.config_file)
         calibrator_parset_file = "Pre-Facet-Calibrator.parset"
@@ -77,11 +77,11 @@ class ProcessView(QMainWindow):
             for id in self.SASidsTarget:
                 parsetTarget = self.targetDir + str(id) + "_RAW/" + "Pre-Facet-Target.parset"
                 configTarget = self.targetDir + str(id) + "_RAW/" + "pipeline.cfg"
+                self.timer.start()
+                self.timer.timeout.connect(self.timerEvent)
                 self.run_pipeline(parsetTarget, configTarget)  # run target
-                self.timer.start(80, self)
+                self.log_file = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", "config.cfg") + "/" + "targets/" + "pipeline_" + str(id) + ".log"
                 self.progress_bars_index += 1
-                self.log_file = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", "config.cfg") + "/" + "targets" + "pipeline_" + str(id) + ".log"
-
         else:
             self.tasks = get_pipeline_task(prefactor_path, calibrator_parset_file)
             self.create_init_view(self.SASidsCalibrator)
@@ -89,12 +89,13 @@ class ProcessView(QMainWindow):
             for id in self.SASidsCalibrator:
                 parsetCalib = self.calibratorDir + str(id) + "_RAW/" + "Pre-Facet-Calibrator.parset"
                 configCalib = self.calibratorDir + str(id) + "_RAW/" + "pipeline.cfg"
+                self.timer.start()
+                self.timer.timeout.connect(self.timerEvent)
                 self.run_pipeline(parsetCalib, configCalib)  # run calibrator
-                self.timer.start(80, self)
+                self.log_file = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", "config.cfg") + "/" + "calibrators/" + "pipeline_" + str(id) + ".log"
                 self.progress_bars_index += 1
-                self.log_file = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", "config.cfg") + "/" + "calibrators" + "pipeline_" + str(id) + ".log"
 
-        self.startProgress()
+        #self.startProgress()
 
     def create_init_view(self, SAS_ids):
         y_l = 10
@@ -119,17 +120,19 @@ class ProcessView(QMainWindow):
         else:
             self.timer.start(80, self)
 
-    def timerEvent(self, event):
-        if self.step >= 100:
+    def timerEvent(self):
+        if self.step >= 100.0:
             self.timer.stop()
             return
 
-        self.progress = self.tasks.index(self.get_task_from_log_file())
-        self.step = self.get_progress_value()
-        self.progress_bars[self.progress_bars_index].setValue(self.step)
+        last_started_task = self.get_task_from_log_file()
+        if last_started_task is not "not started":
+            self.progress = self.tasks.index(last_started_task)
+            self.step = self.get_progress_value()
+            self.progress_bars[self.progress_bars_index -1].setValue(self.step)
 
     def get_progress_value(self):
-        return self.progress / len(self.tasks)
+        return (self.progress / len(self.tasks))*100
 
     def run_pipeline(self, parset_file, config_file):
         try:
@@ -138,12 +141,17 @@ class ProcessView(QMainWindow):
             print("Something went wrong")
 
     def get_task_from_log_file(self):
-        task = ""
+        tasks = []
         log_file = self.log_file
-        with open(log_file) as parset_file:
+        with open(log_file, "rb") as parset_file:
             lines = parset_file.readlines()
             for line in lines:
-                if "completed successfully" in line:
-                    task = line.split(" ")[5]
+                line = line.decode("utf-8")
+                if "Beginning step" in line:
+                    task = line.split(":")[-1].split(" ")[-1].replace("\n", "")
+                    tasks.append(task)
 
-        return task
+        if len(tasks) == 0:
+            return "not started"
+        else:
+            return tasks[-1]

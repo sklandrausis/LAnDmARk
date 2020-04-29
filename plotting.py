@@ -7,7 +7,6 @@ from matplotlib.figure import Figure
 from PyQt5 import QtWidgets
 
 
-
 class Plot(FigureCanvas):
 
     def __init__(self, parent=None, width=5, height=4, dpi=100):

@@ -219,6 +219,7 @@ class StageProgressPlot(QWidget):
             if getConfigs("Operations", "retrieve", self.config_file) == "True":
                 sas_ids_string_calibrator = ""
                 sas_ids_string_target = ""
+                suffix_urls_string = ""
 
                 for sas_id in range(0, len(self.SASidsCalibrator)):
                     if sas_id == len(self.SASidsCalibrator) - 1:
@@ -234,10 +235,9 @@ class StageProgressPlot(QWidget):
 
                 for stage_id in set(self.tmpStagesIDs):
                     suffix_urls = list(set(get_surls_online(int(stage_id))))
-                    suffix_urls_string = ""
 
                     for s in range(0, len(suffix_urls)):
-                        if s == len(suffix_urls) -1:
+                        if s == len(suffix_urls) - 1:
                             suffix_urls_string += suffix_urls[s]
                         else:
                             suffix_urls_string += suffix_urls[s] + "#"
