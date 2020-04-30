@@ -1,4 +1,6 @@
+import sys
 import os
+import threading
 from PyQt5.QtWidgets import QMainWindow, QProgressBar, QLabel
 from PyQt5 import QtCore
 from parsers._configparser import getConfigs
@@ -16,10 +18,18 @@ def get_pipeline_task(prefactor_path, parset_file):
     return tasks
 
 
+def run_pipeline(parset_file, config_file):
+    try:
+        os.system('genericpipeline.py ' + parset_file + ' -c ' + config_file + ' -d')
+    except:
+        print("Something went wrong")
+
+
 class ProcessView(QMainWindow):
     def __init__(self, *args, **kwargs):
         super(ProcessView, self).__init__(*args, **kwargs)
         self.progress_bars = []
+        self.task_labels = []
         self.progress_bars_index = 0
         self.progress = 0
         self.config_file = "config.cfg"
@@ -79,27 +89,29 @@ class ProcessView(QMainWindow):
                 configTarget = self.targetDir + str(id) + "_RAW/" + "pipeline.cfg"
                 self.timer.start()
                 self.timer.timeout.connect(self.timerEvent)
-                self.run_pipeline(parsetTarget, configTarget)  # run target
+                self.progress_bars_index = self.SASidsTarget.index(id)
+                run_pipeline(parsetTarget, configTarget)  # run target
                 self.log_file = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", "config.cfg") + "/" + "targets/" + "pipeline_" + str(id) + ".log"
-                self.progress_bars_index += 1
+
         else:
             self.tasks = get_pipeline_task(prefactor_path, calibrator_parset_file)
+            print(self.tasks)
             self.create_init_view(self.SASidsCalibrator)
 
             for id in self.SASidsCalibrator:
                 parsetCalib = self.calibratorDir + str(id) + "_RAW/" + "Pre-Facet-Calibrator.parset"
                 configCalib = self.calibratorDir + str(id) + "_RAW/" + "pipeline.cfg"
                 self.timer.start()
-                self.timer.timeout.connect(self.timerEvent)
-                self.run_pipeline(parsetCalib, configCalib)  # run calibrator
-                self.log_file = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", "config.cfg") + "/" + "calibrators/" + "pipeline_" + str(id) + ".log"
-                self.progress_bars_index += 1
-
-        #self.startProgress()
+                self.timer.timeout.connect(self.update_progress_bar)
+                self.log_file = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + \
+                                getConfigs("Data","TargetName", "config.cfg") + "/" + "calibrators/" + "pipeline_" + str(id) + ".log"
+                threading.Thread(target=run_pipeline, args=(parsetCalib, configCalib,)).start()  # run calibrator
+                self.progress_bars_index = self.SASidsCalibrator.index(id)
 
     def create_init_view(self, SAS_ids):
         y_l = 10
         y_p = 50
+
         for id in SAS_ids:
             self.progress_label = QLabel(self)
             self.progress_label.setText("Running progress for SAS id " + str(id))
@@ -109,36 +121,33 @@ class ProcessView(QMainWindow):
             self.progress_bar.setGeometry(10, y_p, 250, 25)
             self.progress_bars.append(self.progress_bar)
 
+            self.task_label = QLabel(self)
+            self.task_label.setText("Pipeline is not started")
+            self.task_label.setGeometry(280, y_p, 280, 25)
+            self.task_labels.append(self.task_label)
+
             y_l += 70
             y_p += 70
 
-        self.setGeometry(10, 20, len("Running progress for SAS id ") + 250, 90 * len(SAS_ids))
+        self.setGeometry(10, 20, len("Running progress for SAS id ") + 520, 90 * len(SAS_ids))
 
-    def startProgress(self):
-        if self.timer.isActive():
-            self.timer.stop()
-        else:
-            self.timer.start(80, self)
-
-    def timerEvent(self):
+    def update_progress_bar(self):
         if self.step >= 100.0:
             self.timer.stop()
             return
 
         last_started_task = self.get_task_from_log_file()
         if last_started_task is not "not started":
-            self.progress = self.tasks.index(last_started_task)
-            self.step = self.get_progress_value()
-            self.progress_bars[self.progress_bars_index -1].setValue(self.step)
+            try:
+                self.progress = self.tasks.index(last_started_task)
+                self.step = self.get_progress_value()
+                self.progress_bars[self.progress_bars_index].setValue(self.step)
+                self.task_labels[self.progress_bars_index].setText("Prefactor task executed: " + last_started_task)
+            except ValueError as e:
+                print("ValueError", e, sys.exc_info()[0])
 
     def get_progress_value(self):
         return (self.progress / len(self.tasks))*100
-
-    def run_pipeline(self, parset_file, config_file):
-        try:
-            os.system('genericpipeline.py ' + parset_file + ' -c ' + config_file + ' -d')
-        except:
-            print("Something went wrong")
 
     def get_task_from_log_file(self):
         tasks = []
