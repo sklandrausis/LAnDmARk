@@ -95,7 +95,6 @@ class ProcessView(QMainWindow):
 
         else:
             self.tasks = get_pipeline_task(prefactor_path, calibrator_parset_file)
-            print(self.tasks)
             self.create_init_view(self.SASidsCalibrator)
 
             for id in self.SASidsCalibrator:
@@ -123,44 +122,48 @@ class ProcessView(QMainWindow):
 
             self.task_label = QLabel(self)
             self.task_label.setText("Pipeline is not started")
-            self.task_label.setGeometry(280, y_p, 280, 25)
+            self.task_label.setGeometry(280, y_p, 500, 25)
             self.task_labels.append(self.task_label)
 
             y_l += 70
             y_p += 70
 
-        self.setGeometry(10, 20, len("Running progress for SAS id ") + 520, 90 * len(SAS_ids))
+        self.setGeometry(10, 20, len("Running progress for SAS id ") + 560, 90 * len(SAS_ids))
 
     def update_progress_bar(self):
         if self.step >= 100.0:
             self.timer.stop()
             return
 
-        last_started_task = self.get_task_from_log_file()
+        executed_tasks = self.get_tasks_from_log_file()
+        if len(executed_tasks) == 0:
+            last_started_task = "not started"
+        else:
+            last_started_task = executed_tasks[-1]
+
         if last_started_task is not "not started":
             try:
-                self.progress = self.tasks.index(last_started_task)
+                self.progress = len(executed_tasks)
                 self.step = self.get_progress_value()
                 self.progress_bars[self.progress_bars_index].setValue(self.step)
-                self.task_labels[self.progress_bars_index].setText("Prefactor task executed: " + last_started_task)
+                self.task_labels[self.progress_bars_index].setText("Prefactor started to execute task: " + last_started_task)
             except ValueError as e:
                 print("ValueError", e, sys.exc_info()[0])
 
     def get_progress_value(self):
         return (self.progress / len(self.tasks))*100
 
-    def get_task_from_log_file(self):
+    def get_tasks_from_log_file(self):
         tasks = []
         log_file = self.log_file
-        with open(log_file, "rb") as parset_file:
-            lines = parset_file.readlines()
-            for line in lines:
-                line = line.decode("utf-8")
-                if "Beginning step" in line:
-                    task = line.split(":")[-1].split(" ")[-1].replace("\n", "")
-                    tasks.append(task)
 
-        if len(tasks) == 0:
-            return "not started"
-        else:
-            return tasks[-1]
+        if os.path.isfile(log_file):
+            with open(log_file, "rb") as parset_file:
+                lines = parset_file.readlines()
+                for line in lines:
+                    line = line.decode("utf-8")
+                    if "Beginning step" in line:
+                        task = line.split(":")[-1].split(" ")[-1].replace("\n", "")
+                        tasks.append(task.strip())
+
+        return tasks

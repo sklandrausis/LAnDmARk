@@ -70,9 +70,7 @@ class RunController(QObject):
         else:
             if not self.query_done:
                 while querying_setup2:
-                    station_count_querying_thread = Thread(target=self.query_station_count())
-                    station_count_querying_thread.start()
-                    station_count_querying_thread.join()
+                    Thread(target=self.query_station_count()).start()
 
                     width = 0.35
                     ind = np.arange(0, len(self.SASidsTarget))
@@ -86,13 +84,11 @@ class RunController(QObject):
                         iStationsCalibrator = []
                         tStationsCalibrator = []
 
-
                         for id in self.SASidsCalibrator:
                             cStationsCalibrator.append(station_count_q1[id]["Core stations"])
                             rStationsCalibrator.append(station_count_q1[id]["Remote stations"])
                             iStationsCalibrator.append(station_count_q1[id]["International stations"])
                             tStationsCalibrator.append(station_count_q1[id]["Total stations"])
-
 
                         # pc4 = axc.bar(ind - width, tStationsCalibrator, width/2, color='y')
                         pc1 = axc.bar(ind, cStationsCalibrator, width, color='r', bottom=[0, 0])
