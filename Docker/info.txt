@@ -1,0 +1,11 @@
+Build: docker build -f Docker/Dockerfile -t <Image name> .
+Build example:  docker build -f Docker/Dockerfile -t landmark .
+
+Before executing docker run command: execute xhost +
+
+Run: docker run --env DISPLAY=$DISPLAY --privileged --volume $XAUTH:/root/.Xauthority --volume /tmp/.X11-unix:/tmp/.X11-unix  -it -e USER -v $HOME/:$HOME/ -e HOME -w $HOME --rm  <Image name>
+Run example: docker run --env DISPLAY=$DISPLAY --privileged --volume $XAUTH:/root/.Xauthority --volume /tmp/.X11-unix:/tmp/.X11-unix  -it -e USER -v $HOME/:$HOME/ -e HOME -w $HOME --rm  landmark
+
+Before using LAnDmARk: execute command  source /opt/lofarsoft/lofarinit.sh and edit file  ~/.awe/Environment.cfg change "database_user" to your LTA user name, change "database_password" to your LTA password, clone Prefactor and LAnDmARk repo to your computer.
+
+To start LAnDmARk GUI execute: python3 mainGUI.py
