@@ -18,13 +18,6 @@ def get_pipeline_task(prefactor_path, parset_file):
     return tasks
 
 
-def run_pipeline(parset_file, config_file):
-    try:
-        os.system('nohup genericpipeline.py ' + parset_file + ' -c ' + config_file + ' -d -v')
-    except:
-        print(sys.exc_info())
-
-
 def get_tasks_from_log_file(log_file):
     tasks = []
     if os.path.isfile(log_file):
@@ -101,15 +94,11 @@ class ProcessView(QMainWindow):
         elif getConfigs("Operations", "which_obj", "config.cfg") == "targets":
             self.tasks = get_pipeline_task(prefactor_path, target_parset_file)
             self.create_init_view(self.SASidsTarget)
+            self.ids = self.SASidsTarget
 
             for id in self.SASidsTarget:
-                parsetTarget = self.targetDir + str(id) + "_RAW/" + "Pre-Facet-Target.parset"
-                configTarget = self.targetDir + str(id) + "_RAW/" + "pipeline.cfg"
-                self.timer.start()
-                self.timer.timeout.connect(self.timerEvent)
-                self.progress_bars_index = self.SASidsTarget.index(id)
-                run_pipeline(parsetTarget, configTarget)  # run target
-                self.log_file = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + getConfigs("Data", "TargetName", "config.cfg") + "/" + "targets/" + "pipeline_" + str(id) + ".log"
+                step = 0
+                self.steps.append(step)
 
         else:
             self.tasks = get_pipeline_task(prefactor_path, calibrator_parset_file)
@@ -117,12 +106,10 @@ class ProcessView(QMainWindow):
             self.ids = self.SASidsCalibrator
 
             for id in self.SASidsCalibrator:
-                parsetCalib = self.calibratorDir + str(id) + "_RAW/" + "Pre-Facet-Calibrator.parset"
-                configCalib = self.calibratorDir + str(id) + "_RAW/" + "pipeline.cfg"
-                t = threading.Thread(target=run_pipeline, args=(parsetCalib, configCalib,)).start() # run calibrator
-                self.threads.append(t)
                 step = 0
                 self.steps.append(step)
+
+        threading.Thread(target=os.system, args=(" ./run_pipelines.py", )).start()
 
     def create_init_view(self, SAS_ids):
         y_l = 10

@@ -15,8 +15,8 @@ RUN pip3 install seaborn coloredlogs configparser pyqt5==5.14
 RUN wget https://lta.lofar.eu/software/lofar_lta-2.7.1.tar.gz
 RUN tar -xzf /lofar_lta-2.7.1.tar.gz  -C / 
 RUN cd /lofar_lta-2.7.1/ && python3  setup.py install_oracle && python3  setup.py install && python2 setup.py install_oracle && python2 setup.py install
-RUN echo "LD_LIBRARY_PATH=/usr/lib/instantclient_11_2" >> /opt/lofarsoft/lofarinit.sh
-RUN echo "unset PYTHONPATH" >> /opt/lofarsoft/lofarinit.sh
+RUN echo "export LD_LIBRARY_PATH=/usr/lib/instantclient_11_2" >> /opt/lofarsoft/lofarinit.sh
+RUN echo "export PYTHONPATH=''" >> /opt/lofarsoft/lofarinit.sh
 RUN cp -rfv /opt/lofarsoft/lib/python2.7/site-packages/* /usr/local/lib/python2.7/dist-packages/
 
 RUN git clone https://github.com/lofar-astron/LofarStMan.git /LofarStMan
