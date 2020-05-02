@@ -71,28 +71,19 @@ class ProcessView(QMainWindow):
         threading.Thread(target=self.timer.start()).start()
 
         if getConfigs("Operations", "which_obj", "config.cfg") == "all" or len(getConfigs("Operations", "which_obj", "config.cfg")) == 0:
-            calibrator_tasks = get_pipeline_task(prefactor_path, calibrator_parset_file)
-            target_tasks = get_pipeline_task(prefactor_path, target_parset_file)
-            imaging_tasks = get_pipeline_task(prefactor_path, imaging_parset_file)
+            self.calibrator_tasks = get_pipeline_task(prefactor_path, calibrator_parset_file)
+            self.target_tasks = get_pipeline_task(prefactor_path, target_parset_file)
+            self.imaging_tasks = get_pipeline_task(prefactor_path, imaging_parset_file)
+            ids = self.SASidsCalibrator.extend(self.SASidsTarget)
+            ids = ids.extend("imaging")
+            self.create_init_view(ids)
 
-            '''
-            for id in self.SASidsCalibrator:
-                parsetCalib = self.calibratorDir + str(id) + "_RAW/" + "Pre-Facet-Calibrator.parset"
-                configCalib = self.calibratorDir + str(id) + "_RAW/" + "pipeline.cfg"
-                self.run_pipeline(parsetCalib, configCalib)  # run calibrator
-
-            for id in self.SASidsTarget:
-                parsetTarget = targetDir + str(id) + "_RAW/" + "Pre-Facet-Target.parset"
-                configTarget = targetDir + str(id) + "_RAW/" + "pipeline.cfg"
-                self.run_pipeline(parsetTarget, configTarget)  # run target
-
-            parsetImage = imageDir + "Initial-Subtract.parset"
-            configImage = imageDir + "pipeline.cfg"
-            self.run_pipeline(parsetImage, configImage)  # run imaging
-            '''
+            for id in ids:
+                step = 0
+                self.steps.append(step)
 
         elif getConfigs("Operations", "which_obj", "config.cfg") == "targets":
-            self.tasks = get_pipeline_task(prefactor_path, target_parset_file)
+            self.target_tasks = get_pipeline_task(prefactor_path, target_parset_file)
             self.create_init_view(self.SASidsTarget)
             self.ids = self.SASidsTarget
 
@@ -101,7 +92,7 @@ class ProcessView(QMainWindow):
                 self.steps.append(step)
 
         else:
-            self.tasks = get_pipeline_task(prefactor_path, calibrator_parset_file)
+            self.calibrator_tasks = get_pipeline_task(prefactor_path, calibrator_parset_file)
             self.create_init_view(self.SASidsCalibrator)
             self.ids = self.SASidsCalibrator
 
@@ -116,17 +107,25 @@ class ProcessView(QMainWindow):
         y_p = 50
 
         for id in SAS_ids:
+            if id in self.SASidsCalibrator:
+                msg = "Progress for calibrator pipeline for SAS id " + str(id)
+            elif id in self.SASidsTarget:
+                msg = "Progress for target pipeline for SAS id " + str(id)
+
+            else:
+                msg = "Progress for imaging pipeline"
+
             self.progress_label = QLabel(self)
-            self.progress_label.setText("Running progress for SAS id " + str(id))
-            self.progress_label.setGeometry(10, y_l, 250, 25)
+            self.progress_label.setText(msg)
+            self.progress_label.setGeometry(10, y_l, 280, 25)
 
             self.progress_bar = QProgressBar(self)
-            self.progress_bar.setGeometry(10, y_p, 250, 25)
+            self.progress_bar.setGeometry(10, y_p, 280, 25)
             self.progress_bars.append(self.progress_bar)
 
             self.task_label = QLabel(self)
             self.task_label.setText("Pipeline is not started")
-            self.task_label.setGeometry(280, y_p, 500, 25)
+            self.task_label.setGeometry(300, y_p, 500, 25)
             self.task_labels.append(self.task_label)
 
             y_l += 70
@@ -139,9 +138,17 @@ class ProcessView(QMainWindow):
             self.timer.stop()
 
         for id in self.ids:
+            if id in self.SASidsCalibrator:
+                log_file = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + \
+                           getConfigs("Data", "TargetName", "config.cfg") + "/" + "calibrators/" + "pipeline_" + str(id) + ".log"
+            elif id in self.SASidsTarget:
+                log_file = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + \
+                           getConfigs("Data", "TargetName", "config.cfg") + "/" + "target/" + "pipeline_" + str(id) + ".log"
 
-            log_file = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + \
-                            getConfigs("Data", "TargetName", "config.cfg") + "/" + "calibrators/" + "pipeline_" + str(id) + ".log"
+            else:
+                log_file = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + \
+                           getConfigs("Data", "TargetName", "config.cfg") + "/" + "imaging_deep/" + "pipeline_" + str(id) + ".log"
+
             progress_bars_index = self.ids.index(id)
 
             executed_tasks = get_tasks_from_log_file(log_file)
@@ -153,11 +160,16 @@ class ProcessView(QMainWindow):
             if last_started_task is not "not started":
                 try:
                     self.progress = len(executed_tasks)
-                    self.steps[progress_bars_index] = self.get_progress_value()
+                    self.steps[progress_bars_index] = self.get_progress_value(id)
                     self.progress_bars[progress_bars_index].setValue(self.steps[progress_bars_index])
                     self.task_labels[progress_bars_index].setText("Prefactor started to execute task: " + last_started_task)
                 except ValueError as e:
                     print("ValueError", e, sys.exc_info()[0])
 
-    def get_progress_value(self):
-        return (self.progress / len(self.tasks))*100
+    def get_progress_value(self, id):
+        if id in self.SASidsCalibrator:
+            return (self.progress / len(self.calibrator_tasks)) * 100
+        elif id in self.SASidsTarget:
+            return (self.progress / len(self.target_tasks)) * 100
+        else:
+            return(self.progress/len(self.imaging_tasks)) * 100

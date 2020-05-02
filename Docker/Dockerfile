@@ -9,6 +9,7 @@ RUN apt install python3-pyqt5 -y
 RUN apt install pyqt5-dev-tools -y
 RUN apt install qttools5-dev-tools -y
 RUN apt install python3-pip -y
+RUN apt get install screen -y
 
 RUN pip3 install seaborn coloredlogs configparser pyqt5==5.14
 
