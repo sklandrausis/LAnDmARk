@@ -117,15 +117,15 @@ class ProcessView(QMainWindow):
 
             self.progress_label = QLabel(self)
             self.progress_label.setText(msg)
-            self.progress_label.setGeometry(10, y_l, 280, 25)
+            self.progress_label.setGeometry(10, y_l, 320, 25)
 
             self.progress_bar = QProgressBar(self)
-            self.progress_bar.setGeometry(10, y_p, 280, 25)
+            self.progress_bar.setGeometry(10, y_p, 320, 25)
             self.progress_bars.append(self.progress_bar)
 
             self.task_label = QLabel(self)
             self.task_label.setText("Pipeline is not started")
-            self.task_label.setGeometry(300, y_p, 500, 25)
+            self.task_label.setGeometry(340, y_p, 520, 25)
             self.task_labels.append(self.task_label)
 
             y_l += 70

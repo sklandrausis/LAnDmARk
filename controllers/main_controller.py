@@ -23,11 +23,9 @@ class MainController(QObject):
     @pyqtSlot()
     def run(self):
         if python_version == 3:
-            #os.system("python3 " + "setup.py")
-            print("yes")
+            os.system("python3 " + "setup.py")
         elif python_version == 2:
-            #os.system("python2 " + "setup.py")
-            print(print("yes"))
+            os.system("python2 " + "setup.py")
         else:
             print("python version is not supported")
             sys.exit(1)

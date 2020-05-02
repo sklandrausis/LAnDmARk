@@ -9,25 +9,52 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>457</width>
-    <height>112</height>
+    <width>932</width>
+    <height>397</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>chech_view</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="landmark_button">
+   <widget class="QComboBox" name="choose_combobox">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>20</y>
+      <x>10</x>
+      <y>10</y>
       <width>231</width>
       <height>36</height>
      </rect>
     </property>
-    <property name="text">
-     <string>View LAnDmARk inspection plos</string>
+    <item>
+     <property name="text">
+      <string>LAnDmARk inspection plots</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Prefacotor calibrator inspection plots</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Prefactor target inspection plots</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Prefactor imaging inspection plots</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QComboBox" name="inspection_plots_combobox">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>10</y>
+      <width>301</width>
+      <height>36</height>
+     </rect>
     </property>
    </widget>
   </widget>
