@@ -75,8 +75,8 @@ if __name__ == "__main__":
             print("Setup for calibrator id", id)
             id = str(id)
             create_directory(calibratorDir + id + "_RAW")
-            job_directory = workingDir + "calibrators/calibrators_results/"
             log_file = workingDir + "calibrators/" + "pipeline_" + id + ".log"
+            xml_stat_file = workingDir + "calibrators/" + "statistics_" + id + ".xml"
 
             # Creating calibrator files
             copy_files(PrefactorDir + 'pipeline.cfg', calibratorDir + id + "_RAW/")
@@ -92,9 +92,10 @@ if __name__ == "__main__":
                        calibratorDir + id + "_RAW" + "/pipeline.cfg")
             setConfigs("DEFAULT", "pythonpath", pythonpath, calibratorDir + id + "_RAW" + "/pipeline.cfg")
             setConfigs("remote", "max_per_node", max_per_node, calibratorDir + id + "_RAW" + "/pipeline.cfg")
-            setConfigs("layout", "job_directory", job_directory, calibratorDir + id + "_RAW" + "/pipeline.cfg")
+            setConfigs("layout", "job_directory", calibratorDir + id + "_RAW", calibratorDir + id + "_RAW" + "/pipeline.cfg")
             setConfigs("DEFAULT", "task_files", task_file, calibratorDir + id + "_RAW" + "/pipeline.cfg")
             setConfigs("logging", "log_file", log_file, calibratorDir + id + "_RAW" + "/pipeline.cfg")
+            setConfigs("logging", "xml_stat_file", xml_stat_file, calibratorDir + id + "_RAW" + "/pipeline.cfg")
 
             with open(calibratorDir + id + "_RAW" + '/Pre-Facet-Calibrator.parset', "r") as parset_file:
                 parset_file = parset_file.readlines()
@@ -122,11 +123,11 @@ if __name__ == "__main__":
 
                 elif "! job_directory " in line:
                     parset_file[parset_file.index(line)] = line.replace(line,
-                                                                        "! job_directory        =   " + job_directory + "  ## directory of the prefactor outputs\n")
+                                                                        "! job_directory        =   " + calibratorDir + id + "_RAW" + "  ## directory of the prefactor outputs\n")
 
                 elif "! results_directory " in line:
                     parset_file[parset_file.index(line)] = line.replace(line,
-                                                                        "! results_directory        =   " + "{{ job_directory }}/results" + "  ## location of the results\n")
+                                                                        "! results_directory        =   " + workingDir + "calibrators/calibrators_results/results" + "  ## location of the results\n")
 
                 elif "! inspection_directory " in line:
                     parset_file[parset_file.index(line)] = line.replace(line,
@@ -143,6 +144,8 @@ if __name__ == "__main__":
         for id in targetSASids:
             print("Setup for target id", id)
             create_directory(targetDir + id + "_RAW")
+            log_file = workingDir + "target/" + "pipeline_" + id + ".log"
+            xml_stat_file = workingDir + "target/" + "statistics_" + id + ".xml"
 
             # Creating target files
             copy_files(PrefactorDir + 'pipeline.cfg', targetDir + id + "_RAW")
@@ -158,6 +161,11 @@ if __name__ == "__main__":
                        targetDir + id + "_RAW" + "/pipeline.cfg")
             setConfigs("DEFAULT", "pythonpath", pythonpath, targetDir + id + "_RAW" + "/pipeline.cfg")
             setConfigs("remote", "max_per_node", max_per_node, targetDir + id + "_RAW" + "/pipeline.cfg")
+            setConfigs("layout", "job_directory", targetDir + id + "_RAW",
+                       targetDir + id + "_RAW" + "/pipeline.cfg")
+            setConfigs("DEFAULT", "task_files", task_file, targetDir + id + "_RAW" + "/pipeline.cfg")
+            setConfigs("logging", "log_file", log_file, targetDir + id + "_RAW" + "/pipeline.cfg")
+            setConfigs("logging", "xml_stat_file", xml_stat_file, targetDir + id + "_RAW" + "/pipeline.cfg")
 
             with open(targetDir + id + "_RAW" + "/Pre-Facet-Target.parset", "r") as parset_file:
                 parset_file = parset_file.readlines()
@@ -185,13 +193,22 @@ if __name__ == "__main__":
 
                 elif "! cal_solutions" in line:
                     parset_file[parset_file.index(line)] = line.replace(line,
-                                                                        "! cal_solutions             =  " + calibratorDir + str(
-                                                                            SASidsCalibrator[targetSASids.index(
-                                                                                id)]) + "_RAW/Pre-Facet-Calibrator/results/cal_values/cal_solutions.h5" + "\n")
+                                                                        "! cal_solutions             =  " + calibratorDir  + "/calibrators_results/results/cal_values_" + str(SASidsCalibrator[targetSASids.index(id)]) + "/" + "cal_solutions.h5" + "\n")
+
+                elif "! job_directory " in line:
+                    parset_file[parset_file.index(line)] = line.replace(line,
+                                                                        "! job_directory        =   " + targetDir + id + "_RAW" + "  ## directory of the prefactor outputs\n")
+
+                elif "! results_directory " in line:
+                    parset_file[parset_file.index(line)] = line.replace(line,
+                                                                        "! results_directory        =   " + workingDir + "targets/targets_results/results" + "  ## location of the results\n")
+
+                elif "! inspection_directory " in line:
+                    parset_file[parset_file.index(line)] = line.replace(line,
+                                                                        "! inspection_directory         =   " + "{{ results_directory }}/inspection_" + id + "  ## directory where the inspection plots will be stored \n")
 
             with open(targetDir + id + "_RAW" + "/Pre-Facet-Target.parset", "w") as parset_filew:
-                for line in parset_file:
-                    parset_filew.write(line)
+                parset_filew.write("".join(parset_file))
 
     if getConfigs("Operations", "which_obj", config_file) == "calibrators":
         create_directory(calibratorDir)
@@ -211,6 +228,8 @@ if __name__ == "__main__":
         create_directory(imagingDir)
         setup_calibrator()
         setup_target()
+        log_file = workingDir + "imaging_deep/" + "pipeline_imaging.log"
+        xml_stat_file = workingDir + "imaging_deep/" + "statistics_imaging.xml"
 
         copy_files(PrefactorDir + 'pipeline.cfg', imagingDir)
         copy_files(PrefactorDir + 'Pre-Facet-Image.parset', imagingDir)
@@ -223,6 +242,10 @@ if __name__ == "__main__":
         setConfigs("DEFAULT", "working_directory", workingDir, imagingDir + "pipeline.cfg")
         setConfigs("DEFAULT", "pythonpath", pythonpath, imagingDir + "pipeline.cfg")
         setConfigs("remote", "max_per_node", max_per_node, imagingDir + "pipeline.cfg")
+        setConfigs("layout", "job_directory", imagingDir, imagingDir + "pipeline.cfg")
+        setConfigs("DEFAULT", "task_files", task_file, imagingDir + "pipeline.cfg")
+        setConfigs("logging", "log_file", log_file, imagingDir + "pipeline.cfg")
+        setConfigs("logging", "xml_stat_file", xml_stat_file, imagingDir + "pipeline.cfg")
 
         with open(imagingDir + "/Pre-Facet-Image.parset", "r") as parset_file:
             parset_file = parset_file.readlines()
@@ -243,6 +266,17 @@ if __name__ == "__main__":
             elif "wsclean_executable" in line:
                 parset_file[parset_file.index(line)] = line.replace(line,
                                                                     "! wsclean_executable       =   " + wsclean_executable + "  ## path to your local WSClean executable\n")
+            elif "! job_directory " in line:
+                parset_file[parset_file.index(line)] = line.replace(line,
+                                                                    "! job_directory        =   " + imagingDir + "_RAW" + "  ## directory of the prefactor outputs\n")
+
+            elif "! results_directory " in line:
+                parset_file[parset_file.index(line)] = line.replace(line,
+                                                                    "! results_directory        =   " + workingDir + "target/targets_results/results" + "  ## location of the results\n")
+
+            elif "! inspection_directory " in line:
+                parset_file[parset_file.index(line)] = line.replace(line,
+                                                                    "! inspection_directory         =   " + "{{ results_directory }}/inspection_"  + "  ## directory where the inspection plots will be stored \n")
 
         with open(imagingDir + "/Pre-Facet-Image.parset"
                                "", "w") as parset_filew:
