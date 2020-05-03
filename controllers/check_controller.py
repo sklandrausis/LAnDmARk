@@ -77,3 +77,20 @@ class CheckController(QObject):
             if len(sub_path) != 0:
                 path += sub_path[0] + "/"
                 self.check_view.set_image(path + image)
+
+        else:
+            for id in self.SASidsCalibrator:
+                if str(id) in self.ui.choose_combobox.currentText():
+                    for d in self.non_empty_dirs:
+                        if str(id) in d:
+                            path = d + "/"
+                            self.check_view.set_image(path + image)
+                            break
+
+            for id in self.targetSASids:
+                if str(id) in self.ui.choose_combobox.currentText():
+                    for d in self.non_empty_dirs:
+                        if str(id) in d:
+                            path = d + "/"
+                            self.check_view.set_image(path + image)
+                            break

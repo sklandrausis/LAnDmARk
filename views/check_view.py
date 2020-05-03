@@ -1,6 +1,7 @@
 import os
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt
 from views.check_view_ui import Ui_check_view
 from controllers.check_controller import CheckController
 
@@ -92,7 +93,7 @@ class CheckView(QMainWindow):
 
     def set_image(self, image):
         self.pixmap = QPixmap(image)
-        self._ui.inspection_plot.setPixmap(self.pixmap)
-        self.resize(self.pixmap.width(), self.pixmap.height())
+        img = self.pixmap.scaled(self._ui.inspection_plot.size(), Qt.KeepAspectRatio, Qt.FastTransformation)
+        self._ui.inspection_plot.setPixmap(img)
 
 
