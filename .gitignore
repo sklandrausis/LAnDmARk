@@ -78,3 +78,5 @@ parsers/__pycache__/*
 parsers/__pycache__/__init__.cpython-36.py
 parsers/__pycache__/_configparser.cpython-36.pyc
 
+querying_results.txt
+
