@@ -25,8 +25,8 @@ class QueryView(QMainWindow):
             self.timer.stop()
             self.run_ui.show_query_progress_button.setStyleSheet("background-color: green")
         if len(querying_msg) > 0:
-            self.setGeometry(QtCore.QRect(10, 10, len(max(querying_msg)) + 470, len(querying_msg) + 470))
+            self.setGeometry(QtCore.QRect(10, 10, len(max(querying_msg)) + 480, len(querying_msg) + 480))
             self._ui.querying_message.setGeometry(QtCore.QRect(10, 10, len(max(querying_msg)) +
-                                                               470, len(querying_msg) + 470))
+                                                               480, len(querying_msg) + 480))
             self._ui.querying_message.setText("".join(querying_msg))
         querying_results.close()

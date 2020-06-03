@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import sys
+import subprocess
 import argparse
+import threading
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 import seaborn as sns
@@ -215,10 +217,57 @@ def main():
 
         plot__querying_results(q1, q2)
 
+    if getConfigs("Operations", "stage", config_file) == "True":
+        if q1 is not None:
+            if len(q1.valid_files) == 0:
+                calibrator_SURI = q1.get_SURI()
+            else:
+                calibrator_SURI = q1.uris
+        else:
+            calibrator_SURI = ""
 
+        if q2 is not None:
+            if len(q2.valid_files) == 0:
+                target_SURI = q2.get_SURI()
+            else:
+                target_SURI = q2.uris
+        else:
+            target_SURI = ""
+            
+        if calibrator_SURI is not "":
+            sas_ids_string = ""
+            suris_string = ""
+            for sas_id in range(0, len(SASidsCalibrator)):
+                for uri in range(0, len(calibrator_SURI[SASidsCalibrator[sas_id]])):
+                    if uri == len(SASidsCalibrator) - 1:
+                        suris_string += list(calibrator_SURI[SASidsCalibrator[sas_id]])[uri] + "#"
+                    else:
+                        suris_string += list(calibrator_SURI[SASidsCalibrator[sas_id]])[uri] + "#"
 
+                if sas_id == len(SASidsCalibrator) - 1:
+                    sas_ids_string += str(SASidsCalibrator[sas_id])
+                else:
+                    sas_ids_string += str(SASidsCalibrator[sas_id]) + "_"
 
+            threading.Thread(target=subprocess.Popen, args=(["nohup", "./stage.py", sas_ids_string, suris_string],)).start()
 
+        if target_SURI is not "":
+            sas_ids_string = ""
+            suris_string = ""
+            for sas_id in range(0, len(SASidsTarget)):
+                for uri in range(0, len(target_SURI[SASidsTarget[sas_id]])):
+                    if uri == len(SASidsCalibrator) - 1:
+                        suris_string += list(target_SURI[SASidsTarget[sas_id]])[uri]
+                    else:
+                        suris_string += list(target_SURI[SASidsTarget[sas_id]])[uri] + "#"
+
+                if sas_id == len(SASidsTarget) - 1:
+                    sas_ids_string += str(SASidsTarget[sas_id])
+                else:
+                    sas_ids_string += str(SASidsTarget[sas_id]) + "_"
+                    suris_string += "&"
+
+            threading.Thread(target=subprocess.Popen, args=(["nohup", "./stage.py", sas_ids_string, suris_string],)).start()
 
 
 
