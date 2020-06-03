@@ -4,7 +4,7 @@ import time
 import datetime
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QGridLayout, QWidget
-from services.stager_access import get_progress
+from services.stager_access import get_progress, get_surls_online
 from parsers._configparser import getConfigs
 from plotting import Plot
 
@@ -167,8 +167,7 @@ class StageProgressPlot(QWidget):
             self._ui.show_stage_progress_button.setDisabled(True)
             retrieve_setup = False
         else:
-            print()
-            """
+
             if getConfigs("Operations", "retrieve", self.config_file) == "True":
                 sas_ids_string_calibrator = ""
                 sas_ids_string_target = ""
@@ -196,4 +195,3 @@ class StageProgressPlot(QWidget):
                             suffix_urls_string += suffix_urls[s] + "#"
 
                 subprocess.Popen(["nohup", "./retrieve.py", '"' + suffix_urls_string + '"', self.download_dir, sas_ids_string_calibrator, sas_ids_string_target])
-            """
