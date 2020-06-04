@@ -64,7 +64,7 @@ def query():
     return q1, q2
 
 
-def plot__querying_results(q1, q2):
+def plot_querying_results(q1, q2):
     width = 0.35
     ind = np.arange(0, len(SASidsTarget))
     fig = plt.figure("Number of stations", figsize=(50, 50))
@@ -215,7 +215,7 @@ def main():
         querying_results.write("done")
         querying_results.close()
 
-        plot__querying_results(q1, q2)
+        plot_querying_results(q1, q2)
 
     if getConfigs("Operations", "stage", config_file) == "True":
         if q1 is not None:
@@ -249,7 +249,9 @@ def main():
                 else:
                     sas_ids_string += str(SASidsCalibrator[sas_id]) + "_"
 
-            threading.Thread(target=subprocess.Popen, args=(["nohup", "./stage.py", sas_ids_string, suris_string],)).start()
+            t = threading.Thread(target=subprocess.Popen, args=(["nohup", "./stage.py", sas_ids_string, suris_string],))
+            t.start()
+            t.join()
 
         if target_SURI is not "":
             sas_ids_string = ""
@@ -267,7 +269,64 @@ def main():
                     sas_ids_string += str(SASidsTarget[sas_id]) + "_"
                     suris_string += "&"
 
-            threading.Thread(target=subprocess.Popen, args=(["nohup", "./stage.py", sas_ids_string, suris_string],)).start()
+            t = threading.Thread(target=subprocess.Popen, args=(["nohup", "./stage.py", sas_ids_string, suris_string],))
+            t.start()
+            t.join()
+
+    if getConfigs("Operations", "retrieve", config_file) == "True":
+        sas_ids_string_calibrator = ""
+        sas_ids_string_target = ""
+        suffix_urls_string = ""
+        download_dir = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + \
+                       getConfigs("Data", "TargetName", "config.cfg") + "/"
+
+        for sas_id in range(0, len(SASidsCalibrator)):
+            if sas_id == len(SASidsCalibrator) - 1:
+                sas_ids_string_calibrator += str(SASidsCalibrator[sas_id])
+            else:
+                sas_ids_string_calibrator += str(SASidsCalibrator[sas_id]) + "_"
+
+        for sas_id in range(0, len(SASidsTarget)):
+            if sas_id == len(SASidsTarget) - 1:
+                sas_ids_string_target += str(SASidsTarget[sas_id])
+            else:
+                sas_ids_string_target += str(SASidsTarget[sas_id]) + "_"
+
+        if q1 is not None:
+            if len(q1.valid_files) == 0:
+                calibrator_SURI = q1.get_SURI()
+            else:
+                calibrator_SURI = q1.uris
+        else:
+            calibrator_SURI = ""
+
+        if q2 is not None:
+            if len(q2.valid_files) == 0:
+                target_SURI = q2.get_SURI()
+            else:
+                target_SURI = q2.uris
+        else:
+            target_SURI = ""
+
+        suffix_urls = []
+        if calibrator_SURI != "":
+            for sas_id in SASidsCalibrator:
+                suffix_urls.extend(calibrator_SURI[sas_id])
+
+        if target_SURI != "":
+            for sas_id in SASidsTarget:
+                suffix_urls.extend(target_SURI[sas_id])
+
+        for s in range(0, len(suffix_urls)):
+            if s == len(suffix_urls) - 1:
+                suffix_urls_string += suffix_urls[s]
+            else:
+                suffix_urls_string += suffix_urls[s] + "#"
+
+        t = threading.Thread(target=subprocess.Popen, args=(["nohup", "./retrieve.py", '"' + suffix_urls_string + '"',
+                                                         download_dir, sas_ids_string_calibrator, sas_ids_string_target],))
+        t.start()
+        t.join()
 
     sys.exit(0)
 

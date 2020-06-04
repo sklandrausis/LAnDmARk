@@ -20,7 +20,7 @@ class RunController(QObject):
         Thread(target=self.stage_progress_plot.show()).start()
 
     def retrieve_progress(self):
-        self.retrieve_progress_plot = RetrieveProgressPlot(self)
+        self.retrieve_progress_plot = RetrieveProgressPlot()
         Thread(target=self.retrieve_progress_plot.show()).start()
 
     def process_progress(self):

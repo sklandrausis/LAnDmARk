@@ -63,6 +63,7 @@ print("%s - stager_access: Creating proxy" % (datetime.datetime.now()))
 proxy = xmlrpclib.ServerProxy("https://" + user + ':' + passw + "@webportal.astron.nl/service-public/xmlrpc")
 LtaStager = proxy.LtaStager
 
+
 def stage(surls, send_notifications=True):
     """ Stage list of SURLs, optionally enable/disable email notifications """
     if isinstance(surls, str):

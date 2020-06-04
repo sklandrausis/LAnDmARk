@@ -154,44 +154,12 @@ class StageProgressPlot(QWidget):
         return progress_dict
 
     def __retrieve(self):
-        retrieve_setup = True
-        while retrieve_setup:
-            self.timer.stop()
-            workingDir = getConfigs("Paths", "WorkingPath", self.config_file)
-            targetName = getConfigs("Data", "TargetName", self.config_file)
-            workingDir = workingDir + "/" + targetName + "/"
-            auxDir = workingDir + "/LAnDmARk_aux"
-            self.p1.fig.savefig(auxDir + "/stage/" + 'staging_progress_count.png')
-            self.p2.fig.savefig(auxDir + "/stage/" + 'staging_progress_percent.png')
-            self._ui.show_stage_progress_button.setStyleSheet("background-color: green")
-            self._ui.show_stage_progress_button.setDisabled(True)
-            retrieve_setup = False
-        else:
-
-            if getConfigs("Operations", "retrieve", self.config_file) == "True":
-                sas_ids_string_calibrator = ""
-                sas_ids_string_target = ""
-                suffix_urls_string = ""
-
-                for sas_id in range(0, len(self.SASidsCalibrator)):
-                    if sas_id == len(self.SASidsCalibrator) - 1:
-                        sas_ids_string_calibrator += str(self.SASidsCalibrator[sas_id])
-                    else:
-                        sas_ids_string_calibrator += str(self.SASidsCalibrator[sas_id]) + "_"
-
-                for sas_id in range(0, len(self.SASidsTarget)):
-                    if sas_id == len(self.SASidsTarget) - 1:
-                        sas_ids_string_target += str(self.SASidsTarget[sas_id])
-                    else:
-                        sas_ids_string_target += str(self.SASidsTarget[sas_id]) + "_"
-
-                for stage_id in set(self.tmpStagesIDs):
-                    suffix_urls = list(set(get_surls_online(int(stage_id))))
-
-                    for s in range(0, len(suffix_urls)):
-                        if s == len(suffix_urls) - 1:
-                            suffix_urls_string += suffix_urls[s]
-                        else:
-                            suffix_urls_string += suffix_urls[s] + "#"
-
-                subprocess.Popen(["nohup", "./retrieve.py", '"' + suffix_urls_string + '"', self.download_dir, sas_ids_string_calibrator, sas_ids_string_target])
+        self.timer.stop()
+        workingDir = getConfigs("Paths", "WorkingPath", self.config_file)
+        targetName = getConfigs("Data", "TargetName", self.config_file)
+        workingDir = workingDir + "/" + targetName + "/"
+        auxDir = workingDir + "/LAnDmARk_aux"
+        self.p1.fig.savefig(auxDir + "/stage/" + 'staging_progress_count.png')
+        self.p2.fig.savefig(auxDir + "/stage/" + 'staging_progress_percent.png')
+        self._ui.show_stage_progress_button.setStyleSheet("background-color: green")
+        self._ui.show_stage_progress_button.setDisabled(True)
