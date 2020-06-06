@@ -7,12 +7,13 @@ from parsers._configparser import getConfigs
 
 
 class RetrieveProgressPlot(QWidget):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, _ui, *args, **kwargs):
         super(RetrieveProgressPlot, self).__init__(*args, **kwargs)
         self.grid = QGridLayout()
         self.setLayout(self.grid)
         self.grid.setSpacing(10)
         self.setWindowTitle('Retrieved files')
+        self._ui = _ui
         self.config_file = "config.cfg"
         self.download_dir = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + \
                             getConfigs("Data", "TargetName", "config.cfg") + "/"
@@ -74,7 +75,7 @@ class RetrieveProgressPlot(QWidget):
             i += 1
 
         j = 0
-        for sas_id_ in self.retrieve_files_counts:
+        for sas_id_ in self.retrieve_files_percent:
             self.retrieve_files_percent[sas_id_].append(0)
             self.p2.graph.plot(self.time,  self.retrieve_files_percent[sas_id_], colors[j] + symbols[j], label="SAS id " + str(sas_id_))
             j += 1
@@ -113,7 +114,7 @@ class RetrieveProgressPlot(QWidget):
                 self.p1.draw()
                 i += 1
         j = 0
-        for sas_id_ in list(self.retrieve_files_counts.keys()):
+        for sas_id_ in list(self.retrieve_files_percent.keys()):
             if sas_id_ in self.SASidsCalibrator:
                 directory = self.download_dir + "calibrators/" + str(sas_id_) + "_RAW/"
             elif sas_id_ in self.SASidsTarget:
@@ -153,3 +154,4 @@ class RetrieveProgressPlot(QWidget):
         auxDir = workingDir + "/LAnDmARk_aux"
         self.p1.fig.savefig(auxDir + "/retrieve/" + 'retrieve_progress_count.png')
         self.p2.fig.savefig(auxDir + "/retrieve/" + 'retrieve_progress_percent.png')
+        self._ui.show_retrieve_progress_button.setStyleSheet("background-color: green")

@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
+import os
 import sys
 import subprocess
 import argparse
 import threading
+import time
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 import seaborn as sns
 import numpy as np
+from services.stager_access import get_progress
 from services.querying_service import Querying
 from parsers._configparser import getConfigs
 
@@ -183,6 +186,7 @@ def plot_querying_results(q1, q2):
 
 def main():
     q1, q2 = query()
+
     if getConfigs("Operations", "querying", config_file) == "True":
         querying_results = open("querying_results.txt", "w")
 
@@ -252,6 +256,11 @@ def main():
             t = threading.Thread(target=subprocess.Popen, args=(["nohup", "./stage.py", sas_ids_string, suris_string],))
             t.start()
             t.join()
+            while True:
+                progress = get_progress()
+                if progress is None:
+                    break
+                time.sleep(30)
 
         if target_SURI is not "":
             sas_ids_string = ""
@@ -269,9 +278,15 @@ def main():
                     sas_ids_string += str(SASidsTarget[sas_id]) + "_"
                     suris_string += "&"
 
-            t = threading.Thread(target=subprocess.Popen, args=(["nohup", "./stage.py", sas_ids_string, suris_string],))
+            t = threading.Thread(target=subprocess.Popen,
+                             args=(["nohup", "./stage.py", sas_ids_string, suris_string],))
             t.start()
             t.join()
+            while True:
+                progress = get_progress()
+                if progress is None:
+                    break
+                time.sleep(30)
 
     if getConfigs("Operations", "retrieve", config_file) == "True":
         sas_ids_string_calibrator = ""
@@ -327,6 +342,51 @@ def main():
                                                          download_dir, sas_ids_string_calibrator, sas_ids_string_target],))
         t.start()
         t.join()
+        
+        retrieve_files_percent = dict()
+        if getConfigs("Operations", "which_obj", config_file) == "calibrators":
+            for sas_id in SASidsCalibrator:
+                retrieve_files_percent[sas_id] = []
+
+        elif getConfigs("Operations", "which_obj", config_file) == "target":
+            for sas_id in SASidsTarget:
+                retrieve_files_percent[sas_id] = []
+        else:
+            for sas_id in SASidsCalibrator:
+                retrieve_files_percent[sas_id] = []
+            for sas_id in SASidsTarget:
+                retrieve_files_percent[sas_id] = []
+                
+        for sas_id in retrieve_files_percent:
+            retrieve_files_percent[sas_id].append(0)
+
+        while True:
+            percent_done = []
+
+            for sas_id_ in list(retrieve_files_percent.keys()):
+                if sas_id_ in SASidsCalibrator:
+                    directory = download_dir + "calibrators/" + str(sas_id_) + "_RAW/"
+                elif sas_id_ in SASidsTarget:
+                    directory = download_dir + "targets/" + str(sas_id_) + "_RAW/"
+
+                if directory != "":
+                    with open("querying_results.txt", "r") as querying_results:
+                        lines = querying_results.readlines()
+                        for line in lines:
+                            if str(sas_id_) in line and "valid files" in line:
+                                valid_files = int(line.split(" ")[7])
+                                break
+
+                file_count = len([f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))
+                                  and ".tar" in f or ".MS" in f])
+
+                percent_done.append(file_count / valid_files)
+
+            if sum(percent_done) == len(percent_done):
+                break
+
+    if getConfigs("Operations", "process", config_file) == "True":
+        threading.Thread(target=subprocess.Popen, args=(["./run_pipelines.py"],)).start()
 
     sys.exit(0)
 

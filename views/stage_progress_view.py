@@ -4,7 +4,7 @@ import time
 import datetime
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QGridLayout, QWidget
-from services.stager_access import get_progress, get_surls_online
+from services.stager_access import get_progress
 from parsers._configparser import getConfigs
 from plotting import Plot
 
@@ -104,7 +104,7 @@ class StageProgressPlot(QWidget):
                 i = 0
                 for index in range(0, len(self.get_staging_progress())):
                     stage_id = list(self.get_staging_progress().keys())[index]
-                    staged_file_count_for_id_tmp = self.get_staging_progress()[int(stage_id)]["Files done"]
+                    staged_file_count_for_id_tmp = self.get_staging_progress()[stage_id]["Files done"]
                     self.stages_files_counts[index].append(staged_file_count_for_id_tmp)
                     self.p1.graph.plot(self.time, self.stages_files_counts[index], colors[i] + symbols[i], label="stage id: " + str(stage_id))
                     self.p1.draw()
@@ -113,7 +113,7 @@ class StageProgressPlot(QWidget):
                 j = 0
                 for index_ in range(0, len(self.get_staging_progress())):
                     stage_id_ = list(self.get_staging_progress().keys())[index_]
-                    staged_file_percent_for_id_tmp = self.get_staging_progress()[int(stage_id_)]["Percent done"]
+                    staged_file_percent_for_id_tmp = self.get_staging_progress()[stage_id_]["Percent done"]
                     self.stages_files_percent[index_].append(staged_file_percent_for_id_tmp)
                     self.p2.graph.plot(self.time, self.stages_files_percent[index_], colors[j] + symbols[j],  label="Stage id: " + str(stage_id_))
                     self.p2.draw()
