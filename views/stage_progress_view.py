@@ -50,8 +50,8 @@ class StageProgressPlot(QWidget):
         self.p2.graph.set_ylabel("Stage file percent")
         self.grid.addWidget(self.p2, 0, 1)
 
-        progress = get_progress()
-        if progress is None:
+        progress = self.get_staging_progress()
+        if len(progress) == 0:
             time.sleep(10)
             stagesIDs = list(progress.keys())
 
@@ -90,30 +90,30 @@ class StageProgressPlot(QWidget):
         elif len(progress_dict) == 0:
             self.__retrieve()
 
-        elif len(list(self.get_staging_progress().keys())) == 0:
-            print()
+        elif len(list(progress_dict.keys())) == 0:
             self.__retrieve()
 
         else:
             self.time.append(datetime.datetime.now().strftime("%H:%M"))
 
             try:
+                print(progress_dict)
                 symbols = ["*", "o", "v", "^", "<", ">", "1", "2", "3", "4"]
                 colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
 
                 i = 0
-                for index in range(0, len(self.get_staging_progress())):
-                    stage_id = list(self.get_staging_progress().keys())[index]
-                    staged_file_count_for_id_tmp = self.get_staging_progress()[stage_id]["Files done"]
+                for index in range(0, len(self.tmpStagesIDs)):
+                    stage_id = list(self.tmpStagesIDs)[index]
+                    staged_file_count_for_id_tmp = progress_dict[stage_id]["Files done"]
                     self.stages_files_counts[index].append(staged_file_count_for_id_tmp)
                     self.p1.graph.plot(self.time, self.stages_files_counts[index], colors[i] + symbols[i], label="stage id: " + str(stage_id))
                     self.p1.draw()
                     i += 1
 
                 j = 0
-                for index_ in range(0, len(self.get_staging_progress())):
-                    stage_id_ = list(self.get_staging_progress().keys())[index_]
-                    staged_file_percent_for_id_tmp = self.get_staging_progress()[stage_id_]["Percent done"]
+                for index_ in range(0, len(self.tmpStagesIDs)):
+                    stage_id_ = list(self.tmpStagesIDs)[index_]
+                    staged_file_percent_for_id_tmp = progress_dict[stage_id_]["Percent done"]
                     self.stages_files_percent[index_].append(staged_file_percent_for_id_tmp)
                     self.p2.graph.plot(self.time, self.stages_files_percent[index_], colors[j] + symbols[j],  label="Stage id: " + str(stage_id_))
                     self.p2.draw()
@@ -145,10 +145,8 @@ class StageProgressPlot(QWidget):
                     progress_dict[stage_id] = {"Files done": float(staged_file_count),
                                                "Percent done": float(staged_file_percent)}
             else:
-                print()
                 self.__retrieve()
         else:
-            print()
             self.__retrieve()
 
         return progress_dict

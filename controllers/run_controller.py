@@ -10,9 +10,9 @@ class RunController(QObject):
     def __init__(self, _ui, *args, **kwargs):
         super(RunController, self).__init__(*args, **kwargs)
         self._ui = _ui
-        self.query_view = QueryView(self._ui)
 
     def query_progress(self):
+        self.query_view = QueryView(self._ui)
         Thread(target=self.query_view.show()).start()
 
     def stage_progress(self):

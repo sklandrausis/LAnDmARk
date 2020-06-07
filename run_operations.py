@@ -222,6 +222,7 @@ def main():
         plot_querying_results(q1, q2)
 
     if getConfigs("Operations", "stage", config_file) == "True":
+
         if q1 is not None:
             if len(q1.valid_files) == 0:
                 calibrator_SURI = q1.get_SURI()
@@ -237,7 +238,7 @@ def main():
                 target_SURI = q2.uris
         else:
             target_SURI = ""
-            
+
         if calibrator_SURI is not "":
             sas_ids_string = ""
             suris_string = ""
@@ -253,11 +254,13 @@ def main():
                 else:
                     sas_ids_string += str(SASidsCalibrator[sas_id]) + "_"
 
+            print("start")
             t = threading.Thread(target=subprocess.Popen, args=(["nohup", "./stage.py", sas_ids_string, suris_string],))
             t.start()
             t.join()
             while True:
                 progress = get_progress()
+                print(progress)
                 if progress is None:
                     break
                 time.sleep(30)
