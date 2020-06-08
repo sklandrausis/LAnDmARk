@@ -1,5 +1,4 @@
 import sys
-import subprocess
 import time
 import datetime
 from PyQt5 import QtCore
@@ -20,6 +19,7 @@ class StageProgressPlot(QWidget):
         self.tmpStagesIDs = set([])
         self._ui = _ui
         self.setWindowTitle('Staged files')
+        self.timer = QtCore.QTimer()
         self.download_dir = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + \
                             getConfigs("Data", "TargetName", "config.cfg") + "/"
 
@@ -75,7 +75,6 @@ class StageProgressPlot(QWidget):
 
         self.p1.legend()
         self.p2.legend()
-        self.timer = QtCore.QTimer()
         self.timer.setInterval(100)
         self.timer.timeout.connect(self.update_plot)
         self.timer.start()
@@ -97,7 +96,6 @@ class StageProgressPlot(QWidget):
             self.time.append(datetime.datetime.now().strftime("%H:%M"))
 
             try:
-                print(progress_dict)
                 symbols = ["*", "o", "v", "^", "<", ">", "1", "2", "3", "4"]
                 colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
 

@@ -254,13 +254,11 @@ def main():
                 else:
                     sas_ids_string += str(SASidsCalibrator[sas_id]) + "_"
 
-            print("start")
             t = threading.Thread(target=subprocess.Popen, args=(["nohup", "./stage.py", sas_ids_string, suris_string],))
             t.start()
             t.join()
             while True:
                 progress = get_progress()
-                print(progress)
                 if progress is None:
                     break
                 time.sleep(30)

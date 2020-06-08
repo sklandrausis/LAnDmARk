@@ -46,4 +46,5 @@ class MainController(QObject):
 
     @pyqtSlot()
     def check(self):
+        os.sync()
         self.check_view.show()

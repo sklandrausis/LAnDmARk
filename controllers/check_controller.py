@@ -7,6 +7,7 @@ from parsers._configparser import getConfigs
 class CheckController(QObject):
     def __init__(self, check_view, *args, **kwargs):
         super(CheckController, self).__init__(*args, **kwargs)
+        os.sync()
         self.check_view = check_view
         self.ui = self.check_view._ui
         self.config_file = "config.cfg"
