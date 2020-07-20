@@ -10,7 +10,8 @@ class CheckController(QObject):
         self.check_view = check_view
         self.ui = self.check_view._ui
         self.config_file = "config.cfg"
-        self.working_directory = getConfigs("Paths", "workingpath", "config.cfg") + "/" + getConfigs("Data", "targetname", "config.cfg")
+        self.working_directory = getConfigs("Paths", "workingpath", "config.cfg") + "/" + \
+                                 getConfigs("Data", "targetname", "config.cfg")
 
         self.project = getConfigs("Data", "PROJECTid", self.config_file)
         self.targetSASids = getConfigs("Data", "targetSASids", self.config_file).replace(" ", "").split(",")

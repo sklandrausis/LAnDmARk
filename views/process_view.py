@@ -114,7 +114,7 @@ class ProcessView(QMainWindow):
 
             else:
                 msg = "Progress for imaging pipeline"
-
+            print(msg)
             self.progress_label = QLabel(self)
             self.progress_label.setText(msg)
             self.progress_label.setGeometry(10, y_l, 320, 25)
@@ -143,7 +143,9 @@ class ProcessView(QMainWindow):
                            getConfigs("Data", "TargetName", "config.cfg") + "/" + "calibrators/" + "pipeline_" + str(id) + ".log"
             elif id in self.SASidsTarget:
                 log_file = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + \
-                           getConfigs("Data", "TargetName", "config.cfg") + "/" + "target/" + "pipeline_" + str(id) + ".log"
+                           getConfigs("Data", "TargetName", "config.cfg") + "/" + "targets/" + "pipeline_" + str(id) + ".log"
+                print(log_file)
+                sys.exit(0)
 
             else:
                 log_file = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + \

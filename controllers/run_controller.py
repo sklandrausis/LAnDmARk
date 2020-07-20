@@ -1,3 +1,4 @@
+import sys
 from threading import Thread
 from PyQt5.QtCore import QObject
 import matplotlib.pyplot as plt
@@ -114,7 +115,7 @@ class RunController(QObject):
 
                         for id in self.SASidsTarget:
                             cStationsTarget.append(station_count_q2[id]["Core stations"])
-                            rStationsTarget.append(station_count_q2[id]["Remote station"])
+                            rStationsTarget.append(station_count_q2[id]["Remote stations"])
                             iStationsTarget.append(station_count_q2[id]["International stations"])
                             tStationsTarget.append(station_count_q2[id]["Total stations"])
 
@@ -153,7 +154,10 @@ class RunController(QObject):
                         invalid_files = self.q1.get_invalid_file()
                         ratiosCalibrator = []
                         for id in self.SASidsCalibrator:
-                            ratiosCalibrator.append(valid_files[id] / (valid_files[id] + invalid_files[id]))
+                            try:
+                                ratiosCalibrator.append(valid_files[id] / (valid_files[id] + invalid_files[id]))
+                            except ZeroDivisionError as error:
+                                print("Zero division error", error, sys.exc_info()[0])
 
                         plt.subplot(1, 2, 2)
                         plt.bar(self.SASidsCalibrator, np.array(ratiosCalibrator) * 100, color='g')
@@ -168,7 +172,11 @@ class RunController(QObject):
                         invalid_files = self.q2.get_invalid_file()
                         ratiosTarget = []
                         for id in self.SASidsTarget:
-                            ratiosTarget.append(valid_files[id] / (valid_files[id] + invalid_files[id]))
+                            print("SASidsTarget", self.SASidsTarget)
+                            try:
+                                ratiosTarget.append(valid_files[id] / (valid_files[id] + invalid_files[id]))
+                            except ZeroDivisionError as error:
+                                print("Zero division error", error, sys.exc_info()[0])
 
                         plt.subplot(1, 2, 1)
                         plt.bar(self.SASidsTarget, np.array(ratiosTarget) * 100, color='g')

@@ -192,10 +192,10 @@ class SetupController(QObject):
         if self.setup_model.process == "True" and self.setup_model.which_obj == "target":
             valid_count += process_valid()
             if len(self.setup_model.targetSASids) != 0 and self.setup_model.PROJECTid == "MSSS_HBA_2013":
-                targetSASids = [t.trim() for t in self.setup_model.targetSASids.split(",")]
+                targetSASids = [t.strip() for t in self.setup_model.targetSASids.split(",")]
 
                 for id in targetSASids:
-                    calibrator_id = id -1
+                    calibrator_id = int(id) -1
                     cal_solution_file = self.setup_model.WorkingPath + "/" + self.setup_model.Target_name + "/" + "calibrators/calibrators_results/results/cal_values_" + str(calibrator_id) + "/" + "cal_solutions.h5"
                     if not os.path.isfile(cal_solution_file):
                         valid_count += 1

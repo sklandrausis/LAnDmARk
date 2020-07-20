@@ -50,7 +50,9 @@ class CheckView(QMainWindow):
         for d in non_empty_dirs:
             if "LAnDmARk" in d:
                 self._ui.choose_combobox.addItem("LAnDmARk inspection plots")
+                break
 
+        for d in non_empty_dirs:
             for id in SASidsCalibrator:
                 if str(id) in d:
                     self._ui.choose_combobox.addItem("Prefacotor calibrator inspection plots for SAS id " + str(id))

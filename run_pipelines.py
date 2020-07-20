@@ -61,7 +61,6 @@ def main():
         parsetImage = imageDir + "Initial-Subtract.parset"
         configImage = imageDir + "pipeline.cfg"
         run_pipeline(parsetImage, configImage)  # run imaging
-        sys.exit(0)
 
     elif getConfigs("Operations", "which_obj", "config.cfg") == "targets":
 
