@@ -11,9 +11,9 @@ from parsers._configparser import getConfigs
 class CheckView(QMainWindow):
     def __init__(self, *args, **kwargs):
         super(CheckView, self).__init__(*args, **kwargs)
-
         self._ui = Ui_check_view()
         self._ui.setupUi(self)
+        os.sync()
         self.check_controller = CheckController(self)
         self.setWindowTitle('Check')
         self._ui.choose_combobox.currentTextChanged.connect(self.check_controller.on_choose_combobox_changed)

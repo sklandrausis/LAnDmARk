@@ -33,8 +33,9 @@ def get_tasks_from_log_file(log_file):
 
 
 class ProcessView(QMainWindow):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, _ui, *args, **kwargs):
         super(ProcessView, self).__init__(*args, **kwargs)
+        self._ui = _ui
         self.progress_bars = []
         self.task_labels = []
         self.progress_bars_index = 0
@@ -47,7 +48,7 @@ class ProcessView(QMainWindow):
         self.timer = QtCore.QTimer()
         self.timer.setInterval(100)
         self.steps = []
-        self.threads = []
+        self.finished_pipelines = 0
 
         prefactor_path = getConfigs("Paths", "prefactorpath", self.config_file)
         calibrator_parset_file = "Pre-Facet-Calibrator.parset"
@@ -76,6 +77,7 @@ class ProcessView(QMainWindow):
             self.imaging_tasks = get_pipeline_task(prefactor_path, imaging_parset_file)
             ids = self.SASidsCalibrator.extend(self.SASidsTarget)
             ids = ids.extend("imaging")
+            self.number_of_pipelines_to_run = len(ids)
             self.create_init_view(ids)
 
             for id in ids:
@@ -86,6 +88,7 @@ class ProcessView(QMainWindow):
             self.target_tasks = get_pipeline_task(prefactor_path, target_parset_file)
             self.create_init_view(self.SASidsTarget)
             self.ids = self.SASidsTarget
+            self.number_of_pipelines_to_run = len(self.ids)
 
             for id in self.SASidsTarget:
                 step = 0
@@ -95,12 +98,11 @@ class ProcessView(QMainWindow):
             self.calibrator_tasks = get_pipeline_task(prefactor_path, calibrator_parset_file)
             self.create_init_view(self.SASidsCalibrator)
             self.ids = self.SASidsCalibrator
+            self.number_of_pipelines_to_run = len(self.ids)
 
             for id in self.SASidsCalibrator:
                 step = 0
                 self.steps.append(step)
-
-        threading.Thread(target=os.system, args=(" ./run_pipelines.py", )).start()
 
     def create_init_view(self, SAS_ids):
         y_l = 10
@@ -136,6 +138,10 @@ class ProcessView(QMainWindow):
     def update_progress_bar(self):
         if sum(self.steps)/len(self.steps) >= 100.0:
             self.timer.stop()
+            self.finished_pipelines += 1
+
+            if self.finished_pipelines == self.number_of_pipelines_to_run:
+                self._ui.show_process_progress_button.setStyleSheet("background-color: green")
 
         for id in self.ids:
             if id in self.SASidsCalibrator:

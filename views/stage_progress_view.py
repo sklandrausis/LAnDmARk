@@ -1,17 +1,16 @@
 import sys
-import subprocess
 import time
 import datetime
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QGridLayout, QWidget
-from services.stager_access import get_progress, get_surls_online
+from services.stager_access import get_progress
 from parsers._configparser import getConfigs
 from plotting import Plot
 
 
 class StageProgressPlot(QWidget):
 
-    def __init__(self, _ui, run_controller, *args, **kwargs):
+    def __init__(self, _ui, *args, **kwargs):
         super(StageProgressPlot, self).__init__(*args, **kwargs)
         self.grid = QGridLayout()
         self.setLayout(self.grid)
@@ -19,8 +18,8 @@ class StageProgressPlot(QWidget):
         self.config_file = "config.cfg"
         self.tmpStagesIDs = set([])
         self._ui = _ui
-        self.run_controller = run_controller
         self.setWindowTitle('Staged files')
+        self.timer = QtCore.QTimer()
         self.download_dir = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + \
                             getConfigs("Data", "TargetName", "config.cfg") + "/"
 
@@ -51,61 +50,8 @@ class StageProgressPlot(QWidget):
         self.p2.graph.set_ylabel("Stage file percent")
         self.grid.addWidget(self.p2, 0, 1)
 
-        self.q1, self.q2 = (self.run_controller.q1, self.run_controller.q2)
-
-        if self.q1 is not None:
-            if len(self.q1.valid_files) == 0:
-                calibrator_SURI = self.q1.get_SURI()
-            else:
-                calibrator_SURI = self.q1.uris
-        else:
-            calibrator_SURI = ""
-
-        if self.q2 is not None:
-            if len(self.q2.valid_files) == 0:
-                target_SURI = self.q2.get_SURI()
-            else:
-                target_SURI = self.q2.uris
-        else:
-            target_SURI = ""
-
-        if calibrator_SURI is not "":
-            sas_ids_string = ""
-            suris_string = ""
-            for sas_id in range(0, len(self.SASidsCalibrator)):
-                for uri in range(0, len(calibrator_SURI[self.SASidsCalibrator[sas_id]])):
-                    if uri == len(self.SASidsCalibrator) - 1:
-                        suris_string += list(calibrator_SURI[self.SASidsCalibrator[sas_id]])[uri] + "#"
-                    else:
-                        suris_string += list(calibrator_SURI[self.SASidsCalibrator[sas_id]])[uri] + "#"
-
-                if sas_id == len(self.SASidsCalibrator) - 1:
-                    sas_ids_string += str(self.SASidsCalibrator[sas_id])
-                else:
-                    sas_ids_string += str(self.SASidsCalibrator[sas_id]) + "_"
-
-            subprocess.Popen(["nohup", "./stage.py", sas_ids_string, suris_string])
-
-        if target_SURI is not "":
-            sas_ids_string = ""
-            suris_string = ""
-            for sas_id in range(0, len(self.SASidsTarget)):
-                for uri in range(0, len(target_SURI[self.SASidsTarget[sas_id]])):
-                    if uri == len(self.SASidsCalibrator) - 1:
-                        suris_string += list(target_SURI[self.SASidsTarget[sas_id]])[uri]
-                    else:
-                        suris_string += list(target_SURI[self.SASidsTarget[sas_id]])[uri] + "#"
-
-                if sas_id == len(self.SASidsTarget) - 1:
-                    sas_ids_string += str(self.SASidsTarget[sas_id])
-                else:
-                    sas_ids_string += str(self.SASidsTarget[sas_id]) + "_"
-                    suris_string += "&"
-
-            subprocess.Popen(["nohup", "./stage.py", sas_ids_string, suris_string])
-
-        progress = get_progress()
-        if progress is None:
+        progress = self.get_staging_progress()
+        if len(progress) == 0:
             time.sleep(10)
             stagesIDs = list(progress.keys())
 
@@ -129,7 +75,6 @@ class StageProgressPlot(QWidget):
 
         self.p1.legend()
         self.p2.legend()
-        self.timer = QtCore.QTimer()
         self.timer.setInterval(100)
         self.timer.timeout.connect(self.update_plot)
         self.timer.start()
@@ -144,7 +89,7 @@ class StageProgressPlot(QWidget):
         elif len(progress_dict) == 0:
             self.__retrieve()
 
-        elif len(list(self.get_staging_progress().keys())) == 0:
+        elif len(list(progress_dict.keys())) == 0:
             self.__retrieve()
 
         else:
@@ -155,18 +100,18 @@ class StageProgressPlot(QWidget):
                 colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
 
                 i = 0
-                for index in range(0, len(self.get_staging_progress())):
-                    stage_id = list(self.get_staging_progress().keys())[index]
-                    staged_file_count_for_id_tmp = self.get_staging_progress()[stage_id]["Files done"]
+                for index in range(0, len(self.tmpStagesIDs)):
+                    stage_id = list(self.tmpStagesIDs)[index]
+                    staged_file_count_for_id_tmp = progress_dict[stage_id]["Files done"]
                     self.stages_files_counts[index].append(staged_file_count_for_id_tmp)
                     self.p1.graph.plot(self.time, self.stages_files_counts[index], colors[i] + symbols[i], label="stage id: " + str(stage_id))
                     self.p1.draw()
                     i += 1
 
                 j = 0
-                for index_ in range(0, len(self.get_staging_progress())):
-                    stage_id_ = list(self.get_staging_progress().keys())[index_]
-                    staged_file_percent_for_id_tmp = self.get_staging_progress()[stage_id_]["Percent done"]
+                for index_ in range(0, len(self.tmpStagesIDs)):
+                    stage_id_ = list(self.tmpStagesIDs)[index_]
+                    staged_file_percent_for_id_tmp = progress_dict[stage_id_]["Percent done"]
                     self.stages_files_percent[index_].append(staged_file_percent_for_id_tmp)
                     self.p2.graph.plot(self.time, self.stages_files_percent[index_], colors[j] + symbols[j],  label="Stage id: " + str(stage_id_))
                     self.p2.draw()
@@ -180,6 +125,8 @@ class StageProgressPlot(QWidget):
                 print("UnboundLocalError", e, sys.exc_info()[0])
             except ValueError as e:
                 print("ValueError", e, sys.exc_info()[0])
+            except AttributeError as e:
+                print("AttributeError", e, sys.exc_info()[0])
             except:
                 print("Unexpected error:", sys.exc_info()[0])
 
@@ -203,43 +150,12 @@ class StageProgressPlot(QWidget):
         return progress_dict
 
     def __retrieve(self):
-        retrieve_setup = True
-        while retrieve_setup:
-            self.timer.stop()
-            workingDir = getConfigs("Paths", "WorkingPath", self.config_file)
-            targetName = getConfigs("Data", "TargetName", self.config_file)
-            workingDir = workingDir + "/" + targetName + "/"
-            auxDir = workingDir + "/LAnDmARk_aux"
-            self.p1.fig.savefig(auxDir + "/stage/" + 'staging_progress_count.png')
-            self.p2.fig.savefig(auxDir + "/stage/" + 'staging_progress_percent.png')
-            self._ui.show_stage_progress_button.setStyleSheet("background-color: gray")
-            self._ui.show_stage_progress_button.setDisabled(True)
-            retrieve_setup = False
-        else:
-            if getConfigs("Operations", "retrieve", self.config_file) == "True":
-                sas_ids_string_calibrator = ""
-                sas_ids_string_target = ""
-                suffix_urls_string = ""
-
-                for sas_id in range(0, len(self.SASidsCalibrator)):
-                    if sas_id == len(self.SASidsCalibrator) - 1:
-                        sas_ids_string_calibrator += str(self.SASidsCalibrator[sas_id])
-                    else:
-                        sas_ids_string_calibrator += str(self.SASidsCalibrator[sas_id]) + "_"
-
-                for sas_id in range(0, len(self.SASidsTarget)):
-                    if sas_id == len(self.SASidsTarget) - 1:
-                        sas_ids_string_target += str(self.SASidsTarget[sas_id])
-                    else:
-                        sas_ids_string_target += str(self.SASidsTarget[sas_id]) + "_"
-
-                for stage_id in set(self.tmpStagesIDs):
-                    suffix_urls = list(set(get_surls_online(int(stage_id))))
-
-                    for s in range(0, len(suffix_urls)):
-                        if s == len(suffix_urls) - 1:
-                            suffix_urls_string += suffix_urls[s]
-                        else:
-                            suffix_urls_string += suffix_urls[s] + "#"
-
-                subprocess.Popen(["nohup", "./retrieve.py", '"' + suffix_urls_string + '"', self.download_dir, sas_ids_string_calibrator, sas_ids_string_target])
+        self.timer.stop()
+        workingDir = getConfigs("Paths", "WorkingPath", self.config_file)
+        targetName = getConfigs("Data", "TargetName", self.config_file)
+        workingDir = workingDir + "/" + targetName + "/"
+        auxDir = workingDir + "/LAnDmARk_aux"
+        self.p1.fig.savefig(auxDir + "/stage/" + 'staging_progress_count.png')
+        self.p2.fig.savefig(auxDir + "/stage/" + 'staging_progress_percent.png')
+        self._ui.show_stage_progress_button.setStyleSheet("background-color: green")
+        self._ui.show_stage_progress_button.setDisabled(True)

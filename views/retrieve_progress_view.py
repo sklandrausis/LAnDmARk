@@ -7,13 +7,13 @@ from parsers._configparser import getConfigs
 
 
 class RetrieveProgressPlot(QWidget):
-    def __init__(self, run_controller, *args, **kwargs):
+    def __init__(self, _ui, *args, **kwargs):
         super(RetrieveProgressPlot, self).__init__(*args, **kwargs)
         self.grid = QGridLayout()
         self.setLayout(self.grid)
         self.grid.setSpacing(10)
-        self.run_controller = run_controller
         self.setWindowTitle('Retrieved files')
+        self._ui = _ui
         self.config_file = "config.cfg"
         self.download_dir = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + \
                             getConfigs("Data", "TargetName", "config.cfg") + "/"
@@ -31,11 +31,6 @@ class RetrieveProgressPlot(QWidget):
         else:
             self.SASidsCalibrator = [int(sas_id) for sas_id in getConfigs("Data", "calibratorSASids",
                                                                           self.config_file).replace(" ", "").split(",")]
-
-        for q in (self.run_controller.q1, self.run_controller.q2):
-            if q is not None:
-                if len(q.valid_files) == 0:
-                    q.get_SURI()
 
         self.retrieve_files_counts = dict()
         self.retrieve_files_percent = dict()
@@ -80,7 +75,7 @@ class RetrieveProgressPlot(QWidget):
             i += 1
 
         j = 0
-        for sas_id_ in self.retrieve_files_counts:
+        for sas_id_ in self.retrieve_files_percent:
             self.retrieve_files_percent[sas_id_].append(0)
             self.p2.graph.plot(self.time,  self.retrieve_files_percent[sas_id_], colors[j] + symbols[j], label="SAS id " + str(sas_id_))
             j += 1
@@ -109,11 +104,6 @@ class RetrieveProgressPlot(QWidget):
                 directory = ""
 
             if directory != "":
-                if sas_id in self.run_controller.q1.valid_files.keys():
-                    valid_files = self.run_controller.q1.valid_files
-                elif sas_id in self.run_controller.q2.get_SURI().keys():
-                    valid_files = self.run_controller.q2.valid_files
-
                 symbols = ["*", "o", "v", "^", "<", ">", "1", "2", "3", "4"]
                 colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
                 file_count = len([f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))
@@ -124,7 +114,7 @@ class RetrieveProgressPlot(QWidget):
                 self.p1.draw()
                 i += 1
         j = 0
-        for sas_id_ in list(self.retrieve_files_counts.keys()):
+        for sas_id_ in list(self.retrieve_files_percent.keys()):
             if sas_id_ in self.SASidsCalibrator:
                 directory = self.download_dir + "calibrators/" + str(sas_id_) + "_RAW/"
             elif sas_id_ in self.SASidsTarget:
@@ -135,18 +125,20 @@ class RetrieveProgressPlot(QWidget):
                 directory = ""
 
             if directory != "":
-                if sas_id_ in self.run_controller.q1.valid_files.keys():
-                    valid_files = self.run_controller.q1.valid_files
-                elif sas_id_ in self.run_controller.q2.get_SURI().keys():
-                    valid_files = self.run_controller.q2.valid_files
+                with open("querying_results.txt", "r") as querying_results:
+                    lines = querying_results.readlines()
+                    for line in lines:
+                        if str(sas_id_) in line and "valid files" in line:
+                            valid_files = int(line.split(" ")[7])
+                            break
 
                 symbols = ["*", "o", "v", "^", "<", ">", "1", "2", "3", "4"]
                 colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
                 file_count = len([f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))
                                   and ".tar" in f or ".MS" in f])
 
-                percent_done.append(file_count/valid_files[sas_id_])
-                self.retrieve_files_percent[sas_id_].append(file_count/valid_files[sas_id_])
+                percent_done.append(file_count/valid_files)
+                self.retrieve_files_percent[sas_id_].append(file_count/valid_files)
                 self.p2.graph.plot(self.time, self.retrieve_files_percent[sas_id_], colors[j] + symbols[j], label="SAS id " + str(sas_id_))
                 self.p2.draw()
                 i += 1
@@ -162,3 +154,4 @@ class RetrieveProgressPlot(QWidget):
         auxDir = workingDir + "/LAnDmARk_aux"
         self.p1.fig.savefig(auxDir + "/retrieve/" + 'retrieve_progress_count.png')
         self.p2.fig.savefig(auxDir + "/retrieve/" + 'retrieve_progress_percent.png')
+        self._ui.show_retrieve_progress_button.setStyleSheet("background-color: green")

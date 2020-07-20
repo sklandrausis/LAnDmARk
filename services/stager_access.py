@@ -27,6 +27,7 @@ __version__ = "1.5"
 import os
 import datetime
 from os.path import expanduser
+import threading
 
 # Python2/3 dependent stuff
 from sys import version_info
@@ -62,6 +63,7 @@ except IOError:
 print("%s - stager_access: Creating proxy" % (datetime.datetime.now()))
 proxy = xmlrpclib.ServerProxy("https://" + user + ':' + passw + "@webportal.astron.nl/service-public/xmlrpc")
 LtaStager = proxy.LtaStager
+
 
 def stage(surls, send_notifications=True):
     """ Stage list of SURLs, optionally enable/disable email notifications """
@@ -103,8 +105,8 @@ def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
     """ Download file """
     config_file = "config.cfg"
     download_files = []
-
     dir_to_tmp = dir_to
+    threads = []
 
     for surl in surls:
 
@@ -135,10 +137,9 @@ def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
             for file in os.listdir(dir_to):
                 if 'L' + str(calSASid) in file:
                     if ".tar" in file:
-                        outname = dir_to + "/" + file.split("%")[-1]
-                        os.rename(dir_to + "/" + file, outname)
-                        os.system('tar -xvf ' + outname + " -C " + dir_to + "/")
-                        os.system('rm -r ' + outname)
+                        t = threading.Thread(target=unarchive, args=(dir_to, file))
+                        t.start()
+                        threads.append(t)
 
     def download_target():
         for tarSASid in SASidsTarget:
@@ -156,10 +157,9 @@ def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
             for file in os.listdir(dir_to):
                 if 'L' + str(tarSASid) in file:
                     if ".tar" in file:
-                        outname = dir_to + "/" + file.split("%")[-1]
-                        os.rename(dir_to + "/" + file, outname)
-                        os.system('tar -xvf ' + outname + " -C " + dir_to + "/")
-                        os.system('rm -r ' + outname)
+                        t = threading.Thread(target=unarchive, args=(dir_to, file))
+                        t.start()
+                        threads.append(t)
 
     if getConfigs("Operations", "which_obj", config_file) == "calibrators":
         download_calibrator()
@@ -169,3 +169,14 @@ def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
     else:
         download_calibrator()
         download_target()
+
+    for t in threads:
+        t.join()
+
+
+def unarchive(dir_to, file):
+    outname = dir_to + "/" + file.split("%")[-1]
+    os.rename(dir_to + "/" + file, outname)
+    os.system('tar -xvf ' + outname + " -C " + dir_to + "/")
+    os.system('rm -r ' + outname)
+
