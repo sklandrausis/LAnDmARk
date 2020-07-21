@@ -45,7 +45,8 @@ if len(getConfigs("Data", "calibratorSASids", config_file)) == 0:
     else:
         raise Exception("SAS id for calibrator is not set in config.cfg file")
 else:
-    SASidsCalibrator = [int(id) for id in getConfigs("Data", "calibratorSASids", config_file).replace(" ", "").split(",")]
+    SASidsCalibrator = [int(id) for id in
+                        getConfigs("Data", "calibratorSASids", config_file).replace(" ", "").split(",")]
 
 workingDir = getConfigs("Paths", "WorkingPath", config_file)
 targetName = getConfigs("Data", "TargetName", config_file)
@@ -54,11 +55,10 @@ auxDir = workingDir + "/LAnDmARk_aux"
 
 
 def query():
-
-    if getConfigs("Operations", "which_obj",  config_file) == "calibrators":
+    if getConfigs("Operations", "which_obj", config_file) == "calibrators":
         q1 = Querying(SASidsCalibrator, True, config_file)
         q2 = None
-    elif getConfigs("Operations", "which_obj",  config_file) == "target":
+    elif getConfigs("Operations", "which_obj", config_file) == "targets":
         q1 = None
         q2 = Querying(SASidsTarget, False, config_file)
     else:
@@ -110,7 +110,7 @@ def plot_querying_results(q1, q2):
 
         for id in SASidsTarget:
             cStationsTarget.append(station_count_q2[id]["Core stations"])
-            rStationsTarget.append(station_count_q2[id]["Remote station"])
+            rStationsTarget.append(station_count_q2[id]["Remote stations"])
             iStationsTarget.append(station_count_q2[id]["International stations"])
             tStationsTarget.append(station_count_q2[id]["Total stations"])
 
@@ -130,7 +130,7 @@ def plot_querying_results(q1, q2):
     if getConfigs("Operations", "which_obj", config_file) == "calibrators":
         plot_station_count_calibrator()
 
-    elif getConfigs("Operations", "which_obj", config_file) == "target":
+    elif getConfigs("Operations", "which_obj", config_file) == "targets":
         plot_station_count_target()
 
     elif getConfigs("Operations", "which_obj", config_file) == "all":
@@ -174,7 +174,7 @@ def plot_querying_results(q1, q2):
     if getConfigs("Operations", "which_obj", config_file) == "calibrators":
         plot_valid_files_calibrator()
 
-    elif getConfigs("Operations", "which_obj", config_file) == "target":
+    elif getConfigs("Operations", "which_obj", config_file) == "targets":
         plot_valid_files_target()
 
     elif getConfigs("Operations", "which_obj", config_file) == "all":
@@ -269,7 +269,7 @@ def main():
             for sas_id in range(0, len(SASidsTarget)):
                 for uri in range(0, len(target_SURI[SASidsTarget[sas_id]])):
                     if uri == len(SASidsCalibrator) - 1:
-                        suris_string += list(target_SURI[SASidsTarget[sas_id]])[uri]
+                        suris_string += list(target_SURI[SASidsTarget[sas_id]])[uri] + "#"
                     else:
                         suris_string += list(target_SURI[SASidsTarget[sas_id]])[uri] + "#"
 
@@ -280,7 +280,7 @@ def main():
                     suris_string += "&"
 
             t = threading.Thread(target=subprocess.Popen,
-                             args=(["nohup", "./stage.py", sas_ids_string, suris_string],))
+                                 args=(["nohup", "./stage.py", sas_ids_string, suris_string],))
             t.start()
             t.join()
             while True:
@@ -340,16 +340,17 @@ def main():
                 suffix_urls_string += suffix_urls[s] + "#"
 
         t = threading.Thread(target=subprocess.Popen, args=(["nohup", "./retrieve.py", '"' + suffix_urls_string + '"',
-                                                         download_dir, sas_ids_string_calibrator, sas_ids_string_target],))
+                                                             download_dir, sas_ids_string_calibrator,
+                                                             sas_ids_string_target],))
         t.start()
         t.join()
-        
+
         retrieve_files_percent = dict()
         if getConfigs("Operations", "which_obj", config_file) == "calibrators":
             for sas_id in SASidsCalibrator:
                 retrieve_files_percent[sas_id] = []
 
-        elif getConfigs("Operations", "which_obj", config_file) == "target":
+        elif getConfigs("Operations", "which_obj", config_file) == "targets":
             for sas_id in SASidsTarget:
                 retrieve_files_percent[sas_id] = []
         else:
@@ -357,7 +358,7 @@ def main():
                 retrieve_files_percent[sas_id] = []
             for sas_id in SASidsTarget:
                 retrieve_files_percent[sas_id] = []
-                
+
         for sas_id in retrieve_files_percent:
             retrieve_files_percent[sas_id].append(0)
 

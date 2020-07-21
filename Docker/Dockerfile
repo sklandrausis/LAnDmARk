@@ -12,6 +12,7 @@ RUN apt install python3-pip -y
 RUN apt install screen -y
 
 RUN pip3 install seaborn coloredlogs configparser pyqt5==5.14
+RUN pip3 install -U numpy
 
 RUN wget https://lta.lofar.eu/software/lofar_lta-2.7.1.tar.gz
 RUN tar -xzf /lofar_lta-2.7.1.tar.gz  -C / 

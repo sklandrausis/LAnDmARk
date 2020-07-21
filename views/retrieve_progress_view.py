@@ -39,7 +39,7 @@ class RetrieveProgressPlot(QWidget):
                 self.retrieve_files_counts[sas_id] = []
                 self.retrieve_files_percent[sas_id] = []
 
-        elif getConfigs("Operations", "which_obj", self.config_file) == "target":
+        elif getConfigs("Operations", "which_obj", self.config_file) == "targets":
             for sas_id in self.SASidsTarget:
                 self.retrieve_files_counts[sas_id] = []
                 self.retrieve_files_percent[sas_id] = []

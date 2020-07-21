@@ -33,16 +33,7 @@ class CheckController(QObject):
             dirs.append(self.working_directory + "/calibrators/calibrators_results/results/inspection_" + str(id))
 
         for id in self.targetSASids:
-            dirs.append(self.working_directory + "/targets/target_results/results/inspection_" + str(id))
-
-        dirs = ["selection/", "retrieve/", "stage/"]
-        dirs = [self.working_directory + "/LAnDmARk_aux/" + d for d in dirs]
-
-        for id in self.SASidsCalibrator:
-            dirs.append(self.working_directory + "/calibrators/calibrators_results/results/inspection_" + str(id))
-
-        for id in self.targetSASids:
-            dirs.append(self.working_directory + "/targets/target_results/results/inspection_" + str(id))
+            dirs.append(self.working_directory + "/targets/targets_results/results/inspection_" + str(id))
 
         existing_dirs = [d for d in dirs if os.path.isdir(d)]
         self.non_empty_dirs = [d for d in existing_dirs if len(os.listdir(d)) != 0]

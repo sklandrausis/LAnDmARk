@@ -14,7 +14,6 @@ def parse_arguments():
 
 def start_staging(s_uris, sas_ids):
     for sas_id in sas_ids:
-        print(s_uris[sas_id])
         stagger = LtaStager()
         stagger.stage_uris(set(s_uris[sas_id]))
 

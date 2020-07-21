@@ -40,7 +40,7 @@ class CheckView(QMainWindow):
             dirs.append(self.working_directory + "/calibrators/calibrators_results/results/inspection_" + str(id))
 
         for id in targetSASids:
-            dirs.append(self.working_directory + "/targets/target_results/results/inspection_" + str(id))
+            dirs.append(self.working_directory + "/targets/targets_results/results/inspection_" + str(id))
 
         existing_dirs = [d for d in dirs if os.path.isdir(d)]
         non_empty_dirs = [d for d in existing_dirs if len(os.listdir(d)) != 0]

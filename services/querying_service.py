@@ -108,4 +108,3 @@ class Querying:
             self.__get_data_products()
 
         return Querying.uris
-

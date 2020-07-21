@@ -144,8 +144,8 @@ if __name__ == "__main__":
         for id in targetSASids:
             print("Setup for target id", id)
             create_directory(targetDir + id + "_RAW")
-            log_file = workingDir + "target/" + "pipeline_" + id + ".log"
-            xml_stat_file = workingDir + "target/" + "statistics_" + id + ".xml"
+            log_file = workingDir + "targets/" + "pipeline_" + id + ".log"
+            xml_stat_file = workingDir + "targets/" + "statistics_" + id + ".xml"
 
             # Creating target files
             copy_files(PrefactorDir + 'pipeline.cfg', targetDir + id + "_RAW")

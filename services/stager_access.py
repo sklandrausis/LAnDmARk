@@ -24,6 +24,7 @@
 
 __version__ = "1.5"
 
+import sys
 import os
 import datetime
 from os.path import expanduser
@@ -86,18 +87,22 @@ def get_progress(status=None, exclude=False):
         :param exclude: If set to True then the requests with status 'status' are
         excluded.
     """
-    all_requests = proxy.LtaStager.getprogress()
-    if status is not None and isinstance(status, string_types):
-        if python_version == 3:
-            all_items = all_requests.items()
+    requests = {}
+    try:
+        all_requests = proxy.LtaStager.getprogress()
+        if status is not None and isinstance(status, string_types):
+            if python_version == 3:
+                all_items = all_requests.items()
+            else:
+                all_items = all_requests.iteritems()
+            if exclude is False:
+                requests = {key: value for key, value in all_items if value["Status"] == status}
+            else:
+                requests = {key: value for key, value in all_items if value["Status"] != status}
         else:
-            all_items = all_requests.iteritems()
-        if exclude is False:
-            requests = {key: value for key, value in all_items if value["Status"] == status}
-        else:
-            requests = {key: value for key, value in all_items if value["Status"] != status}
-    else:
-        requests = all_requests
+            requests = all_requests
+    except xmlrpclib.ProtocolError as error:
+        print("AttributeError", error, sys.exc_info()[0])
     return requests
 
 
@@ -164,7 +169,7 @@ def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
     if getConfigs("Operations", "which_obj", config_file) == "calibrators":
         download_calibrator()
 
-    elif getConfigs("Operations", "which_obj", config_file) == "target":
+    elif getConfigs("Operations", "which_obj", config_file) == "targets":
         download_target()
     else:
         download_calibrator()
@@ -179,4 +184,3 @@ def unarchive(dir_to, file):
     os.rename(dir_to + "/" + file, outname)
     os.system('tar -xvf ' + outname + " -C " + dir_to + "/")
     os.system('rm -r ' + outname)
-
