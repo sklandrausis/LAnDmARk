@@ -215,7 +215,7 @@ if __name__ == "__main__":
         create_directory(calibratorDirResults)
         setup_calibrator()
 
-    elif getConfigs("Operations", "which_obj", config_file) == "target":
+    elif getConfigs("Operations", "which_obj", config_file) == "targets":
         create_directory(targetDir)
         create_directory(targetDirResults)
         setup_target()

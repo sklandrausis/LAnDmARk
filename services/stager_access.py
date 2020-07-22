@@ -152,7 +152,8 @@ def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
             dir_to += "/" + "targets/" + str(tarSASid) + "_RAW/"
             for file in download_files:
                 if 'L' + str(tarSASid) in file:
-                    os.system("nohup  wget " + file + " -P " + dir_to + " >/dev/null 2>&1")
+                    print("wget " + file)
+                    #os.system("nohup  wget " + file + " -P " + dir_to + " >/dev/null 2>&1")
 
         dir_to = dir_to_tmp
         for tarSASid in SASidsTarget:
@@ -180,6 +181,7 @@ def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
 
 
 def unarchive(dir_to, file):
+    print(dir_to)
     outname = dir_to + "/" + file.split("%")[-1]
     os.rename(dir_to + "/" + file, outname)
     os.system('tar -xvf ' + outname + " -C " + dir_to + "/")
