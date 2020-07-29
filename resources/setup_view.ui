@@ -1230,14 +1230,17 @@
      <height>36</height>
     </rect>
    </property>
+   <property name="maxVisibleItems">
+    <number>10</number>
+   </property>
    <item>
     <property name="text">
-     <string>True</string>
+     <string>False</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>False</string>
+     <string>True</string>
     </property>
    </item>
   </widget>
