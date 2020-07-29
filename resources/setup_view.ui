@@ -1221,6 +1221,91 @@
     <string>Save LAnDmARk configuration</string>
    </property>
   </widget>
+  <widget class="QComboBox" name="select_subband_range_combobox">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>360</y>
+     <width>141</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>True</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>False</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="select_subband_range_label">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>340</y>
+     <width>141</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Select subband range</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="min_subband_label">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>399</y>
+     <width>111</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Min subband</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="min_subband_input">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>420</y>
+     <width>91</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="max_subband_label">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>460</y>
+     <width>111</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Max subband</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="max_subband_input">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>480</y>
+     <width>91</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
  </widget>
  <tabstops>
   <tabstop>which_combobox</tabstop>

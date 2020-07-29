@@ -28,6 +28,9 @@ class SetupModel(QObject):
         self.__wsclean_executable = "/opt/cep/wsclean/wsclean-2.8/bin/wsclean"
         self.__pythonpath = ""
         self.__task_file = "%(lofarroot)s/share/pipeline/tasks.cfg"
+        self.__max_subband = ""
+        self.__min_subband = ""
+        self.__subband_select = "False"
 
     @property
     def querying(self):
@@ -220,3 +223,27 @@ class SetupModel(QObject):
     @task_file.setter
     def task_file(self, task_file):
         self.__task_file = task_file
+
+    @property
+    def min_subband(self):
+        return self.__min_subband
+
+    @min_subband.setter
+    def min_subband(self, min_subband):
+        self.__min_subband = min_subband
+
+    @property
+    def max_subband(self):
+        return self.__max_subband
+
+    @max_subband.setter
+    def max_subband(self, max_subband):
+        self.__max_subband = max_subband
+
+    @property
+    def subband_select(self):
+        return self.__subband_select
+
+    @subband_select.setter
+    def subband_select(self, subband_select):
+        self.__subband_select = subband_select

@@ -17,11 +17,12 @@ class SetupView(QMainWindow):
 
         self._setup_controller = SetupController(self._ui,  self.run_ui)
         self._ui.save_button.clicked.connect(self._setup_controller.save_configuration)
-
         self._ui.querying_comboBox.currentTextChanged.connect(self._setup_controller.on_querying_combobox_changed)
         self._ui.stage_combobox.currentTextChanged.connect(self._setup_controller.on_stage_combobox_changed)
         self._ui.retrieve_combobox.currentTextChanged.connect(self._setup_controller.on_retrieve_combobox_changed)
         self._ui.process_combobox.currentTextChanged.connect(self._setup_controller.on_process_combobox_changed)
+        self._ui.select_subband_range_combobox.currentTextChanged.connect(
+            self._setup_controller.on_select_subband_range_combobox_changed)
 
         if len(getConfigs("Data", "targetsasids", self.config_file)) != 0:
             self._ui.targetSASids_input.setText(getConfigs("Data", "targetsasids", self.config_file))
@@ -37,6 +38,15 @@ class SetupView(QMainWindow):
 
         if len(getConfigs("Data", "producttype", self.config_file)) != 0:
             self._ui.product_type_combobox.setCurrentText(getConfigs("Data", "producttype", self.config_file))
+
+        if len(getConfigs("Data", "minsubband", self.config_file)) != 0:
+            self._ui.min_subband_input.setText(getConfigs("Data", "minsubband", self.config_file))
+
+        if len(getConfigs("Data", "maxsubband", self.config_file)) != 0:
+            self._ui.max_subband_input.setText(getConfigs("Data", "maxsubband", self.config_file))
+
+        if len(getConfigs("Data", "subbandselect", self.config_file)) != 0:
+            self._ui.select_subband_range_combobox.setCurrentText(getConfigs("Data", "subbandselect", self.config_file))
 
         if len(getConfigs("Operations", "querying", self.config_file)) != 0:
             self._ui.querying_comboBox.setCurrentText(getConfigs("Operations", "querying", self.config_file))
@@ -94,6 +104,18 @@ class SetupView(QMainWindow):
 
         if len(getConfigs("Cluster", "method", self.config_file)) != 0:
             self._ui.method_input.setText(getConfigs("Cluster", "method", self.config_file))
+
+        if self._ui.select_subband_range_combobox.currentText() == "True":
+            self._ui.min_subband_label.setEnabled(True)
+            self._ui.min_subband_input.setEnabled(True)
+            self._ui.max_subband_label.setEnabled(True)
+            self._ui.max_subband_input.setEnabled(True)
+
+        elif self._ui.select_subband_range_combobox.currentText() == "False":
+            self._ui.min_subband_label.setEnabled(False)
+            self._ui.min_subband_input.setEnabled(False)
+            self._ui.max_subband_label.setEnabled(False)
+            self._ui.max_subband_input.setEnabled(False)
 
     def init_color_setup(self):
         self._ui.WorkingPath_input.setStyleSheet("Background-color: rgb(152,251,152)")

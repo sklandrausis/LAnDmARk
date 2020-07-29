@@ -40,6 +40,9 @@ class SetupController(QObject):
         self.setup_model.wsclean_executable = self._ui.wsclean_executable_input.text()
         self.setup_model.pythonpath = self._ui.pythonpath_input.text()
         self.setup_model.task_file = self._ui.task_file_input.text()
+        self.setup_model.min_subband = self._ui.min_subband_input.text()
+        self.setup_model.max_subband = self._ui.min_subband_input.text()
+        self.setup_model.subband_select = self._ui.select_subband_range_combobox.currentText()
 
         def process_valid():
             valid_count = 0
@@ -201,6 +204,17 @@ class SetupController(QObject):
                         valid_count += 1
                         QMessageBox.warning(QMessageBox(), "Warning", "calibrator solution file " + cal_solution_file + " do not exits")
 
+        if self._ui.select_subband_range_combobox.currentText() == "True":
+            if len(self.setup_model.min_subband) > 0:
+                if int(self.setup_model.min_subband) < 0:
+                    valid_count += 1
+                    QMessageBox.warning(QMessageBox(), "Warning", "Subband cannot be negative")
+
+            if len(self.setup_model.max_subband) > 0:
+                if int(self.setup_model.max_subband) < 0:
+                    valid_count += 1
+                    QMessageBox.warning(QMessageBox(), "Warning", "Subband cannot be negative")
+
         if valid_count == 0:
             valid = True
         else:
@@ -215,6 +229,9 @@ class SetupController(QObject):
             setConfigs("Data", "targetname", self.setup_model.Target_name, config_file)
             setConfigs("Data", "projectid", self.setup_model.PROJECTid, config_file)
             setConfigs("Data", "producttype", self.setup_model.product_type, config_file)
+            setConfigs("Data", "minSubband", self.setup_model.min_subband, config_file)
+            setConfigs("Data", "maxSubband", self.setup_model.max_subband, config_file)
+            setConfigs("Data", "subbandselect", self.setup_model.subband_select, config_file)
 
             setConfigs("Operations", "querying", self.setup_model.querying, config_file)
             setConfigs("Operations", "stage", self.setup_model.stage, config_file)
@@ -307,3 +324,25 @@ class SetupController(QObject):
 
             self.run_ui.show_process_progress_button.setDisabled(True)
             self.run_ui.show_process_progress_button.setStyleSheet("background-color: white")
+
+    def on_select_subband_range_combobox_changed(self):
+        if self._ui.select_subband_range_combobox.currentText() == "True":
+            self._ui.min_subband_label.setEnabled(True)
+            self._ui.min_subband_input.setEnabled(True)
+            self._ui.max_subband_label.setEnabled(True)
+            self._ui.max_subband_input.setEnabled(True)
+
+            if len(self._ui.min_subband_input.text()) > 0:
+                if int(self._ui.min_subband_input.text()) < 0:
+                    QMessageBox.warning(QMessageBox(), "Warning", "Subband cannot be negative")
+
+            if len(self._ui.max_subband_input.text()) > 0:
+                if int(self._ui.max_subband_input.text()) < 0:
+                    QMessageBox.warning(QMessageBox(), "Warning", "Subband cannot be negative")
+
+        elif self._ui.select_subband_range_combobox.currentText() == "False":
+            self._ui.min_subband_label.setEnabled(False)
+            self._ui.min_subband_input.setEnabled(False)
+            self._ui.max_subband_label.setEnabled(False)
+            self._ui.max_subband_input.setEnabled(False)
+

@@ -54,6 +54,10 @@ class Querying:
             Querying.uris[SASid] = set()
             observation = self.observations[SASid]
             data_product_query = self.cls.observations.contains(observation)
+            if getConfigs("Data", "subbandselect", self.config_file) == "True":
+                subband1 = getConfigs("Data", "minsubband", self.config_file)
+                subband2 = getConfigs("Data", "maxsubband", self.config_file)
+                data_product_query &= ((self.cls.subband >= subband1) | (self.cls.subband <= subband2))
             data_product_query &= self.cls.isValid == 1
 
             if not self.calibrator:
