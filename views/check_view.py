@@ -42,6 +42,8 @@ class CheckView(QMainWindow):
         for id in targetSASids:
             dirs.append(self.working_directory + "/targets/targets_results/results/inspection_" + str(id))
 
+        dirs.append(self.working_directory + "/imaging_deep/results/inspection")
+
         existing_dirs = [d for d in dirs if os.path.isdir(d)]
         non_empty_dirs = [d for d in existing_dirs if len(os.listdir(d)) != 0]
         dir_length = [len(os.listdir(d)) for d in existing_dirs]
@@ -50,6 +52,11 @@ class CheckView(QMainWindow):
         for d in non_empty_dirs:
             if "LAnDmARk" in d:
                 self._ui.choose_combobox.addItem("LAnDmARk inspection plots")
+                break
+
+        for d in non_empty_dirs:
+            if "imaging_deep" in d:
+                self._ui.choose_combobox.addItem("Imaging inspection plots")
                 break
 
         for d in non_empty_dirs:

@@ -251,13 +251,13 @@ if __name__ == "__main__":
             parset_file = parset_file.readlines()
 
         for line in parset_file:
-            if "! data_input_path" in line:
+            if "! target_input_path" in line:
                 parset_file[parset_file.index(line)] = line.replace(line,
-                                                                    "! data_input_path          =  " + targetDirResults + "  ## specify the directory where your concatenated target data are stored\n")
+                                                                    "! target_input_path          =  " + targetDirResults + "/results" + "  ## specify the directory where your concatenated target data are stored\n")
 
-            elif "! data_input_pattern" in line:
+            elif "! target_input_pattern" in line:
                 parset_file[parset_file.index(line)] = line.replace(line,
-                                                                    "! data_input_pattern       =  L*.pre-cal.ms    ## regular expression pattern of all your calibrator files\n")
+                                                                    "! target_input_pattern       =  L*.pre-cal.ms    ## regular expression pattern of all your calibrator files\n")
 
             elif "! prefactor_directory" in line:
                 parset_file[parset_file.index(line)] = line.replace(line,
@@ -268,7 +268,7 @@ if __name__ == "__main__":
                                                                     "! wsclean_executable       =   " + wsclean_executable + "  ## path to your local WSClean executable\n")
             elif "! job_directory " in line:
                 parset_file[parset_file.index(line)] = line.replace(line,
-                                                                    "! job_directory        =   " + imagingDir + "_RAW" + "  ## directory of the prefactor outputs\n")
+                                                                    "! job_directory        =   " + imagingDir + "  ## directory of the prefactor outputs\n")
 
             elif "! results_directory " in line:
                 parset_file[parset_file.index(line)] = line.replace(line,

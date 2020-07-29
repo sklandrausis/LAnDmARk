@@ -28,6 +28,7 @@ class CheckController(QObject):
 
         dirs = ["selection/", "retrieve/", "stage/"]
         dirs = [self.working_directory + "/LAnDmARk_aux/" + d for d in dirs]
+        dirs.append(self.working_directory + "/imaging_deep/results/inspection")
 
         for id in self.SASidsCalibrator:
             dirs.append(self.working_directory + "/calibrators/calibrators_results/results/inspection_" + str(id))
@@ -43,6 +44,11 @@ class CheckController(QObject):
         if "LAnDmARk" in self.ui.choose_combobox.currentText():
             for d in self.non_empty_dirs:
                 if "LAnDmARk" in d:
+                    items.extend(os.listdir(d))
+
+        elif "Imaging" in self.ui.choose_combobox.currentText():
+            for d in self.non_empty_dirs:
+                if "imaging_deep" in d:
                     items.extend(os.listdir(d))
 
         for id in self.SASidsCalibrator:
@@ -69,6 +75,11 @@ class CheckController(QObject):
             sub_path = [d for d in os.listdir(path) if image in os.listdir(path + "/" + d)]
             if len(sub_path) != 0:
                 path += sub_path[0] + "/"
+                self.check_view.set_image(path + image)
+
+        elif "Imaging" in self.ui.choose_combobox.currentText():
+            path += "/imaging_deep/results/inspection/"
+            if len(path) != 0:
                 self.check_view.set_image(path + image)
 
         else:

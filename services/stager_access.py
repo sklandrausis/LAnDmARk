@@ -1,4 +1,5 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3
+
 
 # Copyright 2019 Stichting Nederlandse Wetenschappelijk Onderzoek Instituten,
 # ASTRON Netherlands Institute for Radio Astronomy
@@ -114,7 +115,6 @@ def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
     threads = []
 
     for surl in surls:
-
         if "sara" in surl:
             prefix = "https://lofar-download.grid.surfsara.nl/lofigrid/SRMFifoGet.py?surl="
 
@@ -132,7 +132,7 @@ def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
             dir_to += "/" + "calibrators/" + str(calSASid) + "_RAW/"
             for file in download_files:
                 if 'L' + str(calSASid) in file:
-                    os.system("nohup  wget " + file + " -P " + dir_to + " >/dev/null 2>&1")
+                    os.system("wget " + file + " -P " + dir_to)
 
         dir_to = dir_to_tmp
         for calSASid in SASidsCalibrator:
@@ -152,8 +152,7 @@ def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
             dir_to += "/" + "targets/" + str(tarSASid) + "_RAW/"
             for file in download_files:
                 if 'L' + str(tarSASid) in file:
-                    print("wget " + file)
-                    #os.system("nohup  wget " + file + " -P " + dir_to + " >/dev/null 2>&1")
+                    os.system("nohup  wget " + file + " -P " + dir_to + " >/dev/null 2>&1")
 
         dir_to = dir_to_tmp
         for tarSASid in SASidsTarget:
@@ -181,7 +180,6 @@ def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
 
 
 def unarchive(dir_to, file):
-    print(dir_to)
     outname = dir_to + "/" + file.split("%")[-1]
     os.rename(dir_to + "/" + file, outname)
     os.system('tar -xvf ' + outname + " -C " + dir_to + "/")

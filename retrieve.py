@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import sys
 import argparse
 from services.stager_access import download
@@ -20,7 +21,8 @@ def main():
     dir_to = args.dir_to
     SASidsCalibrator = [int(s) for s in args.SASidsCalibrator.split("_")]
     SASidsTarget = [int(s) for s in args.SASidsTarget.split("_")]
-    download(surls, dir_to, SASidsCalibrator, SASidsTarget)
+    for surl in surls:
+        download([surl], dir_to, SASidsCalibrator, SASidsTarget)
     sys.exit(0)
 
 

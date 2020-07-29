@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import os
 import sys
 import subprocess
@@ -9,7 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 import seaborn as sns
 import numpy as np
-from services.stager_access import get_progress
+from services.stager_access import get_progress, download
 from services.querying_service import Querying
 from parsers._configparser import getConfigs
 
@@ -290,23 +291,8 @@ def main():
                 time.sleep(30)
 
     if getConfigs("Operations", "retrieve", config_file) == "True":
-        sas_ids_string_calibrator = ""
-        sas_ids_string_target = ""
-        suffix_urls_string = ""
         download_dir = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + \
                        getConfigs("Data", "TargetName", "config.cfg") + "/"
-
-        for sas_id in range(0, len(SASidsCalibrator)):
-            if sas_id == len(SASidsCalibrator) - 1:
-                sas_ids_string_calibrator += str(SASidsCalibrator[sas_id])
-            else:
-                sas_ids_string_calibrator += str(SASidsCalibrator[sas_id]) + "_"
-
-        for sas_id in range(0, len(SASidsTarget)):
-            if sas_id == len(SASidsTarget) - 1:
-                sas_ids_string_target += str(SASidsTarget[sas_id])
-            else:
-                sas_ids_string_target += str(SASidsTarget[sas_id]) + "_"
 
         if q1 is not None:
             if len(q1.valid_files) == 0:
@@ -333,59 +319,8 @@ def main():
             for sas_id in SASidsTarget:
                 suffix_urls.extend(target_SURI[sas_id])
 
-        for s in range(0, len(suffix_urls)):
-            if s == len(suffix_urls) - 1:
-                suffix_urls_string += suffix_urls[s]
-            else:
-                suffix_urls_string += suffix_urls[s] + "#"
-
-        t = threading.Thread(target=subprocess.Popen, args=(["nohup", "./retrieve.py", '"' + suffix_urls_string + '"',
-                                                             download_dir, sas_ids_string_calibrator,
-                                                             sas_ids_string_target],))
-        t.start()
-        t.join()
-
-        retrieve_files_percent = dict()
-        if getConfigs("Operations", "which_obj", config_file) == "calibrators":
-            for sas_id in SASidsCalibrator:
-                retrieve_files_percent[sas_id] = []
-
-        elif getConfigs("Operations", "which_obj", config_file) == "targets":
-            for sas_id in SASidsTarget:
-                retrieve_files_percent[sas_id] = []
-        else:
-            for sas_id in SASidsCalibrator:
-                retrieve_files_percent[sas_id] = []
-            for sas_id in SASidsTarget:
-                retrieve_files_percent[sas_id] = []
-
-        for sas_id in retrieve_files_percent:
-            retrieve_files_percent[sas_id].append(0)
-
-        while True:
-            percent_done = []
-
-            for sas_id_ in list(retrieve_files_percent.keys()):
-                if sas_id_ in SASidsCalibrator:
-                    directory = download_dir + "calibrators/" + str(sas_id_) + "_RAW/"
-                elif sas_id_ in SASidsTarget:
-                    directory = download_dir + "targets/" + str(sas_id_) + "_RAW/"
-
-                if directory != "":
-                    with open("querying_results.txt", "r") as querying_results:
-                        lines = querying_results.readlines()
-                        for line in lines:
-                            if str(sas_id_) in line and "valid files" in line:
-                                valid_files = int(line.split(" ")[7])
-                                break
-
-                file_count = len([f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))
-                                  and ".tar" in f or ".MS" in f])
-
-                percent_done.append(file_count / valid_files)
-
-            if sum(percent_done) == len(percent_done):
-                break
+        for suffix_url in suffix_urls:
+            download([suffix_url], download_dir, SASidsCalibrator, SASidsTarget)
 
     if getConfigs("Operations", "process", config_file) == "True":
         threading.Thread(target=subprocess.Popen, args=(["./run_pipelines.py"],)).start()
