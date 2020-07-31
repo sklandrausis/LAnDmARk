@@ -1,3 +1,5 @@
+import os
+
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QMainWindow
 from views.query_view_ui import Ui_query_view
@@ -11,7 +13,9 @@ class QueryView(QMainWindow):
         self._ui.setupUi(self)
         self.run_ui = run_ui
         self.timer = QtCore.QTimer()
-        f_tmp = open("querying_results.txt", "w")
+        if not os.path.exists("querying_results.txt"):
+            os.system("touch querying_results.txt")
+        f_tmp = open("querying_results.txt", "r")
         f_tmp.close()
         self.timer.setInterval(100)
         self.timer.timeout.connect(self.update_query_message)
@@ -23,7 +27,7 @@ class QueryView(QMainWindow):
         if "done" in querying_msg:
             querying_msg.remove("done")
             self.timer.stop()
-            self.run_ui.show_query_progress_button.setStyleSheet("background-color: green")
+            #self.run_ui.show_query_progress_button.setStyleSheet("background-color: green")
         if len(querying_msg) > 0:
             self.setGeometry(QtCore.QRect(10, 10, len(max(querying_msg)) + 480, len(querying_msg) + 480))
             self._ui.querying_message.setGeometry(QtCore.QRect(10, 10, len(max(querying_msg)) +

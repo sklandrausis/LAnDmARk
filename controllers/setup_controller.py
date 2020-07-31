@@ -41,7 +41,7 @@ class SetupController(QObject):
         self.setup_model.pythonpath = self._ui.pythonpath_input.text()
         self.setup_model.task_file = self._ui.task_file_input.text()
         self.setup_model.min_subband = self._ui.min_subband_input.text()
-        self.setup_model.max_subband = self._ui.min_subband_input.text()
+        self.setup_model.max_subband = self._ui.max_subband_input.text()
         self.setup_model.subband_select = self._ui.select_subband_range_combobox.currentText()
 
         def process_valid():
@@ -150,7 +150,6 @@ class SetupController(QObject):
             else:
                 project = self.setup_model.PROJECTid
                 context.set_project(project)
-
                 if project != context.get_current_project().name:
                     valid_count += 1
                     QMessageBox.warning(QMessageBox(), "Warning", "You are not member of project")
@@ -205,15 +204,19 @@ class SetupController(QObject):
                         QMessageBox.warning(QMessageBox(), "Warning", "calibrator solution file " + cal_solution_file + " do not exits")
 
         if self._ui.select_subband_range_combobox.currentText() == "True":
-            if len(self.setup_model.min_subband) > 0:
-                if int(self.setup_model.min_subband) < 0:
-                    valid_count += 1
-                    QMessageBox.warning(QMessageBox(), "Warning", "Subband cannot be negative")
+            if int(self._ui.min_subband_input.text()) >= int(self._ui.max_subband_input.text()):
+                valid_count += 1
+                QMessageBox.warning(QMessageBox(), "Warning", "min subband cannot be equal or smaller that max subband")
+            else:
+                if len(self.setup_model.min_subband) > 0:
+                    if int(self.setup_model.min_subband) < 0:
+                        valid_count += 1
+                        QMessageBox.warning(QMessageBox(), "Warning", "Subband cannot be negative")
 
-            if len(self.setup_model.max_subband) > 0:
-                if int(self.setup_model.max_subband) < 0:
-                    valid_count += 1
-                    QMessageBox.warning(QMessageBox(), "Warning", "Subband cannot be negative")
+                if len(self.setup_model.max_subband) > 0:
+                    if int(self.setup_model.max_subband) < 0:
+                        valid_count += 1
+                        QMessageBox.warning(QMessageBox(), "Warning", "Subband cannot be negative")
 
         if valid_count == 0:
             valid = True
@@ -332,13 +335,16 @@ class SetupController(QObject):
             self._ui.max_subband_label.setEnabled(True)
             self._ui.max_subband_input.setEnabled(True)
 
-            if len(self._ui.min_subband_input.text()) > 0:
-                if int(self._ui.min_subband_input.text()) < 0:
-                    QMessageBox.warning(QMessageBox(), "Warning", "Subband cannot be negative")
+            if int(self._ui.min_subband_input.text()) >= int(self._ui.max_subband_input.text()):
+                QMessageBox.warning(QMessageBox(), "Warning", "min subband cannot be equal or smaller that max subband")
+            else:
+                if len(self._ui.min_subband_input.text()) > 0:
+                    if int(self._ui.min_subband_input.text()) < 0:
+                        QMessageBox.warning(QMessageBox(), "Warning", "Subband cannot be negative")
 
-            if len(self._ui.max_subband_input.text()) > 0:
-                if int(self._ui.max_subband_input.text()) < 0:
-                    QMessageBox.warning(QMessageBox(), "Warning", "Subband cannot be negative")
+                if len(self._ui.max_subband_input.text()) > 0:
+                    if int(self._ui.max_subband_input.text()) < 0:
+                        QMessageBox.warning(QMessageBox(), "Warning", "Subband cannot be negative")
 
         elif self._ui.select_subband_range_combobox.currentText() == "False":
             self._ui.min_subband_label.setEnabled(False)
