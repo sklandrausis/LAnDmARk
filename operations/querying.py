@@ -8,7 +8,7 @@ PACKAGE_PARENT = '..'
 SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
 sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 
-from services.querying_service import Querying
+from services.querying_service import query
 from parsers._configparser import getConfigs
 
 config_file = "config.cfg"
@@ -29,19 +29,6 @@ working_dir = getConfigs("Paths", "WorkingPath", config_file)
 target_name = getConfigs("Data", "TargetName", config_file)
 working_dir = working_dir + "/" + target_name + "/"
 aux_dir = working_dir + "/LAnDmARk_aux"
-
-
-def query():
-    if getConfigs("Operations", "which_obj", config_file) == "calibrators":
-        q1 = Querying(sas_ids_calibrator, True, config_file)
-        q2 = None
-    elif getConfigs("Operations", "which_obj", config_file) == "targets":
-        q1 = None
-        q2 = Querying(sas_ids_target, False, config_file)
-    else:
-        q1 = Querying(sas_ids_calibrator, True, config_file)
-        q2 = Querying(sas_ids_target, False, config_file)
-    return q1, q2
 
 
 def plot_querying_results(q1, q2):
@@ -163,8 +150,53 @@ def main():
     if not os.path.exists("querying_results.txt"):
         os.system("touch querying_results.txt")
     querying_results = open("querying_results.txt", "w")
+    suri_file_name_calibrator = "calibrator"
+    suri_file_name_target = "target"
+    suri_file_name_calibrators = []
+    suri_file_name_targets = []
 
-    q1, q2 = query()
+    for sas_ids in sas_ids_calibrator:
+        suri_file_name_calibrator += "_" + str(sas_ids)
+        if getConfigs("Data", "subbandselect", config_file) == "True":
+            suri_file_name_calibrator += "_" + \
+                                         getConfigs("Data", "minsubband", config_file) + "_" + \
+                                         getConfigs("Data", "maxsubband", config_file)
+        if getConfigs("Operations", "which_obj", config_file) == "calibrators":
+            os.system("touch " + suri_file_name_calibrator)
+            suri_file_name_calibrators.append(suri_file_name_calibrator)
+
+    for sas_ids in sas_ids_target:
+        suri_file_name_target += "_" + str(sas_ids)
+        if getConfigs("Data", "subbandselect", config_file) == "True":
+            suri_file_name_target += "_" + \
+                                         getConfigs("Data", "minsubband", config_file) + "_" + \
+                                         getConfigs("Data", "maxsubband", config_file)
+        if not getConfigs("Operations", "which_obj", config_file) == "targets":
+            os.system("touch " + suri_file_name_target)
+            suri_file_name_targets.append(suri_file_name_target)
+
+    if getConfigs("Operations", "which_obj", config_file) == "all":
+        for sas_ids in sas_ids_calibrator:
+            suri_file_name_calibrator += "_" + str(sas_ids)
+            if getConfigs("Data", "subbandselect", config_file) == "True":
+                suri_file_name_calibrator += "_" + \
+                                             getConfigs("Data", "minsubband", config_file) + "_" + \
+                                             getConfigs("Data", "maxsubband", config_file)
+
+            os.system("touch " + suri_file_name_calibrator)
+            suri_file_name_calibrators.append(suri_file_name_calibrator)
+
+        for sas_ids in sas_ids_target:
+            suri_file_name_target += "_" + str(sas_ids)
+            if getConfigs("Data", "subbandselect", config_file) == "True":
+                suri_file_name_target += "_" + \
+                                         getConfigs("Data", "minsubband", config_file) + "_" + \
+                                         getConfigs("Data", "maxsubband", config_file)
+
+            os.system("touch " + suri_file_name_target)
+            suri_file_name_targets.append(suri_file_name_target)
+
+    q1, q2 = query(sas_ids_calibrator, sas_ids_target, config_file)
 
     if q1 is None:
         msg_st = q2.get_station_count_message()
@@ -173,6 +205,14 @@ def main():
         msg_d = q2.get_valid_file_message()
         querying_results.write(msg_d)
         querying_results.write("\n")
+        suri = q2.get_SURI()
+        index = 0
+        for sas_ids in sas_ids_target:
+            with open(suri_file_name_targets[index], "w") as suri_file:
+                for si in suri[sas_ids]:
+                    suri_file.write(si)
+                    suri_file.write("\n")
+            index += 1
     elif q2 is None:
         msg_st = q1.get_station_count_message()
         querying_results.write(msg_st)
@@ -180,6 +220,14 @@ def main():
         msg_d = q1.get_valid_file_message()
         querying_results.write(msg_d)
         querying_results.write("\n")
+        suri = q1.get_SURI()
+        index = 0
+        for sas_ids in sas_ids_calibrator:
+            with open(suri_file_name_calibrators[index], "w") as suri_file:
+                for si in suri[sas_ids]:
+                    suri_file.write(si)
+                    suri_file.write("\n")
+            index +=1
     else:
         msg1_st = q1.get_station_count_message()
         msg2_st = q2.get_station_count_message()
@@ -191,6 +239,23 @@ def main():
         msg_d = msg1_d + "\n" + msg2_d
         querying_results.write(msg_d)
         querying_results.write("\n")
+        suri = q2.get_SURI()
+        indexc = 0
+        for sas_id in sas_ids_calibrator:
+            with open(suri_file_name_calibrators[indexc], "w") as suri_file:
+                for si in suri[sas_id]:
+                    suri_file.write(si)
+                    suri_file.write("\n")
+            indexc += 1
+
+        suri = q1.get_SURI()
+        indext = 0
+        for sas_id in sas_ids_target:
+            with open(suri_file_name_targets[indext], "w") as suri_file:
+                for si in suri[sas_id]:
+                    suri_file.write(si)
+                    suri_file.write("\n")
+            indext += 1
 
     querying_results.write("done")
     querying_results.close()

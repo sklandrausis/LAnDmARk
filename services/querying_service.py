@@ -107,8 +107,20 @@ class Querying:
         return message
 
     def get_SURI(self):
-
-        if len(self.uris) == 0:
+        if len(Querying.uris) == 0:
             self.__get_data_products()
 
         return Querying.uris
+
+
+def query(sas_ids_calibrator, sas_ids_target, config_file):
+    if getConfigs("Operations", "which_obj", config_file) == "calibrators":
+        query.q1 = Querying(sas_ids_calibrator, True, config_file)
+        query.q2 = None
+    elif getConfigs("Operations", "which_obj", config_file) == "targets":
+        query.q1 = None
+        query.q2 = Querying(sas_ids_target, False, config_file)
+    else:
+        query.q1 = Querying(sas_ids_calibrator, True, config_file)
+        query.q2 = Querying(sas_ids_target, False, config_file)
+    return query.q1, query.q2
