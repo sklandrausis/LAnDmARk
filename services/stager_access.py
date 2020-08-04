@@ -132,7 +132,7 @@ def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
             dir_to += "/" + "calibrators/" + str(calSASid) + "_RAW/"
             for file in download_files:
                 if 'L' + str(calSASid) in file:
-                    os.system("wget " + file + " -P " + dir_to)
+                    os.system("wget -P " + dir_to + " " + file)
 
         dir_to = dir_to_tmp
         for calSASid in SASidsCalibrator:

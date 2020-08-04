@@ -5,6 +5,7 @@ import threading
 from PyQt5.QtCore import QObject, pyqtSlot
 from operations.operation import Status
 from operations.query import Query
+from operations.retrieve import Retrieve
 from operations.stage import Stage
 from parsers._configparser import getConfigs
 from views.check_view import CheckView
@@ -60,6 +61,12 @@ class MainController(QObject):
             stage_operation.status = Status.not_started
             operations.append(stage_operation)
             self.run_view.update_view(stage_operation)
+
+        if getConfigs("Operations", "retrieve", self.config_file) == "True":
+            retrieve_operation = Retrieve()
+            retrieve_operation.status = Status.not_started
+            operations.append(retrieve_operation)
+            self.run_view.update_view(retrieve_operation)
 
         threading.Thread(target=self.run_operations, args=(operations,)).start()
 

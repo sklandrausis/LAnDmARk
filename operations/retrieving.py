@@ -1,43 +1,38 @@
 #!/usr/bin/env python3
 import sys
 import os
-from awlofar.toolbox.LtaStager import LtaStager
 
 PACKAGE_PARENT = '..'
 SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
 sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 
-from services.querying_service import query
 from parsers._configparser import getConfigs
-
-config_file = "config.cfg"
-sas_ids_target = [int(id) for id in getConfigs("Data", "targetSASids", config_file).replace(" ", "").split(",")]
-project = getConfigs("Data", "PROJECTid", config_file)
-
-if len(getConfigs("Data", "calibratorSASids", config_file)) == 0:
-    if project == "MSSS_HBA_2013":
-        sas_ids_calibrator = [id - 1 for id in sas_ids_target]
-
-    else:
-        raise Exception("SAS id for calibrator is not set in config.cfg file")
-else:
-    sas_ids_calibrator = [int(id) for id in
-                          getConfigs("Data", "calibratorSASids",
-                                     config_file).replace(" ", "").split(",")]
-
-
-def stage(suri, sas_ids):
-    for sas_id in sas_ids:
-        stagger = LtaStager()
-        stagger.stage_uris(set(suri[sas_id]))
+from services.querying_service import query
+from services.stager_access import download
 
 
 def main():
-    q1, q2 = query(sas_ids_calibrator, sas_ids_target, config_file)
     suri_file_name_calibrator = "calibrator"
     suri_file_name_target = "target"
     suri_file_name_calibrators = []
     suri_file_name_targets = []
+    config_file = "config.cfg"
+    download_dir = getConfigs("Paths", "WorkingPath", config_file) + "/" + \
+                   getConfigs("Data", "TargetName", config_file) + "/"
+
+    sas_ids_target = [int(id) for id in getConfigs("Data", "targetSASids", config_file).replace(" ", "").split(",")]
+    project = getConfigs("Data", "PROJECTid", config_file)
+
+    if len(getConfigs("Data", "calibratorSASids", config_file)) == 0:
+        if project == "MSSS_HBA_2013":
+            sas_ids_calibrator = [id - 1 for id in sas_ids_target]
+
+        else:
+            raise Exception("SAS id for calibrator is not set in config.cfg file")
+    else:
+        sas_ids_calibrator = [int(id) for id in
+                              getConfigs("Data", "calibratorSASids",
+                                         config_file).replace(" ", "").split(",")]
 
     for sas_ids in sas_ids_calibrator:
         suri_file_name_calibrator += "_" + str(sas_ids)
@@ -79,6 +74,7 @@ def main():
 
             suri_file_name_targets.append(suri_file_name_target)
 
+    q1, q2 = query(sas_ids_calibrator, sas_ids_target, config_file)
     if q1 is None:
         if len(suri_file_name_targets) > 0:
             for si in range(0, len(suri_file_name_targets)):
@@ -97,24 +93,28 @@ def main():
     if q2 is None:
         if len(suri_file_name_calibrators) > 0:
             for si in range(0, len(suri_file_name_calibrators)):
-                suri = open(suri_file_name_calibrators[si], "r").readlines()[0:
-                       len(open(suri_file_name_calibrators[si], "r").readlines()) - 1]
+                suri = open(suri_file_name_calibrators[si], "r").readlines()[
+                       0:len(open(suri_file_name_calibrators[si], "r").readlines()) - 1]
                 calibrator_suri = {sas_ids_calibrator[si]: suri}
         else:
             if len(q1.valid_files) == 0:
                 calibrator_suri = q1.get_SURI()
             else:
                 calibrator_suri = q1.uris
-    else:
-        calibrator_suri = ""
 
-    if calibrator_suri is not "":
-        stage(calibrator_suri, sas_ids_calibrator)
+    suffix_urls = []
+    if calibrator_suri != "":
+        for sas_id in sas_ids_calibrator:
+            suffix_urls.extend(calibrator_suri[sas_id])
 
-    if target_suri is not "":
-        stage(target_suri, sas_ids_target)
+    if target_suri != "":
+        for sas_id in sas_ids_target:
+            suffix_urls.extend(target_suri[sas_id])
 
-    sys.exit(0)
+    for suffix_url in suffix_urls:
+        download([suffix_url], download_dir, sas_ids_calibrator, sas_ids_target)
+
+    sys.exit()
 
 
 if __name__ == "__main__":
