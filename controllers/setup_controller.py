@@ -135,7 +135,10 @@ class SetupController(QObject):
                     QMessageBox.warning(QMessageBox(), "Warning", "python path is not existing")
             return valid_count
 
-        if self.setup_model.querying == "True" or self.setup_model.stage == "True" or self.setup_model.retrive == "True" or self.setup_model.process == "True":
+        if self.setup_model.querying == "True" or \
+                self.setup_model.stage == "True" or \
+                self.setup_model.retrieve == "True" or \
+                self.setup_model.process == "True":
             if len(self.setup_model.WorkingPath) == 0:
                 valid_count += 1
                 QMessageBox.warning(QMessageBox(), "Warning", "Working path cannot be empty")

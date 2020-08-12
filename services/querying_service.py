@@ -4,9 +4,6 @@ from parsers._configparser import getConfigs
 
 
 class Querying:
-    uris = dict()
-    invalid_files = dict()
-    valid_files = dict()
 
     def __init__(self, SASids, calibrator, config_file):
         self.SASids = SASids
@@ -15,6 +12,9 @@ class Querying:
         self.targetName = getConfigs("Data", "TargetName", self.config_file)
         self.observations = {s: "" for s in self.SASids}
         self.cls = CorrelatedDataProduct
+        self.uris = dict()
+        self.invalid_files = dict()
+        self.valid_files = dict()
 
         for SASid in self.SASids:
             query_observations = (getattr(Process, "observationId") == SASid) & (Process.isValid > 0)
@@ -47,11 +47,10 @@ class Querying:
         return message
 
     def __get_data_products(self):
-
         for SASid in self.SASids:
-            Querying.invalid_files[SASid] = 0
-            Querying.valid_files[SASid] = 0
-            Querying.uris[SASid] = set()
+            self.invalid_files[SASid] = 0
+            self.valid_files[SASid] = 0
+            self.uris[SASid] = set()
             observation = self.observations[SASid]
             data_product_query = self.cls.observations.contains(observation)
             if getConfigs("Data", "subbandselect", self.config_file) == "True":
@@ -68,49 +67,49 @@ class Querying:
                 if fileobject:
                     if getConfigs("Data", "ProductType", self.config_file) == "observation":
                         if '/L' + str(SASid) in fileobject.URI and not "dppp" in fileobject.URI:
-                            Querying.uris[SASid].add(fileobject.URI)
+                            self.uris[SASid].add(fileobject.URI)
                             print(fileobject.URI)
-                            Querying.valid_files[SASid] += 1
+                            self.valid_files[SASid] += 1
 
                     elif getConfigs("Data", "ProductType", self.config_file) == "pipeline":
 
                         if '/L' + str(SASid) in fileobject.URI and "dppp" in fileobject.URI:
-                            Querying.uris[SASid].add(fileobject.URI)
-                            Querying.valid_files[SASid] += 1
+                            self.uris[SASid].add(fileobject.URI)
+                            self.valid_files[SASid] += 1
 
                     else:
                         print("Wrong data product type requested")
                 else:
-                    Querying.invalid_files[SASid] += 1
+                    self.invalid_files[SASid] += 1
 
             data_product_query = self.cls.observations.contains(observation)
             data_product_query &= self.cls.isValid == 0
 
             for _ in data_product_query:
-                Querying.invalid_files[SASid] += 1
+                self.invalid_files[SASid] += 1
 
     def get_valid_file(self):
-        return Querying.valid_files
+        return self.valid_files
 
     def get_invalid_file(self):
-        return Querying.invalid_files
+        return self.invalid_files
 
     def get_valid_file_message(self):
-        if len(Querying.invalid_files) == 0 and len(Querying.valid_files) == 0:
+        if len(self.invalid_files) == 0 and len(self.valid_files) == 0:
             self.__get_data_products()
 
         message = ""
         for SASid in self.SASids:
             message += "For SAS id " + str(SASid) + \
-                       " valid files is " + str(Querying.valid_files[SASid]) + \
-                       " invalid files are " + str(Querying.invalid_files[SASid]) + "\n"
+                       " valid files is " + str(self.valid_files[SASid]) + \
+                       " invalid files are " + str(self.invalid_files[SASid]) + "\n"
         return message
 
     def get_SURI(self):
-        if len(Querying.uris) == 0:
+        if len(self.uris) == 0:
             self.__get_data_products()
 
-        return Querying.uris
+        return self.uris
 
 
 def query(sas_ids_calibrator, sas_ids_target, config_file):

@@ -156,6 +156,7 @@ def main():
     suri_file_name_targets = []
 
     for sas_ids in sas_ids_calibrator:
+        suri_file_name_calibrator = "calibrator"
         suri_file_name_calibrator += "_" + str(sas_ids)
         if getConfigs("Data", "subbandselect", config_file) == "True":
             suri_file_name_calibrator += "_" + \
@@ -166,17 +167,19 @@ def main():
             suri_file_name_calibrators.append(suri_file_name_calibrator)
 
     for sas_ids in sas_ids_target:
+        suri_file_name_target = "target"
         suri_file_name_target += "_" + str(sas_ids)
         if getConfigs("Data", "subbandselect", config_file) == "True":
             suri_file_name_target += "_" + \
                                          getConfigs("Data", "minsubband", config_file) + "_" + \
                                          getConfigs("Data", "maxsubband", config_file)
-        if not getConfigs("Operations", "which_obj", config_file) == "targets":
+        if getConfigs("Operations", "which_obj", config_file) == "targets":
             os.system("touch " + suri_file_name_target)
             suri_file_name_targets.append(suri_file_name_target)
 
     if getConfigs("Operations", "which_obj", config_file) == "all":
         for sas_ids in sas_ids_calibrator:
+            suri_file_name_calibrator = "calibrator"
             suri_file_name_calibrator += "_" + str(sas_ids)
             if getConfigs("Data", "subbandselect", config_file) == "True":
                 suri_file_name_calibrator += "_" + \
@@ -187,6 +190,7 @@ def main():
             suri_file_name_calibrators.append(suri_file_name_calibrator)
 
         for sas_ids in sas_ids_target:
+            suri_file_name_target = "target"
             suri_file_name_target += "_" + str(sas_ids)
             if getConfigs("Data", "subbandselect", config_file) == "True":
                 suri_file_name_target += "_" + \
@@ -195,7 +199,7 @@ def main():
 
             os.system("touch " + suri_file_name_target)
             suri_file_name_targets.append(suri_file_name_target)
-
+    print(suri_file_name_targets, suri_file_name_calibrators)
     q1, q2 = query(sas_ids_calibrator, sas_ids_target, config_file)
 
     if q1 is None:
@@ -241,8 +245,8 @@ def main():
         querying_results.write("\n")
         suri = q2.get_SURI()
         indexc = 0
-        for sas_id in sas_ids_calibrator:
-            with open(suri_file_name_calibrators[indexc], "w") as suri_file:
+        for sas_id in sas_ids_target:
+            with open(suri_file_name_targets[indexc], "w") as suri_file:
                 for si in suri[sas_id]:
                     suri_file.write(si)
                     suri_file.write("\n")
@@ -250,8 +254,8 @@ def main():
 
         suri = q1.get_SURI()
         indext = 0
-        for sas_id in sas_ids_target:
-            with open(suri_file_name_targets[indext], "w") as suri_file:
+        for sas_id in sas_ids_calibrator:
+            with open(suri_file_name_calibrators[indext], "w") as suri_file:
                 for si in suri[sas_id]:
                     suri_file.write(si)
                     suri_file.write("\n")
