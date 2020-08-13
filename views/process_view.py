@@ -75,13 +75,14 @@ class ProcessView(QMainWindow):
             self.calibrator_tasks = get_pipeline_task(prefactor_path, calibrator_parset_file)
             self.target_tasks = get_pipeline_task(prefactor_path, target_parset_file)
             self.imaging_tasks = get_pipeline_task(prefactor_path, imaging_parset_file)
-            ids = self.SASidsCalibrator
-            ids.extend(self.SASidsTarget)
-            ids.append("imaging")
-            self.number_of_pipelines_to_run = len(ids)
-            self.create_init_view(ids)
+            self.ids = []
+            self.ids.extend(self.SASidsCalibrator)
+            self.ids.extend(self.SASidsTarget)
+            self.ids.append("imaging")
+            self.number_of_pipelines_to_run = len(self.ids)
+            self.create_init_view(self.ids)
 
-            for id in ids:
+            for id in self.ids:
                 step = 0
                 self.steps.append(step)
 
@@ -108,7 +109,6 @@ class ProcessView(QMainWindow):
     def create_init_view(self, SAS_ids):
         y_l = 10
         y_p = 50
-
         for id in SAS_ids:
             if id in self.SASidsCalibrator:
                 msg = "Progress for calibrator pipeline for SAS id " + str(id)
@@ -117,7 +117,6 @@ class ProcessView(QMainWindow):
 
             else:
                 msg = "Progress for imaging pipeline"
-            print(msg)
             self.progress_label = QLabel(self)
             self.progress_label.setText(msg)
             self.progress_label.setGeometry(10, y_l, 320, 25)
@@ -151,7 +150,6 @@ class ProcessView(QMainWindow):
             elif id in self.SASidsTarget:
                 log_file = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + \
                            getConfigs("Data", "TargetName", "config.cfg") + "/" + "targets/" + "pipeline_" + str(id) + ".log"
-                print(log_file)
                 sys.exit(0)
 
             else:
@@ -171,6 +169,7 @@ class ProcessView(QMainWindow):
                     self.progress = len(executed_tasks)
                     self.steps[progress_bars_index] = self.get_progress_value(id)
                     self.progress_bars[progress_bars_index].setValue(self.steps[progress_bars_index])
+                    print(last_started_task)
                     self.task_labels[progress_bars_index].setText("Prefactor started to execute task: " + last_started_task)
                 except ValueError as e:
                     print("ValueError", e, sys.exc_info()[0])
