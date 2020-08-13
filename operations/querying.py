@@ -199,7 +199,6 @@ def main():
 
             os.system("touch " + suri_file_name_target)
             suri_file_name_targets.append(suri_file_name_target)
-    print(suri_file_name_targets, suri_file_name_calibrators)
     q1, q2 = query(sas_ids_calibrator, sas_ids_target, config_file)
 
     if q1 is None:

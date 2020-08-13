@@ -93,7 +93,7 @@ def main():
         if len(suri_file_name_targets) > 0:
             for si in range(0, len(suri_file_name_targets)):
                 suri = open(suri_file_name_targets[si], "r").readlines()[
-                       0:len(open(suri_file_name_targets[si], "r").readlines()) - 1]
+                       0:len(open(suri_file_name_targets[si], "r").readlines())]
                 target_suri_tmp = {sas_ids_target[si]: suri}
 
         else:
@@ -108,7 +108,7 @@ def main():
         if len(suri_file_name_calibrators) > 0:
             for si in range(0, len(suri_file_name_calibrators)):
                 suri = open(suri_file_name_calibrators[si], "r").readlines()[0:
-                       len(open(suri_file_name_calibrators[si], "r").readlines()) - 1]
+                       len(open(suri_file_name_calibrators[si], "r").readlines())]
                 calibrator_suri_tmp = {sas_ids_calibrator[si]: suri}
         else:
             if len(q1.valid_files) == 0:

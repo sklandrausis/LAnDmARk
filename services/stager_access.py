@@ -150,9 +150,9 @@ def download(surls, dir_to, SASidsCalibrator, SASidsTarget):
         for tarSASid in SASidsTarget:
             dir_to = dir_to_tmp
             dir_to += "/" + "targets/" + str(tarSASid) + "_RAW/"
-            for file in download_files:
-                if 'L' + str(tarSASid) in file:
-                    os.system("nohup  wget " + file + " -P " + dir_to + " >/dev/null 2>&1")
+            #for file in download_files:
+                #if 'L' + str(tarSASid) in file:
+                    #os.system("wget -P " + dir_to + " " + file)
 
         dir_to = dir_to_tmp
         for tarSASid in SASidsTarget:

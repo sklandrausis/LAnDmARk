@@ -75,8 +75,9 @@ class ProcessView(QMainWindow):
             self.calibrator_tasks = get_pipeline_task(prefactor_path, calibrator_parset_file)
             self.target_tasks = get_pipeline_task(prefactor_path, target_parset_file)
             self.imaging_tasks = get_pipeline_task(prefactor_path, imaging_parset_file)
-            ids = self.SASidsCalibrator.extend(self.SASidsTarget)
-            ids = ids.extend("imaging")
+            ids = self.SASidsCalibrator
+            ids.extend(self.SASidsTarget)
+            ids.append("imaging")
             self.number_of_pipelines_to_run = len(ids)
             self.create_init_view(ids)
 
