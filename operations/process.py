@@ -44,20 +44,17 @@ class Process(Operation):
             for id in sas_ids_calibrator:
                 parset_calib = calibrator_dir + str(id) + "_RAW/" + "Pre-Facet-Calibrator.parset"
                 config_calib = calibrator_dir + str(id) + "_RAW/" + "pipeline.cfg"
-                run_pipeline(parset_calib, config_calib)  # run calibrator
                 tc = threading.Thread(target=run_pipeline, args=(parset_calib, config_calib,))
                 threads.append(tc)
 
             for id in sas_ids_target:
                 parset_target = target_dir + str(id) + "_RAW/" + "Pre-Facet-Target.parset"
                 config_target = target_dir + str(id) + "_RAW/" + "pipeline.cfg"
-                run_pipeline(parset_target, config_target)  # run target
                 tt = threading.Thread(target=run_pipeline, args=(parset_target, config_target,))
                 threads.append(tt)
 
             parset_image = image_dir + "Pre-Facet-Image.parset"
             config_image = image_dir + "pipeline.cfg"
-            run_pipeline(parset_image, config_image)  # run imaging
             ti = threading.Thread(target=run_pipeline, args=(parset_image, config_image,))
             threads.append(ti)
 
@@ -66,14 +63,12 @@ class Process(Operation):
             for id in sas_ids_target:
                 parset_target = target_dir + str(id) + "_RAW/" + "Pre-Facet-Target.parset"
                 config_target = target_dir + str(id) + "_RAW/" + "pipeline.cfg"
-                run_pipeline(parset_target, config_target)  # run target
                 tt = threading.Thread(target=run_pipeline, args=(parset_target, config_target,))
                 threads.append(tt)
         else:
             for id in sas_ids_calibrator:
                 parset_calib = calibrator_dir + str(id) + "_RAW/" + "Pre-Facet-Calibrator.parset"
                 config_calib = calibrator_dir + str(id) + "_RAW/" + "pipeline.cfg"
-                run_pipeline(parset_calib, config_calib)  # run calibrator
                 tc = threading.Thread(target=run_pipeline, args=(parset_calib, config_calib,))
                 threads.append(tc)
 

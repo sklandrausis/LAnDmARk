@@ -9,12 +9,21 @@ from parsers._configparser import getConfigs
 def get_pipeline_task(prefactor_path, parset_file):
     tasks = []
     file = prefactor_path + "/" + parset_file
-    with open(file) as parset_file:
-        lines = parset_file.readlines()
-        for line in lines:
-            if "pipeline.steps." in line:
-                tasks_tmp = [t.strip() for t in line.split("=")[-1].replace("[", "").replace("]", "").replace("{", "").replace("}","").strip().split(",")]
-                tasks.extend(tasks_tmp)
+    if parset_file == "Pre-Facet-Image.parset":
+        with open(file) as parset_file:
+            lines = parset_file.readlines()
+            for line in lines:
+                if "pipeline.steps" in line:
+                    tasks_tmp = [t.strip() for t in
+                                 line.split("=")[-1].replace("[", "").replace("]", "").replace("{", "").replace("}", "").strip().split(",")]
+                    tasks.extend(tasks_tmp)
+    else:
+        with open(file) as parset_file:
+            lines = parset_file.readlines()
+            for line in lines:
+                if "pipeline.steps." in line:
+                    tasks_tmp = [t.strip() for t in line.split("=")[-1].replace("[", "").replace("]", "").replace("{", "").replace("}","").strip().split(",")]
+                    tasks.extend(tasks_tmp)
     return tasks
 
 
@@ -150,14 +159,11 @@ class ProcessView(QMainWindow):
             elif id in self.SASidsTarget:
                 log_file = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + \
                            getConfigs("Data", "TargetName", "config.cfg") + "/" + "targets/" + "pipeline_" + str(id) + ".log"
-                sys.exit(0)
 
             else:
                 log_file = getConfigs("Paths", "WorkingPath", "config.cfg") + "/" + \
                            getConfigs("Data", "TargetName", "config.cfg") + "/" + "imaging_deep/" + "pipeline_" + str(id) + ".log"
-
             progress_bars_index = self.ids.index(id)
-
             executed_tasks = get_tasks_from_log_file(log_file)
             if len(executed_tasks) == 0:
                 last_started_task = "not started"
@@ -169,7 +175,6 @@ class ProcessView(QMainWindow):
                     self.progress = len(executed_tasks)
                     self.steps[progress_bars_index] = self.get_progress_value(id)
                     self.progress_bars[progress_bars_index].setValue(self.steps[progress_bars_index])
-                    print(last_started_task)
                     self.task_labels[progress_bars_index].setText("Prefactor started to execute task: " + last_started_task)
                 except ValueError as e:
                     print("ValueError", e, sys.exc_info()[0])
