@@ -23,6 +23,8 @@ class SetupView(QMainWindow):
         self._ui.process_combobox.currentTextChanged.connect(self._setup_controller.on_process_combobox_changed)
         self._ui.select_subband_range_combobox.currentTextChanged.connect(
             self._setup_controller.on_select_subband_range_combobox_changed)
+        self._ui.select_frequency_range_combobox.currentTextChanged.connect(
+            self._setup_controller.on_select_frequency_range_combobox_changed)
 
         if len(getConfigs("Data", "targetsasids", self.config_file)) != 0:
             self._ui.targetSASids_input.setText(getConfigs("Data", "targetsasids", self.config_file))
@@ -47,6 +49,15 @@ class SetupView(QMainWindow):
 
         if len(getConfigs("Data", "subbandselect", self.config_file)) != 0:
             self._ui.select_subband_range_combobox.setCurrentText(getConfigs("Data", "subbandselect", self.config_file))
+
+        if len(getConfigs("Data", "minfrequency", self.config_file)) != 0:
+            self._ui.min_frequency_input.setText(getConfigs("Data", "minfrequency", self.config_file))
+
+        if len(getConfigs("Data", "maxfrequency", self.config_file)) != 0:
+            self._ui.max_frequency_input.setText(getConfigs("Data", "maxfrequency", self.config_file))
+
+        if len(getConfigs("Data", "frequencyselect", self.config_file)) != 0:
+            self._ui.select_frequency_range_combobox.setCurrentText(getConfigs("Data", "frequencyselect", self.config_file))
 
         if len(getConfigs("Operations", "querying", self.config_file)) != 0:
             self._ui.querying_comboBox.setCurrentText(getConfigs("Operations", "querying", self.config_file))
@@ -116,6 +127,18 @@ class SetupView(QMainWindow):
             self._ui.min_subband_input.setEnabled(False)
             self._ui.max_subband_label.setEnabled(False)
             self._ui.max_subband_input.setEnabled(False)
+
+        if self._ui.select_frequency_range_combobox.currentText() == "True":
+            self._ui.min_frequency_label.setEnabled(True)
+            self._ui.min_frequency_input.setEnabled(True)
+            self._ui.max_frequency_label.setEnabled(True)
+            self._ui.max_frequency_input.setEnabled(True)
+
+        elif self._ui.select_frequency_range_combobox.currentText() == "False":
+            self._ui.min_frequency_label.setEnabled(False)
+            self._ui.min_frequency_input.setEnabled(False)
+            self._ui.max_frequency_label.setEnabled(False)
+            self._ui.max_frequency_input.setEnabled(False)
 
     def init_color_setup(self):
         self._ui.WorkingPath_input.setStyleSheet("Background-color: rgb(152,251,152)")

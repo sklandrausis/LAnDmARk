@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/setup_view.ui'
 #
-# Created by: PyQt5 UI code generator 5.14.0
+# Created by: PyQt5 UI code generator 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -360,7 +360,7 @@ class Ui_setup_view(object):
         self.select_subband_range_label.setGeometry(QtCore.QRect(160, 340, 141, 20))
         self.select_subband_range_label.setObjectName("select_subband_range_label")
         self.min_subband_label = QtWidgets.QLabel(setup_view)
-        self.min_subband_label.setGeometry(QtCore.QRect(160, 399, 111, 21))
+        self.min_subband_label.setGeometry(QtCore.QRect(160, 400, 111, 21))
         self.min_subband_label.setObjectName("min_subband_label")
         self.min_subband_input = QtWidgets.QLineEdit(setup_view)
         self.min_subband_input.setGeometry(QtCore.QRect(160, 420, 91, 36))
@@ -373,6 +373,29 @@ class Ui_setup_view(object):
         self.max_subband_input.setGeometry(QtCore.QRect(160, 480, 91, 36))
         self.max_subband_input.setText("")
         self.max_subband_input.setObjectName("max_subband_input")
+        self.max_frequency_input = QtWidgets.QLineEdit(setup_view)
+        self.max_frequency_input.setGeometry(QtCore.QRect(160, 660, 91, 36))
+        self.max_frequency_input.setText("")
+        self.max_frequency_input.setObjectName("max_frequency_input")
+        self.max_frequency_label = QtWidgets.QLabel(setup_view)
+        self.max_frequency_label.setGeometry(QtCore.QRect(160, 640, 111, 20))
+        self.max_frequency_label.setObjectName("max_frequency_label")
+        self.select_frequency_range_label = QtWidgets.QLabel(setup_view)
+        self.select_frequency_range_label.setGeometry(QtCore.QRect(160, 520, 151, 20))
+        self.select_frequency_range_label.setObjectName("select_frequency_range_label")
+        self.min_frequency_label = QtWidgets.QLabel(setup_view)
+        self.min_frequency_label.setGeometry(QtCore.QRect(160, 580, 111, 21))
+        self.min_frequency_label.setObjectName("min_frequency_label")
+        self.min_frequency_input = QtWidgets.QLineEdit(setup_view)
+        self.min_frequency_input.setGeometry(QtCore.QRect(160, 600, 91, 36))
+        self.min_frequency_input.setText("")
+        self.min_frequency_input.setObjectName("min_frequency_input")
+        self.select_frequency_range_combobox = QtWidgets.QComboBox(setup_view)
+        self.select_frequency_range_combobox.setGeometry(QtCore.QRect(160, 540, 141, 36))
+        self.select_frequency_range_combobox.setMaxVisibleItems(10)
+        self.select_frequency_range_combobox.setObjectName("select_frequency_range_combobox")
+        self.select_frequency_range_combobox.addItem("")
+        self.select_frequency_range_combobox.addItem("")
 
         self.retranslateUi(setup_view)
         self.querying_comboBox.setCurrentIndex(0)
@@ -461,3 +484,8 @@ class Ui_setup_view(object):
         self.select_subband_range_label.setText(_translate("setup_view", "Select subband range"))
         self.min_subband_label.setText(_translate("setup_view", "Min subband"))
         self.max_subband_label.setText(_translate("setup_view", "Max subband"))
+        self.max_frequency_label.setText(_translate("setup_view", "Max frequency"))
+        self.select_frequency_range_label.setText(_translate("setup_view", "Select frequency range"))
+        self.min_frequency_label.setText(_translate("setup_view", "Min frequency"))
+        self.select_frequency_range_combobox.setItemText(0, _translate("setup_view", "False"))
+        self.select_frequency_range_combobox.setItemText(1, _translate("setup_view", "True"))

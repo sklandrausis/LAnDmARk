@@ -1261,7 +1261,7 @@
    <property name="geometry">
     <rect>
      <x>160</x>
-     <y>399</y>
+     <y>400</y>
      <width>111</width>
      <height>21</height>
     </rect>
@@ -1308,6 +1308,94 @@
    <property name="text">
     <string/>
    </property>
+  </widget>
+  <widget class="QLineEdit" name="max_frequency_input">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>660</y>
+     <width>91</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="max_frequency_label">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>640</y>
+     <width>111</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Max frequency</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="select_frequency_range_label">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>520</y>
+     <width>151</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Select frequency range</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="min_frequency_label">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>580</y>
+     <width>111</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Min frequency</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="min_frequency_input">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>600</y>
+     <width>91</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="select_frequency_range_combobox">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>540</y>
+     <width>141</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="maxVisibleItems">
+    <number>10</number>
+   </property>
+   <item>
+    <property name="text">
+     <string>False</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>True</string>
+    </property>
+   </item>
   </widget>
  </widget>
  <tabstops>

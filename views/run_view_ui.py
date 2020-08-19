@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/run_view.ui'
 #
-# Created by: PyQt5 UI code generator 5.14.0
+# Created by: PyQt5 UI code generator 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
 

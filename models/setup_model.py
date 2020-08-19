@@ -31,6 +31,9 @@ class SetupModel(QObject):
         self.__max_subband = ""
         self.__min_subband = ""
         self.__subband_select = "False"
+        self.__max_frequency = ""
+        self.__min_frequency = ""
+        self.__frequency_select = "False"
 
     @property
     def querying(self):
@@ -247,3 +250,27 @@ class SetupModel(QObject):
     @subband_select.setter
     def subband_select(self, subband_select):
         self.__subband_select = subband_select
+
+    @property
+    def min_frequency(self):
+        return self.__min_frequency
+
+    @min_frequency.setter
+    def min_frequency(self, min_frequency):
+        self.__min_frequency = min_frequency
+
+    @property
+    def max_frequency(self):
+        return self.__max_frequency
+
+    @max_frequency.setter
+    def max_frequency(self, max_frequency):
+        self.__max_frequency = max_frequency
+
+    @property
+    def frequency_select(self):
+        return self.__frequency_select
+
+    @frequency_select.setter
+    def frequency_select(self, frequency_select):
+        self.__frequency_select = frequency_select

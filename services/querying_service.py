@@ -57,6 +57,12 @@ class Querying:
                 subband1 = getConfigs("Data", "minsubband", self.config_file)
                 subband2 = getConfigs("Data", "maxsubband", self.config_file)
                 data_product_query &= ((self.cls.subband >= subband1) & (self.cls.subband <= subband2))
+
+            if getConfigs("Data", "frequencyselect", self.config_file) == "True":
+                frequency1 = float(getConfigs("Data", "minfrequency", self.config_file))
+                frequency2 = float(getConfigs("Data", "maxfrequency", self.config_file))
+                data_product_query &= self.cls.minimumFrequency >= frequency1
+                data_product_query &= self.cls.maximumFrequency <= frequency2
             data_product_query &= self.cls.isValid == 1
 
             if not self.calibrator:

@@ -43,6 +43,9 @@ class SetupController(QObject):
         self.setup_model.min_subband = self._ui.min_subband_input.text()
         self.setup_model.max_subband = self._ui.max_subband_input.text()
         self.setup_model.subband_select = self._ui.select_subband_range_combobox.currentText()
+        self.setup_model.min_frequency = self._ui.min_frequency_input.text()
+        self.setup_model.max_frequency = self._ui.max_frequency_input.text()
+        self.setup_model.frequency_select = self._ui.select_frequency_range_combobox.currentText()
 
         def process_valid():
             valid_count = 0
@@ -214,12 +217,27 @@ class SetupController(QObject):
                 if len(self.setup_model.min_subband) > 0:
                     if int(self.setup_model.min_subband) < 0:
                         valid_count += 1
-                        QMessageBox.warning(QMessageBox(), "Warning", "Subband cannot be negative")
+                        QMessageBox.warning(QMessageBox(), "Warning", "Min subband cannot be negative")
 
                 if len(self.setup_model.max_subband) > 0:
                     if int(self.setup_model.max_subband) < 0:
                         valid_count += 1
-                        QMessageBox.warning(QMessageBox(), "Warning", "Subband cannot be negative")
+                        QMessageBox.warning(QMessageBox(), "Warning", "Min subband cannot be negative")
+
+        if self._ui.select_frequency_range_combobox.currentText() == "True":
+            if float(self._ui.min_frequency_input.text()) >= float(self._ui.max_frequency_input.text()):
+                valid_count += 1
+                QMessageBox.warning(QMessageBox(), "Warning", "min frequency cannot be equal or smaller that max frequency")
+            else:
+                if len(self.setup_model.min_frequency) > 0:
+                    if float(self.setup_model.min_frequency) < 0:
+                        valid_count += 1
+                        QMessageBox.warning(QMessageBox(), "Warning", "Max frequency cannot be negative")
+
+                if len(self.setup_model.max_frequency) > 0:
+                    if float(self.setup_model.max_frequency) < 0:
+                        valid_count += 1
+                        QMessageBox.warning(QMessageBox(), "Warning", "Max frequency cannot be negative")
 
         if valid_count == 0:
             valid = True
@@ -238,6 +256,9 @@ class SetupController(QObject):
             setConfigs("Data", "minSubband", self.setup_model.min_subband, config_file)
             setConfigs("Data", "maxSubband", self.setup_model.max_subband, config_file)
             setConfigs("Data", "subbandselect", self.setup_model.subband_select, config_file)
+            setConfigs("Data", "minFrequency", self.setup_model.min_frequency, config_file)
+            setConfigs("Data", "maxFrequency", self.setup_model.max_frequency, config_file)
+            setConfigs("Data", "frequencyselect", self.setup_model.frequency_select, config_file)
 
             setConfigs("Operations", "querying", self.setup_model.querying, config_file)
             setConfigs("Operations", "stage", self.setup_model.stage, config_file)
@@ -333,6 +354,7 @@ class SetupController(QObject):
 
     def on_select_subband_range_combobox_changed(self):
         if self._ui.select_subband_range_combobox.currentText() == "True":
+            self._ui.select_frequency_range_combobox.setCurrentText("False")
             self._ui.min_subband_label.setEnabled(True)
             self._ui.min_subband_input.setEnabled(True)
             self._ui.max_subband_label.setEnabled(True)
@@ -350,8 +372,35 @@ class SetupController(QObject):
                         QMessageBox.warning(QMessageBox(), "Warning", "Subband cannot be negative")
 
         elif self._ui.select_subband_range_combobox.currentText() == "False":
+            self._ui.select_frequency_range_combobox.setCurrentText("True")
             self._ui.min_subband_label.setEnabled(False)
             self._ui.min_subband_input.setEnabled(False)
             self._ui.max_subband_label.setEnabled(False)
             self._ui.max_subband_input.setEnabled(False)
+
+    def on_select_frequency_range_combobox_changed(self):
+        if self._ui.select_frequency_range_combobox.currentText() == "True":
+            self._ui.select_subband_range_combobox.setCurrentText("False")
+            self._ui.min_frequency_label.setEnabled(True)
+            self._ui.min_frequency_input.setEnabled(True)
+            self._ui.max_frequency_label.setEnabled(True)
+            self._ui.max_frequency_input.setEnabled(True)
+
+            if float(self._ui.min_frequency_input.text()) >= float(self._ui.max_frequency_input.text()):
+                QMessageBox.warning(QMessageBox(), "Warning", "min frequency cannot be equal or smaller that max frequency")
+            else:
+                if len(self._ui.min_frequency_input.text()) > 0:
+                    if float(self._ui.min_frequency_input.text()) < 0:
+                        QMessageBox.warning(QMessageBox(), "Warning", "Frequency cannot be negative")
+
+                if len(self._ui.max_frequency_input.text()) > 0:
+                    if float(self._ui.max_frequency_input.text()) < 0:
+                        QMessageBox.warning(QMessageBox(), "Warning", "Frequency cannot be negative")
+
+        elif self._ui.select_frequency_range_combobox.currentText() == "False":
+            self._ui.select_subband_range_combobox.setCurrentText("True")
+            self._ui.min_frequency_label.setEnabled(False)
+            self._ui.min_frequency_input.setEnabled(False)
+            self._ui.max_frequency_label.setEnabled(False)
+            self._ui.max_frequency_input.setEnabled(False)
 

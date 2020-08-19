@@ -162,6 +162,11 @@ def main():
             suri_file_name_calibrator += "_" + \
                                          getConfigs("Data", "minsubband", config_file) + "_" + \
                                          getConfigs("Data", "maxsubband", config_file)
+
+        if getConfigs("Data", "frequencyselect", config_file) == "True":
+            suri_file_name_calibrator += "_" + \
+                                         getConfigs("Data", "minfrequency", config_file) + "_" + \
+                                         getConfigs("Data", "maxfrequency", config_file)
         if getConfigs("Operations", "which_obj", config_file) == "calibrators":
             os.system("touch " + suri_file_name_calibrator)
             suri_file_name_calibrators.append(suri_file_name_calibrator)
@@ -173,6 +178,11 @@ def main():
             suri_file_name_target += "_" + \
                                          getConfigs("Data", "minsubband", config_file) + "_" + \
                                          getConfigs("Data", "maxsubband", config_file)
+
+        if getConfigs("Data", "frequencyselect", config_file) == "True":
+            suri_file_name_target += "_" + \
+                                         getConfigs("Data", "minfrequency", config_file) + "_" + \
+                                         getConfigs("Data", "maxfrequency", config_file)
         if getConfigs("Operations", "which_obj", config_file) == "targets":
             os.system("touch " + suri_file_name_target)
             suri_file_name_targets.append(suri_file_name_target)
@@ -186,6 +196,11 @@ def main():
                                              getConfigs("Data", "minsubband", config_file) + "_" + \
                                              getConfigs("Data", "maxsubband", config_file)
 
+            if getConfigs("Data", "frequencyselect", config_file) == "True":
+                suri_file_name_calibrator += "_" + \
+                                             getConfigs("Data", "minfrequency", config_file) + "_" + \
+                                             getConfigs("Data", "maxfrequency", config_file)
+
             os.system("touch " + suri_file_name_calibrator)
             suri_file_name_calibrators.append(suri_file_name_calibrator)
 
@@ -196,6 +211,11 @@ def main():
                 suri_file_name_target += "_" + \
                                          getConfigs("Data", "minsubband", config_file) + "_" + \
                                          getConfigs("Data", "maxsubband", config_file)
+
+            if getConfigs("Data", "frequencyselect", config_file) == "True":
+                suri_file_name_target += "_" + \
+                                         getConfigs("Data", "minfrequency", config_file) + "_" + \
+                                         getConfigs("Data", "maxfrequency", config_file)
 
             os.system("touch " + suri_file_name_target)
             suri_file_name_targets.append(suri_file_name_target)
