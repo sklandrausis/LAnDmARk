@@ -1,5 +1,6 @@
 import os
 from awlofar.database.Context import context
+from awlofar.main.aweimports import *
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtCore import QObject, pyqtSlot
 from models.setup_model import SetupModel
@@ -136,6 +137,7 @@ class SetupController(QObject):
                 if not os.path.isdir(self.setup_model.pythonpath):
                     valid_count += 1
                     QMessageBox.warning(QMessageBox(), "Warning", "python path is not existing")
+
             return valid_count
 
         if self.setup_model.querying == "True" or \
@@ -170,13 +172,32 @@ class SetupController(QObject):
                                 valid_count += 1
                                 QMessageBox.warning(QMessageBox(), "Warning", "Target SAS id must be specified")
 
-                    elif self.setup_model.which_obj == "target":
+                    elif self.setup_model.which_obj == "targets":
                         if len(self.setup_model.targetSASids) == 0:
                             valid_count += 1
                             QMessageBox.warning(QMessageBox(), "Warning", "Target SAS id must be specified")
                         if len(self.setup_model.Target_name) == 0:
                             valid_count += 1
                             QMessageBox.warning(QMessageBox(), "Warning", "Target name must be specified")
+
+                        else:
+                            cls = CorrelatedDataProduct
+                            target_sasids = self.setup_model.targetSASids.split(",")
+                            for target_sasid in target_sasids:
+                                query_observations = (getattr(Process, "observationId") ==
+                                                      target_sasid) & (Process.isValid > 0)
+                                if len(query_observations) > 0:
+                                    for observation in query_observations:
+                                        data_product_query = cls.observations.contains(observation)
+                                        data_product_query &= cls.isValid == 1
+                                        data_product_query &= cls.subArrayPointing.targetName == self.setup_model.Target_name
+
+                                        if len(data_product_query) == 0:
+                                            valid_count += 1
+                                            QMessageBox.warning(QMessageBox(), "Warning",
+                                                                "Target name " + self.setup_model.Target_name +
+                                                                " is not in LTA")
+
                     else:
                         if len(self.setup_model.calibratorSASids) == 0:
                             if project != "MSSS_HBA_2013":
@@ -194,10 +215,28 @@ class SetupController(QObject):
                             valid_count += 1
                             QMessageBox.warning(QMessageBox(), "Warning", "Target name must be specified")
 
+                        else:
+                            cls = CorrelatedDataProduct
+                            target_sasids = self.setup_model.targetSASids.split(",")
+                            for target_sasid in target_sasids:
+                                query_observations = (getattr(Process, "observationId") ==
+                                                      target_sasid) & (Process.isValid > 0)
+                                if len(query_observations) > 0:
+                                    for observation in query_observations:
+                                        data_product_query = cls.observations.contains(observation)
+                                        data_product_query &= cls.isValid == 1
+                                        data_product_query &= cls.subArrayPointing.targetName == self.setup_model.Target_name
+
+                                        if len(data_product_query) == 0:
+                                            valid_count += 1
+                                            QMessageBox.warning(QMessageBox(), "Warning",
+                                                                "Target name " + self.setup_model.Target_name +
+                                                                " is not in LTA")
+
         if self.setup_model.process == "True" and self.setup_model.which_obj == "calibrators":
             valid_count += process_valid()
 
-        if self.setup_model.process == "True" and self.setup_model.which_obj == "target":
+        if self.setup_model.process == "True" and self.setup_model.which_obj == "targets":
             valid_count += process_valid()
             if len(self.setup_model.targetSASids) != 0 and self.setup_model.PROJECTid == "MSSS_HBA_2013":
                 targetSASids = [t.strip() for t in self.setup_model.targetSASids.split(",")]
