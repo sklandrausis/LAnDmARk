@@ -167,10 +167,22 @@ class SetupController(QObject):
                         if len(self.setup_model.calibratorSASids) == 0:
                             if project != "MSSS_HBA_2013":
                                 valid_count += 1
-                                QMessageBox.warning(QMessageBox(), "Warning", "If project is not MSSS_HBA_2013 SAS id for calibrator must be specified")
+                                QMessageBox.warning(QMessageBox(), "Warning",
+                                                    "If project is not MSSS_HBA_2013 SAS id for calibrator must be specified")
                             if len(self.setup_model.targetSASids) == 0:
                                 valid_count += 1
                                 QMessageBox.warning(QMessageBox(), "Warning", "Target SAS id must be specified")
+                        else:
+                            calibrator_sasids = self.setup_model.calibratorSASids.split(",")
+                            calibrator_sasids = [sas_id.strip() for sas_id in calibrator_sasids]
+                            for calibrator_sasid in calibrator_sasids:
+                                query_observations = (getattr(Process, "observationId") ==
+                                                      calibrator_sasid) & (Process.isValid > 0)
+                                
+                                if len(query_observations) == 0:
+                                    valid_count += 1
+                                    QMessageBox.warning(QMessageBox(), "Warning", "SAS id  " +
+                                                        calibrator_sasid + " is not in LTA")
 
                     elif self.setup_model.which_obj == "targets":
                         if len(self.setup_model.targetSASids) == 0:
@@ -183,6 +195,7 @@ class SetupController(QObject):
                         else:
                             cls = CorrelatedDataProduct
                             target_sasids = self.setup_model.targetSASids.split(",")
+                            target_sasids = [sas_id.strip() for sas_id in target_sasids]
                             for target_sasid in target_sasids:
                                 query_observations = (getattr(Process, "observationId") ==
                                                       target_sasid) & (Process.isValid > 0)
@@ -197,6 +210,10 @@ class SetupController(QObject):
                                             QMessageBox.warning(QMessageBox(), "Warning",
                                                                 "Target name " + self.setup_model.Target_name +
                                                                 " is not in LTA")
+                                else:
+                                    valid_count += 1
+                                    QMessageBox.warning(QMessageBox(), "Warning", "SAS id  " +
+                                                        target_sasid + " is not in LTA")
 
                     else:
                         if len(self.setup_model.calibratorSASids) == 0:
@@ -207,6 +224,17 @@ class SetupController(QObject):
                             if len(self.setup_model.targetSASids) == 0:
                                 valid_count += 1
                                 QMessageBox.warning(QMessageBox(), "Warning", "Target SAS id must be specified")
+                        else:
+                            calibrator_sasids = self.setup_model.calibratorSASids.split(",")
+                            calibrator_sasids = [sas_id.strip() for sas_id in calibrator_sasids]
+                            for calibrator_sasid in calibrator_sasids:
+                                query_observations = (getattr(Process, "observationId") ==
+                                                      calibrator_sasid) & (Process.isValid > 0)
+
+                                if len(query_observations) == 0:
+                                    valid_count += 1
+                                    QMessageBox.warning(QMessageBox(), "Warning", "SAS id  " +
+                                                        calibrator_sasid + " is not in LTA")
 
                         if len(self.setup_model.targetSASids) == 0:
                             valid_count += 1
@@ -218,6 +246,7 @@ class SetupController(QObject):
                         else:
                             cls = CorrelatedDataProduct
                             target_sasids = self.setup_model.targetSASids.split(",")
+                            target_sasids = [sas_id.strip() for sas_id in target_sasids]
                             for target_sasid in target_sasids:
                                 query_observations = (getattr(Process, "observationId") ==
                                                       target_sasid) & (Process.isValid > 0)
@@ -232,6 +261,10 @@ class SetupController(QObject):
                                             QMessageBox.warning(QMessageBox(), "Warning",
                                                                 "Target name " + self.setup_model.Target_name +
                                                                 " is not in LTA")
+                                else:
+                                    valid_count += 1
+                                    QMessageBox.warning(QMessageBox(), "Warning", "SAS id  " +
+                                                        target_sasid + " is not in LTA")
 
         if self.setup_model.process == "True" and self.setup_model.which_obj == "calibrators":
             valid_count += process_valid()
